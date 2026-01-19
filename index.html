@@ -6,34 +6,42 @@
     <title>Influenza Prediction Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .dashboard-container { max-width: 1200px; margin: 30px auto; padding: 20px; }
-        .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; margin-bottom: 20px; }
-        .header-title { color: #2c3e50; font-weight: 700; }
-        .loading-text { text-align: center; color: #666; margin-top: 50px; }
-        .metric-box { text-align: center; padding: 20px; background: white; border-radius: 8px; }
-        .metric-value { font-size: 2em; font-weight: bold; color: #007bff; }
-        .metric-label { color: #6c757d; text-transform: uppercase; font-size: 0.8em; letter-spacing: 1px; }
+        body { background-color: #f4f6f9; font-family: 'Roboto', sans-serif; color: #333; }
+        .dashboard-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .card { box-shadow: 0 2px 15px rgba(0,0,0,0.05); border: none; border-radius: 12px; margin-bottom: 25px; background: white; }
+        .header-section { margin-bottom: 30px; border-bottom: 1px solid #e0e0e0; padding-bottom: 20px; }
+        .header-title { font-weight: 700; color: #2c3e50; margin-bottom: 5px; }
+        .metric-box { text-align: center; padding: 25px 15px; }
+        .metric-value { font-size: 2.2rem; font-weight: 700; color: #007bff; margin-bottom: 5px; }
+        .metric-label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #6c757d; font-weight: 600; }
+        .section-title { font-weight: 700; color: #34495e; margin-top: 20px; margin-bottom: 15px; border-left: 5px solid #007bff; padding-left: 15px; }
+        .method-text { line-height: 1.7; color: #555; font-size: 0.95rem; }
+        .badge-algo { background-color: #e3f2fd; color: #0d47a1; padding: 5px 10px; border-radius: 4px; font-weight: 600; font-size: 0.85em; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <span class="navbar-brand mb-0 h1">Influenza Forecasting Model</span>
-            <a href="https://github.com/tommbk50-hub/Data-Science-and-Anakytics-Projects" class="btn btn-outline-light btn-sm">View on GitHub</a>
+            <span class="navbar-brand mb-0 h1 fw-bold">UKHSA Influenza Forecast</span>
+            <div class="d-flex">
+                <a href="https://github.com/tommbk50-hub/Data-Science-and-Anakytics-Projects" target="_blank" class="btn btn-outline-light btn-sm">View Source Code</a>
+            </div>
         </div>
     </nav>
 
     <div class="dashboard-container">
-        <div class="row mb-4">
+        
+        <div class="row header-section align-items-end">
             <div class="col-md-8">
-                <h2 class="header-title">Hybrid Seasonal + Residual Forecast</h2>
-                <p class="text-muted">Predicting influenza positivity rates in England using HistGradientBoostingRegressor.</p>
+                <h1 class="header-title">England Influenza Positivity Forecast</h1>
+                <p class="text-muted mb-0">Predicting weekly positivity rates using a Hybrid Machine Learning approach.</p>
             </div>
-            <div class="col-md-4 text-end">
-                <p class="text-muted small">Last Updated: <span id="last-updated">Loading...</span></p>
+            <div class="col-md-4 text-md-end text-start mt-3 mt-md-0">
+                <span class="badge bg-secondary">Auto-Updates Weekly</span>
+                <p class="text-muted small mt-1 mb-0">Last Data Update: <span id="last-updated" class="fw-bold">Loading...</span></p>
             </div>
         </div>
 
@@ -46,34 +54,60 @@
             </div>
             <div class="col-md-4">
                 <div class="card metric-box">
-                    <div class="metric-value" id="peak-forecast">--%</div>
-                    <div class="metric-label">Predicted Peak (Next 52 Wks)</div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card metric-box">
                     <div class="metric-value" id="next-week">--%</div>
                     <div class="metric-label">Forecast Next Week</div>
                 </div>
             </div>
-        </div>
-
-        <div class="card p-3">
-            <div id="plot-div" style="width:100%; height:600px;"></div>
-        </div>
-        
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card p-4">
-                    <h5>Methodology</h5>
-                    <p class="small text-muted mb-0">
-                        This model uses a hybrid approach. First, a seasonal baseline is established using historical Week/Month trends. 
-                        Second, a recursive residual model predicts the deviation from that baseline based on recent errors (lags). 
-                        The final forecast is the sum of the seasonal baseline and the predicted residual.
-                    </p>
+            <div class="col-md-4">
+                <div class="card metric-box">
+                    <div class="metric-value" id="peak-forecast">--%</div>
+                    <div class="metric-label">Projected Annual Peak</div>
                 </div>
             </div>
         </div>
+
+        <div class="card p-4">
+            <h5 class="card-title fw-bold">Forecast vs. Actuals</h5>
+            <p class="small text-muted">The chart below compares the historical actual values (Black) against the model's future prediction (Blue Dashed).</p>
+            <div id="plot-div" style="width:100%; height:500px;"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card p-4 h-100">
+                    <h4 class="section-title">Methodology: The Hybrid Approach</h4>
+                    <p class="method-text">
+                        Influenza data is complex because it contains two distinct patterns: a strong annual cycle (Seasonality) and unpredictable variations (Residuals). A simple model often fails to capture both. Our solution uses a <strong>Hybrid Strategy</strong>:
+                    </p>
+                    <ol class="method-text">
+                        <li><strong>Step 1: Seasonal Decomposition</strong><br>
+                        We first train a model to recognize the "standard" yearly pattern based on the Week Number and Month. This creates a "Baseline" (Green Dotted Line) representing a typical flu season.</li>
+                        
+                        <li><strong>Step 2: Residual Modeling</strong><br>
+                        We calculate the difference between the Baseline and Reality (the Residual). A second model looks at the last 3 weeks of errors to predict how far "off" the current trend is from the norm.</li>
+                        
+                        <li><strong>Step 3: Recursive Forecasting</strong><br>
+                        To forecast the future, we combine the Baseline + Predicted Residual. The output is fed back into the model to predict the subsequent week, creating a recursive loop for 52 weeks.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card p-4 h-100">
+                    <h4 class="section-title">The Algorithm: HistGradientBoosting</h4>
+                    <p class="method-text">
+                        The core machine learning engine used is the <span class="badge-algo">HistGradientBoostingRegressor</span> from Scikit-Learn.
+                    </p>
+                    <h6 class="fw-bold mt-3">Why this model?</h6>
+                    <ul class="method-text">
+                        <li><strong>Handling Non-Linearity:</strong> Unlike Linear Regression, Gradient Boosting builds an ensemble of decision trees. This allows it to model the sharp peaks and complex curves of a flu outbreak accurately.</li>
+                        <li><strong>Speed & Efficiency:</strong> The "Hist" (Histogram-based) method bins data values into discrete groups. This makes training significantly faster (O(n) complexity) and aligns with state-of-the-art libraries like LightGBM.</li>
+                        <li><strong>Robustness:</strong> It natively handles missing values and is generally robust to outliers, ensuring that one week of bad data doesn't break the entire forecast.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -84,63 +118,116 @@
                 const history = data.history;
                 const forecast = data.forecast;
 
-                // 1. Setup Traces for Plotly
-                const traceHistory = {
-                    x: history.dates,
-                    y: history.values,
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: 'Historical Data',
-                    line: { color: 'rgba(0,0,0,0.4)', width: 2 }
-                };
+                // --- 1. Define Traces ---
 
+                // Trace A: The Seasonal Baseline (What a "normal" year looks like)
+                // We show this faintly to provide context.
                 const traceBaseline = {
                     x: forecast.dates,
                     y: forecast.baseline,
                     type: 'scatter',
                     mode: 'lines',
-                    name: 'Seasonal Baseline',
-                    line: { color: 'green', dash: 'dot', width: 2 }
+                    name: 'Seasonal Baseline (Normal)',
+                    line: { color: 'rgba(40, 167, 69, 0.5)', width: 2, dash: 'dot' },
+                    hoverinfo: 'y'
                 };
 
+                // Trace B: The Forecast (The Model's Prediction)
                 const traceForecast = {
                     x: forecast.dates,
                     y: forecast.values,
                     type: 'scatter',
                     mode: 'lines',
-                    name: 'Hybrid Forecast',
-                    line: { color: '#007bff', width: 3 }
+                    name: 'Model Forecast',
+                    line: { color: '#007bff', width: 3, dash: 'dash' }
                 };
 
-                // 2. Layout Configuration
+                // Trace C: Actual History (The Truth)
+                // We plot this LAST so it sits on top of everything else.
+                const traceHistory = {
+                    x: history.dates,
+                    y: history.values,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Actual Data (History)',
+                    line: { color: '#212529', width: 3 }, // Bold Black/Dark Grey
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(33, 37, 41, 0.05)'
+                };
+
+                // --- 2. Calculate "Today" Line ---
+                // We find the last date of history to draw a vertical line separating Past vs Future
+                const lastHistoryDate = history.dates[history.dates.length - 1];
+
+                // --- 3. Layout Configuration ---
                 const layout = {
-                    title: 'Influenza Positivity Rate: History vs Forecast',
-                    xaxis: { title: 'Date', showgrid: true },
-                    yaxis: { title: 'Positivity Rate (%)', showgrid: true },
+                    title: { text: '', font: { size: 18 } },
+                    margin: { t: 20, b: 40, l: 60, r: 20 },
+                    xaxis: { 
+                        title: 'Date', 
+                        showgrid: true,
+                        gridcolor: '#e9ecef'
+                    },
+                    yaxis: { 
+                        title: 'Positivity Rate (%)', 
+                        showgrid: true, 
+                        gridcolor: '#e9ecef',
+                        zeroline: false
+                    },
+                    // Add a vertical line to mark "Today" (Start of Forecast)
+                    shapes: [{
+                        type: 'line',
+                        x0: lastHistoryDate,
+                        y0: 0,
+                        x1: lastHistoryDate,
+                        y1: 1,
+                        yref: 'paper',
+                        line: {
+                            color: 'red',
+                            width: 2,
+                            dash: 'dot'
+                        }
+                    }],
+                    annotations: [{
+                        x: lastHistoryDate,
+                        y: 1,
+                        yref: 'paper',
+                        text: 'Forecast Starts',
+                        showarrow: false,
+                        xanchor: 'left',
+                        font: { color: 'red', size: 10 },
+                        xshift: 5
+                    }],
                     hovermode: 'x unified',
                     showlegend: true,
-                    legend: { orientation: 'h', y: 1.1 }
+                    legend: { orientation: 'h', y: 1.1 },
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)'
                 };
 
-                // 3. Render Plot
-                Plotly.newPlot('plot-div', [traceHistory, traceBaseline, traceForecast], layout);
+                // --- 4. Render Plot ---
+                // Note the order: Baseline first (bottom), then Forecast, then History (top)
+                Plotly.newPlot('plot-div', [traceBaseline, traceForecast, traceHistory], layout);
 
-                // 4. Update Summary Cards
+                // --- 5. Update KPI Cards ---
                 const latestVal = history.values[history.values.length - 1];
                 const maxForecast = Math.max(...forecast.values);
                 const nextVal = forecast.values[0];
 
-                document.getElementById('latest-actual').innerText = latestVal.toFixed(2) + '%';
+                document.getElementById('latest-actual').innerText = latestVal ? latestVal.toFixed(2) + '%' : 'N/A';
                 document.getElementById('peak-forecast').innerText = maxForecast.toFixed(2) + '%';
                 document.getElementById('next-week').innerText = nextVal.toFixed(2) + '%';
                 
-                // Set update date
-                const today = new Date().toLocaleDateString();
-                document.getElementById('last-updated').innerText = today;
+                // Update Date Stamp
+                const updateDate = new Date().toLocaleDateString('en-GB', { 
+                    year: 'numeric', month: 'long', day: 'numeric' 
+                });
+                document.getElementById('last-updated').innerText = updateDate;
             })
             .catch(error => {
                 console.error('Error loading data:', error);
-                document.getElementById('plot-div').innerHTML = '<p class="text-danger text-center">Error loading dashboard_data.json. Please ensure the Python script has been run and the file is in the repository.</p>';
+                document.getElementById('plot-div').innerHTML = 
+                    '<div class="alert alert-danger">Error loading data.json. Ensure the Python script has run successfully.</div>';
             });
     </script>
 </body>
