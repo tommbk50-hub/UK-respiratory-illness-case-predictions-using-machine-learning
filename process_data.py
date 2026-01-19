@@ -14,7 +14,6 @@ METRICS = {
         "name": "PCR Positivity Rate (%)"
     },
     "hospital": {
-        # FIXED: Changed from snake_case to camelCase
         "url_suffix": "influenza_healthcare_hospitalAdmissionRateByWeek", 
         "name": "Hospital Admission Rate (per 100k)"
     },
@@ -27,24 +26,22 @@ METRICS = {
 BASE_URL = "https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/Influenza/geography_types/Nation/geographies/England/metrics/"
 
 def fetch_data(metric_suffix):
-    """Downloads full history for a specific metric."""
     url = f"{BASE_URL}{metric_suffix}"
     print(f"  Fetching data from: {metric_suffix}...")
     
     all_data = []
-    current_url = f"{url}?page_size=365&format=json" # Fetch in large chunks
+    current_url = f"{url}?page_size=365&format=json"
     
     while current_url:
         try:
             response = requests.get(current_url)
             if response.status_code == 404:
-                print(f"    Warning: Metric not found (404). Skipping.")
                 return None
             response.raise_for_status()
             data = response.json()
             all_data.extend(data['results'])
             current_url = data['next']
-            time.sleep(0.2) # Be nice to the API
+            time.sleep(0.2)
         except Exception as e:
             print(f"    Error fetching data: {e}")
             break
@@ -60,8 +57,6 @@ def fetch_data(metric_suffix):
     return df
 
 def train_and_forecast(df):
-    """Runs the Hybrid ML model on a given dataframe."""
-    
     # 1. Feature Engineering
     df['Week_Number'] = df.index.isocalendar().week.astype(int)
     df['Month'] = df.index.month
@@ -87,7 +82,18 @@ def train_and_forecast(df):
     model_resid = HistGradientBoostingRegressor(random_state=42)
     model_resid.fit(df_resid[resid_features], df_resid['Residual'])
 
-    # 4. Generate Forecast (52 Weeks)
+    # --- NEW: Calculate Historical Fit (Backtesting) ---
+    # We predict the residuals for the *past* to see how the model fits the data
+    df_resid['Predicted_Residual'] = model_resid.predict(df_resid[resid_features])
+    
+    # Map these predictions back to the main dataframe
+    df['Model_Fit'] = np.nan
+    df.loc[df_resid.index, 'Model_Fit'] = df.loc[df_resid.index, 'Seasonal_Pred'] + df_resid['Predicted_Residual']
+    
+    # Clamp to 0
+    df['Model_Fit'] = df['Model_Fit'].apply(lambda x: max(0, x) if pd.notnull(x) else None)
+
+    # 4. Generate Future Forecast (52 Weeks)
     last_date = df.index[-1]
     history_residuals = df['Residual'].iloc[-3:].tolist()
     current_date = last_date
@@ -96,20 +102,16 @@ def train_and_forecast(df):
     for i in range(52):
         current_date = current_date + pd.Timedelta(days=7)
         
-        # Seasonal Component
         feat_week = current_date.isocalendar().week
         feat_month = current_date.month
         seasonal_base = model_seasonal.predict(pd.DataFrame([[feat_week, feat_month]], columns=seasonal_features))[0]
         
-        # Residual Component
         res_lag_1 = history_residuals[-1]
         res_lag_2 = history_residuals[-2]
         res_lag_3 = history_residuals[-3]
         pred_residual = model_resid.predict(pd.DataFrame([[res_lag_1, res_lag_2, res_lag_3, feat_week]], columns=resid_features))[0]
         
-        # Combine
         final_pred = seasonal_base + pred_residual
-        # Clamp to 0 (cannot have negative admissions/cases)
         final_pred = max(0, final_pred)
 
         history_residuals.append(pred_residual)
@@ -119,31 +121,27 @@ def train_and_forecast(df):
             'Final_Forecast': float(final_pred)
         })
         
-    return future_forecasts
+    return future_forecasts, df
 
 # -------------------------------------------------------
 # MAIN EXECUTION LOOP
 # -------------------------------------------------------
 full_dashboard_data = {}
-
 print("Starting Multi-Metric Forecast Job...")
 
 for key, config in METRICS.items():
     print(f"\nProcessing: {config['name']}")
-    
-    # 1. Fetch
     df = fetch_data(config['url_suffix'])
     
     if df is not None and not df.empty:
-        # 2. Forecast
-        forecasts = train_and_forecast(df)
+        forecasts, df_history = train_and_forecast(df)
         
-        # 3. Structure Data
         full_dashboard_data[key] = {
             "meta": {"name": config['name']},
             "history": {
-                "dates": df.index.strftime('%Y-%m-%d').tolist(),
-                "values": df['metric_value'].tolist()
+                "dates": df_history.index.strftime('%Y-%m-%d').tolist(),
+                "values": df_history['metric_value'].where(pd.notnull(df_history['metric_value']), None).tolist(),
+                "model_fit": df_history['Model_Fit'].where(pd.notnull(df_history['Model_Fit']), None).tolist() # NEW
             },
             "forecast": {
                 "dates": [x['date'] for x in forecasts],
@@ -154,9 +152,7 @@ for key, config in METRICS.items():
     else:
         print("  Skipping (No data found).")
 
-# 4. Save to JSON
 with open('dashboard_data.json', 'w') as f:
     json.dump(full_dashboard_data, f)
 
-print("\nSuccess: 'dashboard_data.json' updated with all metrics.")
-
+print("\nSuccess: 'dashboard_data.json' updated.")
