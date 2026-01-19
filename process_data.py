@@ -82,29 +82,17 @@ def train_and_forecast(df):
     model_resid = HistGradientBoostingRegressor(random_state=42)
     model_resid.fit(df_resid[resid_features], df_resid['Residual'])
 
-    # --- Calculate Historical Fit ---
-    df_resid['Predicted_Residual'] = model_resid.predict(df_resid[resid_features])
-    
-    df['Model_Fit'] = np.nan
-    df.loc[df_resid.index, 'Model_Fit'] = df.loc[df_resid.index, 'Seasonal_Pred'] + df_resid['Predicted_Residual']
-    # Clamp to 0
-    df['Model_Fit'] = df['Model_Fit'].apply(lambda x: max(0, x) if pd.notnull(x) else None)
-
     # 4. Generate Future Forecast (52 Weeks)
     last_date = df.index[-1]
-    
-    # Get the last "fitted" value to use as the visual starting point for the forecast line
-    last_fit_val = df['Model_Fit'].iloc[-1] if pd.notnull(df['Model_Fit'].iloc[-1]) else df['metric_value'].iloc[-1]
-    
     history_residuals = df['Residual'].iloc[-3:].tolist()
     current_date = last_date
     future_forecasts = []
 
-    # BRIDGE: Add the last historical point as the first forecast point (for visual continuity)
+    # BRIDGE: Start forecast from the last actual point to ensure lines connect visually
     future_forecasts.append({
         'date': last_date.strftime('%Y-%m-%d'),
         'Seasonal_Base': float(df['Seasonal_Pred'].iloc[-1]),
-        'Final_Forecast': float(last_fit_val)
+        'Final_Forecast': float(df['metric_value'].iloc[-1]) # Start at actual
     })
 
     for i in range(52):
@@ -129,7 +117,7 @@ def train_and_forecast(df):
             'Final_Forecast': float(final_pred)
         })
         
-    return future_forecasts, df
+    return future_forecasts
 
 # -------------------------------------------------------
 # MAIN EXECUTION
@@ -142,14 +130,13 @@ for key, config in METRICS.items():
     df = fetch_data(config['url_suffix'])
     
     if df is not None and not df.empty:
-        forecasts, df_history = train_and_forecast(df)
+        forecasts = train_and_forecast(df)
         
         full_dashboard_data[key] = {
             "meta": {"name": config['name']},
             "history": {
-                "dates": df_history.index.strftime('%Y-%m-%d').tolist(),
-                "values": df_history['metric_value'].where(pd.notnull(df_history['metric_value']), None).tolist(),
-                "model_fit": df_history['Model_Fit'].where(pd.notnull(df_history['Model_Fit']), None).tolist()
+                "dates": df.index.strftime('%Y-%m-%d').tolist(),
+                "values": df['metric_value'].tolist()
             },
             "forecast": {
                 "dates": [x['date'] for x in forecasts],
