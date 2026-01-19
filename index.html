@@ -67,8 +67,9 @@
                     <div class="small text-muted mt-1">Source: UK Health Security Agency (Respiratory Viruses > Influenza)</div>
                 </div>
 
-                <p class="text-muted">
-                    This dashboard predicts future trends using a <strong>HistGradientBoostingRegressor</strong> trained on historical surveillance data.
+                <p class="text-muted" style="line-height: 1.6;">
+                    This dashboard predicts future trends using a <strong>HistGradientBoostingRegressor</strong> trained on historical surveillance data. 
+                    The system is fully automated: it <strong>retrieves live data</strong> directly from the UKHSA public API and retrains the model <strong>every week</strong> via GitHub Actions, ensuring the forecast is always based on the latest available statistics.
                 </p>
             </div>
             <div class="col-md-4 text-md-end">
