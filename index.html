@@ -13,22 +13,18 @@
     
     <style>
         body { background-color: #f0f2f5; font-family: 'Roboto', sans-serif; color: #333; }
-        .dashboard-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: white; margin-bottom: 25px; transition: transform 0.2s; }
-        .card:hover { transform: translateY(-2px); }
+        .dashboard-container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: white; margin-bottom: 25px; }
         .header-title { font-weight: 700; color: #1a202c; letter-spacing: -0.5px; }
+        .chart-container { height: 450px; width: 100%; }
+        .metric-card-header { background: #fff; border-bottom: 1px solid #eee; padding: 15px 20px; border-radius: 12px 12px 0 0; }
+        .metric-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; margin: 0; }
         
-        .description-text { font-size: 1rem; line-height: 1.6; color: #495057; }
+        .description-text { font-size: 0.95rem; line-height: 1.6; color: #495057; }
         .description-text a { text-decoration: none; font-weight: 500; }
-        .description-text a:hover { text-decoration: underline; }
-
-        .metric-value { font-size: 2.5rem; font-weight: 700; color: #2d3748; }
-        .metric-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #718096; font-weight: 600; }
-
-        /* Tech Section Styles */
+        
         .tech-section h5 { font-weight: 700; color: #2c3e50; margin-top: 20px; }
         .math-block { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin: 15px 0; overflow-x: auto; }
-        .tech-list li { margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -43,10 +39,6 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="https://ukhsa-dashboard.data.gov.uk/respiratory-viruses/influenza" target="_blank">Official UKHSA Dashboard</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><h6 class="dropdown-header">Raw Data</h6></li>
-                        <li><a class="dropdown-item" href="https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/Influenza/geography_types/Nation/geographies/England/metrics/influenza_testing_positivityByWeek?format=csv" target="_blank">Download CSV</a></li>
-                        <li><a class="dropdown-item" href="https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/Influenza/geography_types/Nation/geographies/England/metrics/influenza_testing_positivityByWeek?format=json" target="_blank">Download JSON</a></li>
                     </ul>
                 </div>
                 <a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning" class="btn btn-light btn-sm fw-bold">GitHub</a>
@@ -57,116 +49,89 @@
     <div class="dashboard-container">
         
         <div class="row mb-4">
-            <div class="col-md-8">
-                <h1 class="header-title mb-3">England Influenza Positivity Forecast</h1>
-                
+            <div class="col-lg-9">
+                <h1 class="header-title mb-3">England Influenza Forecast Dashboard</h1>
                 <div class="description-text">
                     <p>
-                        This dashboard tracks and predicts the percentage of people who received a PCR test for Influenza (flu) and had at least one positive test result in the same 7 days. Here we use a machine learning model to predict future trends so allow appropriate response and preparation, for example, for A&E departments in hospitals. Using a <a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">HistGradientBoostingRegressor model</a> trained on historical surveillance data from the UK Health Security Agency, we are able to get accurate predictions that are automatically updated each week.
+                        This dashboard provides a comprehensive 52-week forecast for Influenza in England across four critical metrics: 
+                        <strong>Transmission (PCR Positivity)</strong>, <strong>Primary Care Impact (GP Consultations)</strong>, and <strong>Secondary Care Impact (Hospital & ICU Admissions)</strong>.
                     </p>
                     <p>
-                        The system is fully automated: it retrieves live data directly from the UKHSA public API and retrains the model every week via GitHub Actions, ensuring the forecast is always based on the latest available statistics.
+                        Predictions are generated using a <a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">HistGradientBoostingRegressor</a> hybrid model.
+                        The system is fully automated: it retrieves live data directly from the UKHSA public API and retrains all four models every week via GitHub Actions.
                     </p>
                     <p class="text-muted small">
-                        Data is shown by specimen date (the date the sample was collected). Last date updated was week beginning <span id="latest-data-date" class="fw-bold">...</span>.
+                        Data source: UK Health Security Agency. Last updated: <span id="last-updated" class="fw-bold">...</span>.
                     </p>
                 </div>
             </div>
-            <div class="col-md-4 text-md-end">
+            <div class="col-lg-3 text-lg-end mt-3 mt-lg-0">
                 <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill">
-                    <i class="fas fa-check-circle me-1"></i> Model Active
+                    <i class="fas fa-check-circle me-1"></i> Multi-Model Active
                 </span>
-                <div class="text-muted small mt-2">Dashboard Updated: <span id="last-updated">...</span></div>
             </div>
         </div>
 
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card p-4 text-center">
-                    <div class="metric-value" id="latest-actual">--%</div>
-                    <div class="metric-label">Current Positivity</div>
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="metric-card-header d-flex justify-content-between align-items-center">
+                        <h5 class="metric-title"><i class="fas fa-vial text-primary me-2"></i>PCR Positivity Rate</h5>
+                        <span class="badge bg-light text-dark border">% of tests positive</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-positivity" class="chart-container"></div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card p-4 text-center">
-                    <div class="metric-value text-primary" id="next-week">--%</div>
-                    <div class="metric-label">Forecast Next Week</div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-4 text-center">
-                    <div class="metric-value text-danger" id="peak-forecast">--%</div>
-                    <div class="metric-label">Predicted Winter Peak</div>
-                </div>
-            </div>
-        </div>
 
-        <div class="card p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold m-0">Weekly positivity of people receiving a PCR test (England) - Actual vs Predicted</h5>
-                <span class="badge bg-light text-dark border">Interactive Chart</span>
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="metric-card-header d-flex justify-content-between align-items-center">
+                        <h5 class="metric-title"><i class="fas fa-user-md text-success me-2"></i>GP Consultations (ILI)</h5>
+                        <span class="badge bg-light text-dark border">Rate per 100,000</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-gp" class="chart-container"></div>
+                    </div>
+                </div>
             </div>
-            <div id="plot-div" style="width:100%; height:550px;"></div>
+            
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="metric-card-header d-flex justify-content-between align-items-center">
+                        <h5 class="metric-title"><i class="fas fa-hospital text-danger me-2"></i>Hospital Admissions</h5>
+                        <span class="badge bg-light text-dark border">Rate per 100,000</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-hospital" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="metric-card-header d-flex justify-content-between align-items-center">
+                        <h5 class="metric-title"><i class="fas fa-procedures text-warning me-2"></i>ICU / HDU Admissions</h5>
+                        <span class="badge bg-light text-dark border">Rate per 100,000</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-icu" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="row mt-4">
             <div class="col-12">
                 <div class="card p-5 tech-section">
                     <h4 class="fw-bold text-primary mb-4"><i class="fas fa-cogs me-2"></i>Technical Methodology</h4>
+                    <p>Our forecasting engine utilises a <strong>Hybrid Approach</strong>. For each metric independently, we first isolate the predictable seasonal cycle, and then use Scikit-Learn's <code>HistGradientBoostingRegressor</code> to model the residuals.</p>
                     
-                    <p>Our forecasting engine utilises a <strong>Hybrid Approach</strong>. We first isolate the predictable seasonal cycle, and then use Scikit-Learn's <code>HistGradientBoostingRegressor</code> to model the residuals (the difference between the seasonal baseline and reality).</p>
-
-                    <hr class="my-4">
-
-                    <h5>1. Histogram-Based Gradient Boosting (HGBR)</h5>
-                    <p>
-                        The <code>HistGradientBoostingRegressor</code> is an implementation of Gradient Boosted Decision Trees (GBDT), inspired by LightGBM. It is significantly faster than traditional GBDT for large datasets (like our weekly time series) because it uses <strong>histogram binning</strong>.
-                    </p>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6><strong>Step A: Data Discretisation (Binning)</strong></h6>
-                            <p>Standard decision trees sort the feature values at every node split, which has a complexity of \(O(N \log N)\). HGBR instead discretises the continuous input features (e.g., previous weeks' residuals) into integer-valued bins (max 255 bins).</p>
-                            <div class="math-block">
-                                $$ X_{binned} = \text{digitize}(X, \text{bins}) \in \{0, \dots, 255\} $$
-                            </div>
-                            <p class="small text-muted">This reduces the complexity of finding the best split to \(O(N)\), as the algorithm only needs to construct histograms of the data distribution.</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><strong>Step B: The Additive Model</strong></h6>
-                            <p>The model is an ensemble of \(M\) decision trees. It is an additive model where the prediction at step \(m\), denoted as \(F_m(x)\), is the sum of the previous prediction and a new tree \(h_m(x)\).</p>
-                            <div class="math-block">
-                                $$ F_m(x) = F_{m-1}(x) + \nu \cdot h_m(x) $$
-                            </div>
-                            <p class="small text-muted">Where \(\nu\) is the learning rate (shrinkage) that controls how strongly each new tree corrects the previous errors.</p>
-                        </div>
-                    </div>
-
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <h6><strong>Step C: Gradient Descent Optimisation</strong></h6>
-                            <p>
-                                At each iteration \(m\), the new tree \(h_m(x)\) is trained to predict the <strong>negative gradient</strong> of the loss function with respect to the previous prediction. For our Least Squares loss function \(L(y, F(x)) = \frac{1}{2}(y - F(x))^2\), this negative gradient is simply the residual:
-                            </p>
-                            <div class="math-block text-center">
-                                $$ r_i = - \frac{\partial L(y_i, F_{m-1}(x_i))}{\partial F_{m-1}(x_i)} = y_i - F_{m-1}(x_i) $$
-                            </div>
-                            <p>
-                                By fitting the new tree to these residuals \(r_i\), the model iteratively corrects its own mistakes, effectively performing gradient descent in function space.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="alert alert-light border mt-4">
+                    <div class="alert alert-light border mt-3">
                         <strong>Source Reference:</strong> 
-                        <br>
-                        <small>
-                            <a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">Scikit-Learn User Guide: Histogram-Based Gradient Boosting</a>
-                            <br>
-                            <a href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.HistGradientBoostingRegressor.html" target="_blank">API Reference: HistGradientBoostingRegressor</a>
-                        </small>
+                        <a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank" class="ms-2">Scikit-Learn User Guide: Histogram-Based Gradient Boosting</a>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -175,110 +140,96 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Mapping JSON keys to HTML Div IDs
+        const chartsConfig = [
+            { key: 'positivity', divId: 'chart-positivity', color: '#007bff' }, // Blue
+            { key: 'gp',         divId: 'chart-gp',         color: '#28a745' }, // Green
+            { key: 'hospital',   divId: 'chart-hospital',   color: '#dc3545' }, // Red
+            { key: 'icu',        divId: 'chart-icu',        color: '#ffc107' }  // Yellow/Orange
+        ];
+
         fetch('dashboard_data.json')
             .then(response => response.json())
             .then(data => {
-                const history = data.history;
-                const forecast = data.forecast;
-
-                // 1. Seasonal Baseline (Faint Green)
-                const traceBaseline = {
-                    x: forecast.dates,
-                    y: forecast.baseline,
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: 'Seasonal Norm',
-                    line: { color: 'rgba(40, 167, 69, 0.4)', width: 2, dash: 'dot' },
-                    hoverinfo: 'y'
-                };
-
-                // 2. The Forecast (Blue Dashed)
-                const traceForecast = {
-                    x: forecast.dates,
-                    y: forecast.values,
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: 'Model Forecast',
-                    line: { color: '#007bff', width: 3, dash: 'dash' }
-                };
-
-                // 3. Actual History (Thin Sharp Black Line)
-                const traceHistory = {
-                    x: history.dates,
-                    y: history.values,
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: 'Actual Data (PCR Positivity)',
-                    line: { color: '#000000', width: 1.5 },
-                    fill: 'tozeroy',
-                    fillcolor: 'rgba(0, 0, 0, 0.05)'
-                };
-
-                // 4. Vertical "Today" Line
-                const lastHistoryDate = history.dates[history.dates.length - 1];
-
-                const layout = {
-                    font: { family: 'Roboto, sans-serif' },
-                    margin: { t: 30, b: 40, l: 60, r: 20 },
-                    xaxis: { 
-                        showgrid: true, 
-                        gridcolor: '#e9ecef',
-                        zeroline: false 
-                    },
-                    yaxis: { 
-                        title: 'Positivity Rate (%)', 
-                        showgrid: true, 
-                        gridcolor: '#e9ecef',
-                        zeroline: false
-                    },
-                    shapes: [{
-                        type: 'line',
-                        x0: lastHistoryDate,
-                        y0: 0,
-                        x1: lastHistoryDate,
-                        y1: 1,
-                        yref: 'paper',
-                        line: { color: '#dc3545', width: 1.5, dash: 'dot' }
-                    }],
-                    annotations: [{
-                        x: lastHistoryDate,
-                        y: 1,
-                        yref: 'paper',
-                        text: 'Forecast Starts',
-                        showarrow: false,
-                        xanchor: 'left',
-                        xshift: 5,
-                        font: { color: '#dc3545', size: 12 }
-                    }],
-                    hovermode: 'x unified',
-                    showlegend: true,
-                    legend: { orientation: 'h', y: 1.05 },
-                    paper_bgcolor: 'rgba(0,0,0,0)',
-                    plot_bgcolor: 'rgba(0,0,0,0)'
-                };
-
-                Plotly.newPlot('plot-div', [traceBaseline, traceForecast, traceHistory], layout);
-
-                // Update Metrics
-                const latestVal = history.values[history.values.length - 1];
-                const maxForecast = Math.max(...forecast.values);
-                const nextVal = forecast.values[0];
-
-                document.getElementById('latest-actual').innerText = latestVal ? latestVal.toFixed(1) + '%' : 'N/A';
-                document.getElementById('peak-forecast').innerText = maxForecast.toFixed(1) + '%';
-                document.getElementById('next-week').innerText = nextVal.toFixed(1) + '%';
                 
+                // Update Date Stamp
                 document.getElementById('last-updated').innerText = new Date().toLocaleDateString('en-GB');
 
-                // DYNAMIC DATE UPDATE FOR DESCRIPTION
-                // Format the last historical date to "5 Jan 2026" style
-                if(lastHistoryDate) {
-                    const dateObj = new Date(lastHistoryDate);
-                    const options = { day: 'numeric', month: 'short', year: 'numeric' };
-                    document.getElementById('latest-data-date').innerText = dateObj.toLocaleDateString('en-GB', options);
-                }
+                // Loop through each chart configuration and render
+                chartsConfig.forEach(config => {
+                    const metricData = data[config.key];
+                    
+                    if (!metricData) {
+                        console.warn(`No data found for ${config.key}`);
+                        document.getElementById(config.divId).innerHTML = '<p class="text-center text-muted mt-5">Data currently unavailable</p>';
+                        return;
+                    }
+
+                    const history = metricData.history;
+                    const forecast = metricData.forecast;
+
+                    // 1. Seasonal Baseline
+                    const traceBaseline = {
+                        x: forecast.dates,
+                        y: forecast.baseline,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Seasonal Norm',
+                        line: { color: 'rgba(128, 128, 128, 0.4)', width: 2, dash: 'dot' },
+                        hoverinfo: 'y'
+                    };
+
+                    // 2. Forecast
+                    const traceForecast = {
+                        x: forecast.dates,
+                        y: forecast.values,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Forecast',
+                        line: { color: config.color, width: 3, dash: 'dash' }
+                    };
+
+                    // 3. History
+                    const traceHistory = {
+                        x: history.dates,
+                        y: history.values,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Actuals',
+                        line: { color: '#212529', width: 1.5 },
+                        fill: 'tozeroy',
+                        fillcolor: 'rgba(0,0,0,0.03)'
+                    };
+
+                    const lastHistoryDate = history.dates[history.dates.length - 1];
+
+                    const layout = {
+                        font: { family: 'Roboto, sans-serif' },
+                        margin: { t: 20, b: 40, l: 50, r: 20 },
+                        xaxis: { showgrid: true, gridcolor: '#f1f3f5' },
+                        yaxis: { showgrid: true, gridcolor: '#f1f3f5', zeroline: false },
+                        shapes: [{
+                            type: 'line',
+                            x0: lastHistoryDate, y0: 0,
+                            x1: lastHistoryDate, y1: 1,
+                            yref: 'paper',
+                            line: { color: '#dc3545', width: 1.5, dash: 'dot' }
+                        }],
+                        showlegend: true,
+                        legend: { orientation: 'h', y: 1.1 },
+                        paper_bgcolor: 'rgba(0,0,0,0)',
+                        plot_bgcolor: 'rgba(0,0,0,0)'
+                    };
+
+                    Plotly.newPlot(config.divId, [traceBaseline, traceForecast, traceHistory], layout);
+                });
+
             })
-            .catch(err => console.error("Error:", err));
+            .catch(err => {
+                console.error("Error:", err);
+                document.querySelector('.dashboard-container').innerHTML += 
+                    `<div class="alert alert-danger">Error loading data.json. Check console for details.</div>`;
+            });
     </script>
 </body>
 </html>
