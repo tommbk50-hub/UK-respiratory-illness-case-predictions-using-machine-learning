@@ -6,26 +6,21 @@ import time
 from sklearn.ensemble import HistGradientBoostingRegressor
 
 # -------------------------------------------------------
-# CONFIGURATION: The 4 Metrics we want to predict
+# CONFIGURATION: The 3 Reliable Metrics
 # -------------------------------------------------------
-# We use the "ByWeek" time-series endpoints, not the "Headline" endpoints 
-# (Headline only gives 1 number; we need history for ML).
 METRICS = {
     "positivity": {
         "url_suffix": "influenza_testing_positivityByWeek",
         "name": "PCR Positivity Rate (%)"
     },
     "hospital": {
-        "url_suffix": "influenza_healthcare_hospital_admission_rateByWeek",
+        # FIXED: Changed from snake_case to camelCase
+        "url_suffix": "influenza_healthcare_hospitalAdmissionRateByWeek", 
         "name": "Hospital Admission Rate (per 100k)"
     },
     "icu": {
         "url_suffix": "influenza_healthcare_ICUHDUadmissionRateByWeek",
         "name": "ICU/HDU Admission Rate (per 100k)"
-    },
-    "gp": {
-        "url_suffix": "influenza_healthcare_GPInHoursConsultationsByWeek",
-        "name": "GP Consultations for ILI (per 100k)"
     }
 }
 
@@ -164,3 +159,4 @@ with open('dashboard_data.json', 'w') as f:
     json.dump(full_dashboard_data, f)
 
 print("\nSuccess: 'dashboard_data.json' updated with all metrics.")
+
