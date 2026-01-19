@@ -182,11 +182,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Mapping JSON keys to HTML Div IDs (GP Removed)
         const chartsConfig = [
-            { key: 'positivity', divId: 'chart-positivity', color: '#007bff' }, // Blue
-            { key: 'hospital',   divId: 'chart-hospital',   color: '#dc3545' }, // Red
-            { key: 'icu',        divId: 'chart-icu',        color: '#ffc107' }  // Yellow/Orange
+            { key: 'positivity', divId: 'chart-positivity', color: '#007bff' },
+            { key: 'hospital',   divId: 'chart-hospital',   color: '#dc3545' },
+            { key: 'icu',        divId: 'chart-icu',        color: '#ffc107' }
         ];
 
         fetch('dashboard_data.json')
@@ -217,14 +216,14 @@
                         hoverinfo: 'y'
                     };
 
-                    // 2. Model Fit (Historical) - NEW TRACE
+                    // 2. Model Fit (Historical)
                     const traceModelFit = {
                         x: history.dates,
                         y: history.model_fit,
                         type: 'scatter',
                         mode: 'lines',
                         name: 'Model Fit',
-                        line: { color: config.color, width: 2 }, // Solid line same color as forecast
+                        line: { color: config.color, width: 2 }, 
                         hoverinfo: 'y'
                     };
 
@@ -238,14 +237,15 @@
                         line: { color: config.color, width: 3, dash: 'dash' }
                     };
 
-                    // 4. History (Actuals) - CHANGED TO DOTS
+                    // 4. History (Actuals) - UPDATED: Markers + Thin Line
                     const traceHistory = {
                         x: history.dates,
                         y: history.values,
                         type: 'scatter',
-                        mode: 'markers', // Dots!
+                        mode: 'lines+markers', // Points connected by lines
                         name: 'Actuals',
-                        marker: { color: '#212529', size: 4, opacity: 0.6 } // Small dark dots
+                        marker: { color: '#212529', size: 4, symbol: 'circle' },
+                        line: { color: 'rgba(33, 37, 41, 0.3)', width: 1 } // Faint connecting line
                     };
 
                     const lastHistoryDate = history.dates[history.dates.length - 1];
@@ -268,7 +268,6 @@
                         plot_bgcolor: 'rgba(0,0,0,0)'
                     };
 
-                    // Render: Note the order. Fit -> Forecast -> Dots on top.
                     Plotly.newPlot(config.divId, [traceBaseline, traceModelFit, traceForecast, traceHistory], layout);
                 });
 
