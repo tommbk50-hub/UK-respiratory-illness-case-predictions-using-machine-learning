@@ -37,7 +37,16 @@ jobs:
         run: |
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'actions@github.com'
-          # Add the generated JSON file
+          
+          # Stage the file
           git add dashboard_data.json
+          
           # Commit only if there are changes
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update forecast data" && git push)
+          # (Logic: If "diff" finds changes, commit. Else, do nothing.)
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-update forecast data"
+          
+          # DOWNLOAD latest changes first to avoid conflicts
+          git pull --rebase origin main
+          
+          # Now upload
+          git push
