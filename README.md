@@ -1,2 +1,2 @@
-# Data-Science-and-Anakytics-Projects
+# Data-Science-and-Analytics-Projects
 Tom's data science and analytics projects
