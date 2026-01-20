@@ -29,7 +29,7 @@ METRICS = {
         "agg": "mean"
     },
 
-    # --- COVID-19 (Daily Data -> Needs Weekly Aggregation) ---
+    # --- COVID-19 (Daily Data -> Resampled to Weekly) ---
     "covid_positivity": {
         "topic": "COVID-19",
         "metric_id": "COVID-19_testing_positivity7DayRolling",
@@ -38,21 +38,20 @@ METRICS = {
     },
     "covid_hospital": {
         "topic": "COVID-19",
-        # VERIFIED: Daily count of admissions (We sum this to get weekly)
-        "metric_id": "COVID-19_healthcare_admissionByDay",
+        # CORRECT ID: Daily Admission Count
+        "metric_id": "COVID-19_healthcare_admissionByDay", 
         "name": "COVID: Weekly Hospital Admissions",
         "agg": "sum"
     },
     "covid_deaths": {
         "topic": "COVID-19",
-        # VERIFIED: Daily count of ONS deaths (We sum this to get weekly)
+        # CORRECT ID: Daily ONS Deaths
         "metric_id": "COVID-19_deaths_ONSByDay",
         "name": "COVID: Weekly Deaths (ONS)",
         "agg": "sum"
     }
 }
 
-# The URL root.
 API_TEMPLATE = "https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/{topic}/geography_types/Nation/geographies/England/metrics/{metric_id}"
 
 def fetch_data(config):
@@ -84,9 +83,7 @@ def fetch_data(config):
     df = df[['date', 'metric_value']].copy()
     df['date'] = pd.to_datetime(df['date'])
     
-    # --- CRITICAL FIX: Handle potential duplicate dates from API ---
-    # Sometimes the API returns multiple rows per date (e.g. different age groups).
-    # We group by date first to get a single clean value per day.
+    # Clean duplicates
     if config['agg'] == 'sum':
         df = df.groupby('date')['metric_value'].sum().reset_index()
     else:
@@ -95,51 +92,40 @@ def fetch_data(config):
     df.sort_values('date', inplace=True)
     df.set_index('date', inplace=True)
     
-    # --- RESAMPLING LOGIC ---
-    # We use 'W-SUN' (Weekly ending Sunday) to align daily COVID data with weekly Flu data
+    # Resample Daily -> Weekly
     if config['agg'] == 'sum':
         df = df.resample('W-SUN')['metric_value'].sum().to_frame()
     else:
         df = df.resample('W-SUN')['metric_value'].mean().to_frame()
     
-    # Clean up artifacts (weeks with 0 data at the very start/end)
     df = df[df['metric_value'] > 0].copy()
     
     return df
 
 def train_and_forecast(df):
-    # 1. Feature Engineering
     df['Week_Number'] = df.index.isocalendar().week.astype(int)
     df['Month'] = df.index.month
-    
     seasonal_features = ['Week_Number', 'Month']
-    target = 'metric_value'
-
-    # 2. Train Seasonal Baseline
-    model_seasonal = HistGradientBoostingRegressor(categorical_features=[0, 1], random_state=42)
-    model_seasonal.fit(df[seasonal_features], df[target])
     
+    model_seasonal = HistGradientBoostingRegressor(categorical_features=[0, 1], random_state=42)
+    model_seasonal.fit(df[seasonal_features], df['metric_value'])
     df['Seasonal_Pred'] = model_seasonal.predict(df[seasonal_features])
     df['Residual'] = df['metric_value'] - df['Seasonal_Pred']
 
-    # 3. Train Residual Model (Lags)
     df['Res_Lag_1'] = df['Residual'].shift(1)
     df['Res_Lag_2'] = df['Residual'].shift(2)
     df['Res_Lag_3'] = df['Residual'].shift(3)
-    
     df_resid = df.dropna().copy()
     resid_features = ['Res_Lag_1', 'Res_Lag_2', 'Res_Lag_3', 'Week_Number']
     
     model_resid = HistGradientBoostingRegressor(random_state=42)
     model_resid.fit(df_resid[resid_features], df_resid['Residual'])
 
-    # 4. Generate Future Forecast (52 Weeks)
     last_date = df.index[-1]
     history_residuals = df['Residual'].iloc[-3:].tolist()
     current_date = last_date
     future_forecasts = []
 
-    # BRIDGE: Start forecast from the last actual point
     future_forecasts.append({
         'date': last_date.strftime('%Y-%m-%d'),
         'Seasonal_Base': float(df['Seasonal_Pred'].iloc[-1]),
@@ -148,20 +134,16 @@ def train_and_forecast(df):
 
     for i in range(52):
         current_date = current_date + pd.Timedelta(days=7)
-        
         feat_week = current_date.isocalendar().week
         feat_month = current_date.month
         seasonal_base = model_seasonal.predict(pd.DataFrame([[feat_week, feat_month]], columns=seasonal_features))[0]
-        
         res_lag_1 = history_residuals[-1]
         res_lag_2 = history_residuals[-2]
         res_lag_3 = history_residuals[-3]
         pred_residual = model_resid.predict(pd.DataFrame([[res_lag_1, res_lag_2, res_lag_3, feat_week]], columns=resid_features))[0]
-        
-        final_pred = seasonal_base + pred_residual
-        final_pred = max(0, final_pred)
-
+        final_pred = max(0, seasonal_base + pred_residual)
         history_residuals.append(pred_residual)
+        
         future_forecasts.append({
             'date': current_date.strftime('%Y-%m-%d'),
             'Seasonal_Base': float(seasonal_base),
@@ -170,9 +152,6 @@ def train_and_forecast(df):
         
     return future_forecasts
 
-# -------------------------------------------------------
-# MAIN EXECUTION
-# -------------------------------------------------------
 full_dashboard_data = {}
 print("Starting Multi-Virus Forecast Job...")
 
@@ -181,13 +160,10 @@ for key, config in METRICS.items():
     df = fetch_data(config)
     
     if df is not None and not df.empty:
-        # Check for sufficient data points
         if len(df) < 10:
-             print("  Skipping (Not enough data points for ML).")
+             print("  Skipping (Not enough data points).")
              continue
-
         forecasts = train_and_forecast(df)
-        
         full_dashboard_data[key] = {
             "meta": {"name": config['name'], "topic": config['topic']},
             "history": {
@@ -206,4 +182,4 @@ for key, config in METRICS.items():
 with open('dashboard_data.json', 'w') as f:
     json.dump(full_dashboard_data, f)
 
-print("\nSuccess: 'dashboard_data.json' updated with Flu and COVID data.")
+print("\nSuccess: 'dashboard_data.json' updated.")
