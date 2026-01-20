@@ -9,7 +9,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 # CONFIGURATION
 # -------------------------------------------------------
 METRICS = {
-    # --- INFLUENZA METRICS (These were already working) ---
+    # --- INFLUENZA METRICS ---
     "positivity": {
         "topic": "Influenza",
         "metric_id": "influenza_testing_positivityByWeek",
@@ -26,32 +26,30 @@ METRICS = {
         "name": "Flu: ICU/HDU Admission Rate"
     },
 
-    # --- COVID-19 METRICS (FIXED IDs) ---
+    # --- COVID-19 METRICS (UPDATED IDs) ---
     "covid_positivity": {
         "topic": "COVID-19",
-        # FIXED: COVID uses '7DayRolling' instead of 'ByWeek' for positivity
         "metric_id": "COVID-19_testing_positivity7DayRolling",
         "name": "COVID: PCR Positivity Rate (%)"
     },
     "covid_hospital": {
         "topic": "COVID-19",
-        # FIXED: Added 'hospital' to the ID to match the Influenza pattern
-        "metric_id": "COVID-19_healthcare_hospitalAdmissionRateByWeek",
-        "name": "COVID: Hospital Admission Rate"
+        # FIXED: Switched to the 'Headline' metric for weekly admissions
+        "metric_id": "COVID-19_headline_7DayAdmissions",
+        "name": "COVID: Weekly Hospital Admissions"
     },
     "covid_deaths": {
         "topic": "COVID-19",
-        # FIXED: Changed to the standard ONS weekly registered deaths metric
-        "metric_id": "COVID-19_deaths_ONSRegisteredByWeek",
-        "name": "COVID: Deaths (ONS Weekly)"
+        # FIXED: Switched to the 'Headline' metric for weekly ONS deaths
+        "metric_id": "COVID-19_headline_ONSdeaths_7DayTotals",
+        "name": "COVID: Weekly Deaths (ONS)"
     }
 }
 
-# The URL root. We will inject {TOPIC} and {METRIC} dynamically.
+# The URL root.
 API_TEMPLATE = "https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/{topic}/geography_types/Nation/geographies/England/metrics/{metric_id}"
 
 def fetch_data(config):
-    # Construct the specific URL for this metric
     url = API_TEMPLATE.format(topic=config['topic'], metric_id=config['metric_id'])
     print(f"  Fetching {config['topic']} data: {config['metric_id']}...")
     
@@ -68,7 +66,7 @@ def fetch_data(config):
             data = response.json()
             all_data.extend(data['results'])
             current_url = data['next']
-            time.sleep(0.2) # Be nice to the API
+            time.sleep(0.2)
         except Exception as e:
             print(f"    Error fetching data: {e}")
             break
