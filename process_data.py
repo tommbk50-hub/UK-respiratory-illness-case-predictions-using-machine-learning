@@ -9,7 +9,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 # CONFIGURATION
 # -------------------------------------------------------
 METRICS = {
-    # --- INFLUENZA (Weekly Data) ---
+    # --- INFLUENZA (3 Charts) ---
     "positivity": {
         "topic": "Influenza",
         "metric_id": "influenza_testing_positivityByWeek",
@@ -29,7 +29,7 @@ METRICS = {
         "agg": "mean"
     },
 
-    # --- COVID-19 (Headline Metrics - GUARANTEED) ---
+    # --- COVID-19 (2 Charts Only) ---
     "covid_positivity": {
         "topic": "COVID-19",
         "metric_id": "COVID-19_testing_positivity7DayRolling",
@@ -38,18 +38,11 @@ METRICS = {
     },
     "covid_hospital": {
         "topic": "COVID-19",
-        # HEADLINE METRIC: Standard weekly total
-        "metric_id": "COVID-19_headline_7DayAdmissions",
+        "metric_id": "COVID-19_headline_7DayAdmissions", 
         "name": "COVID: Weekly Hospital Admissions",
         "agg": "sum"
-    },
-    "covid_cases": {
-        "topic": "COVID-19",
-        # HEADLINE METRIC: Standard weekly total (Replaces Deaths/Lineage)
-        "metric_id": "COVID-19_headline_cases_7DayTotals",
-        "name": "COVID: Weekly Confirmed Cases",
-        "agg": "sum"
     }
+    # Removed 3rd Metric to ensure stability
 }
 
 API_TEMPLATE = "https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/{topic}/geography_types/Nation/geographies/England/metrics/{metric_id}"
@@ -83,7 +76,7 @@ def fetch_data(config):
     df = df[['date', 'metric_value']].copy()
     df['date'] = pd.to_datetime(df['date'])
     
-    # Clean duplicates: Group by date first
+    # Clean duplicates
     if config['agg'] == 'sum':
         df = df.groupby('date')['metric_value'].sum().reset_index()
     else:
@@ -92,7 +85,7 @@ def fetch_data(config):
     df.sort_values('date', inplace=True)
     df.set_index('date', inplace=True)
     
-    # Resample to Weekly (Ending Sunday)
+    # Resample Daily -> Weekly (Ending Sunday)
     if config['agg'] == 'sum':
         df = df.resample('W-SUN')['metric_value'].sum().to_frame()
     else:
