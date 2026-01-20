@@ -45,7 +45,6 @@
     </style>
 </head>
 <body>
-
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1 fw-bold"><i class="fas fa-lungs-virus me-2"></i>UKHSA Respiratory Forecast</span>
@@ -130,8 +129,18 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="card p-4">
-                    <p class="small text-muted mb-3">
+                    <p class="small text-muted mb-2">
                         We continuously monitor performance by running a <strong>52-Week Rolling Backtest</strong>. This simulates how the model would have performed every week for the past year using only data available at that time.
+                    </p>
+                    <p class="small text-muted mb-2">
+                        This chart is designed to be a "truth test." It displays two lines covering the past 52 weeks:
+                    </p>
+                    <ul class="small text-muted mb-3">
+                        <li><strong>Solid Black Line (Actuals):</strong> The real number of hospital admissions reported by the UKHSA.</li>
+                        <li><strong>Dotted Green Line (Model Prediction):</strong> What the model would have predicted for that week if it traveled back in time, using only the data available back then.</li>
+                    </ul>
+                    <p class="small text-muted mb-0">
+                        When the Green line tracks closely with the Black line, it proves the model understands the patterns. If they diverge significantly (e.g., during a sudden outbreak), it visualizes the "Error Gap."
                     </p>
                     <div id="chart-accuracy" class="accuracy-container"></div>
                 </div>
