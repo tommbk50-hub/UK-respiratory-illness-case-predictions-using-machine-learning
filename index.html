@@ -1,290 +1,441 @@
-import pandas as pd
-import numpy as np
-import json
-import requests
-import time
-from sklearn.ensemble import HistGradientBoostingRegressor
-from sklearn.metrics import mean_absolute_error
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Respiratory Virus Forecast</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Roboto', sans-serif; color: #333; }
+        .dashboard-container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: white; margin-bottom: 25px; }
+        .header-title { font-weight: 700; color: #1a202c; letter-spacing: -0.5px; }
+        
+        .chart-container { height: 400px; width: 100%; }
+        .accuracy-container { height: 300px; width: 100%; }
+        
+        .metric-card-header { background: #fff; border-bottom: 1px solid #eee; padding: 15px 20px; border-radius: 12px 12px 0 0; }
+        .metric-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; margin: 0; }
+        
+        .section-header { border-left: 5px solid #007bff; padding-left: 15px; margin: 40px 0 20px 0; color: #1a202c; }
+        .covid-header { border-left-color: #6610f2; }
+        .accuracy-header { border-left-color: #198754; }
+        
+        .description-text { font-size: 0.95rem; line-height: 1.6; color: #495057; }
+        .description-text a { text-decoration: none; font-weight: 500; }
+        
+        /* Tech Section Styles */
+        .tech-section h5 { font-weight: 700; color: #2c3e50; margin-top: 30px; margin-bottom: 15px; }
+        .math-block { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin: 15px 0; overflow-x: auto; }
+        
+        /* Code Block Styles */
+        pre { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+        code { font-family: 'Consolas', 'Monaco', monospace; }
+        .code-comment { color: #75715e; }
+        .code-keyword { color: #66d9ef; }
+        .code-string { color: #e6db74; }
+        
+        .loading-msg { display: flex; align-items: center; justify-content: center; height: 100%; color: #adb5bd; font-style: italic; }
+    </style>
+</head>
+<body>
 
-# -------------------------------------------------------
-# CONFIGURATION
-# -------------------------------------------------------
-METRICS = {
-    # --- INFLUENZA ---
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1 fw-bold"><i class="fas fa-lungs-virus me-2"></i>UKHSA Respiratory Forecast</span>
+            <div class="d-flex gap-2">
+                <div class="dropdown">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-database me-1"></i> Data Options
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="https://ukhsa-dashboard.data.gov.uk/" target="_blank">Official UKHSA Dashboard</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning/blob/main/process_data.py" target="_blank"><i class="fas fa-code me-2 text-muted"></i>View Python Code</a></li>
+                    </ul>
+                </div>
+                <a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning" class="btn btn-light btn-sm fw-bold">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        
+        <div class="row mb-4">
+            <div class="col-lg-9">
+                <h1 class="header-title mb-2">England Respiratory Virus Forecast Dashboard</h1>
+                <p class="mb-3 text-muted">
+                    By <a href="https://www.linkedin.com/in/tom-knight-340784151/" target="_blank" class="text-decoration-none fw-bold" style="color: #0077b5;"><i class="fab fa-linkedin me-1"></i>Tom Knight</a>
+                </p>
+
+                <div class="description-text">
+                    <p>
+                        This dashboard provides a comprehensive 52-week forecast for <strong>Influenza (Flu)</strong> and <strong>COVID-19</strong> in England. By analysing trends in PCR Positivity and Hospital Admissions, these models aim to support healthcare resource planning—helping hospitals and A&E departments anticipate potential winter surges.
+                    </p>
+                    <p>
+                        The predictions are generated using a <strong>Hybrid Machine Learning strategy</strong> (<a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">HistGradientBoostingRegressor</a>). The system is fully automated: it retrieves live data directly from the UKHSA public API and retrains all models every week via GitHub Actions.
+                    </p>
+                    <p class="text-muted small mt-3">
+                        <i class="fas fa-info-circle me-1"></i> Data represents specimen dates (date of sample collection). Last updated: <span id="last-updated" class="fw-bold">...</span>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-header"><i class="fas fa-virus me-2 text-primary"></i>Influenza (Flu) Forecast</h3>
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="metric-card-header"><h5 class="metric-title">PCR Positivity Rate</h5></div>
+                    <div class="card-body"><div id="chart-positivity" class="chart-container"></div></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="metric-card-header"><h5 class="metric-title">Hospital Admissions</h5></div>
+                    <div class="card-body"><div id="chart-hospital" class="chart-container"></div></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="metric-card-header"><h5 class="metric-title">ICU / HDU Admissions</h5></div>
+                    <div class="card-body"><div id="chart-icu" class="chart-container"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-header covid-header"><i class="fas fa-lungs-virus me-2" style="color: #6610f2;"></i>COVID-19 Forecast</h3>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="metric-card-header"><h5 class="metric-title">PCR Positivity Rate</h5></div>
+                    <div class="card-body"><div id="chart-covid-positivity" class="chart-container"></div></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="metric-card-header"><h5 class="metric-title">Weekly Hospital Admissions</h5></div>
+                    <div class="card-body"><div id="chart-covid-hospital" class="chart-container"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-header accuracy-header"><i class="fas fa-bullseye me-2 text-success"></i>Model Accuracy (Historical Backtest)</h3>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card p-4">
+                    <p class="small text-muted mb-2">
+                        We continuously monitor performance by running a <strong>52-Week Rolling Backtest</strong>. This simulates how the model would have performed every week for the past year using only data available at that time.
+                    </p>
+                    <p class="small text-muted mb-2">
+                        This chart is designed to be a "truth test." It displays two lines covering the past 52 weeks:
+                    </p>
+                    <ul class="small text-muted mb-3">
+                        <li><strong>Solid Black Line (Actuals):</strong> The real number of hospital admissions reported by the UKHSA.</li>
+                        <li><strong>Dotted Green Line (Model Prediction):</strong> What the model would have predicted for that week if it traveled back in time, using only the data available back then.</li>
+                    </ul>
+                    <p class="small text-muted mb-0">
+                        When the Green line tracks closely with the Black line, it proves the model understands the patterns. If they diverge significantly (e.g., during a sudden outbreak), it visualizes the "Error Gap."
+                    </p>
+                    <div id="chart-accuracy" class="accuracy-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card p-5 tech-section">
+                    <h4 class="fw-bold text-primary mb-4"><i class="fas fa-cogs me-2"></i>Technical Methodology</h4>
+                    
+                    <p>Our forecasting engine utilises a <strong>Hybrid Approach</strong>. We first isolate the predictable seasonal cycle, and then use Scikit-Learn's <code>HistGradientBoostingRegressor</code> to model the residuals (the difference between the seasonal baseline and reality).</p>
+
+                    <hr class="my-4">
+
+                    <h5>1. Histogram-Based Gradient Boosting (HGBR)</h5>
+                    <p>
+                        Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point. This binning process significantly accelerates the training phase, making the model exceptionally capable of handling large-scale datasets without sacrificing accuracy.
+                    </p>
+                    
+                    <p>
+                        <strong>Uncertainty Quantification:</strong> To provide 90% prediction intervals (the shaded cones in the charts above), we train the model three times using Quantile Loss functions. We model the median (0.5), the lower bound (0.05), and the upper bound (0.95), allowing us to quantify the range of likely outcomes rather than relying on a single point estimate.
+                    </p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><strong>Step A: Data Discretisation (Binning)</strong></h6>
+                            <p>Standard decision trees sort the feature values at every node split, which has a complexity of \(O(N \log N)\). HGBR instead discretises the continuous input features into integer-valued bins (max 255 bins).</p>
+                            <div class="math-block">
+                                $$ X_{binned} = \text{digitize}(X, \text{bins}) \in \{0, \dots, 255\} $$
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><strong>Step B: The Additive Model</strong></h6>
+                            <p>The model is an ensemble of \(M\) decision trees. It is an additive model where the prediction at step \(m\), denoted as \(F_m(x)\), is the sum of the previous prediction and a new tree \(h_m(x)\).</p>
+                            <div class="math-block">
+                                $$ F_m(x) = F_{m-1}(x) + \nu \cdot h_m(x) $$
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6><strong>Step C: Gradient Descent Optimisation</strong></h6>
+                            <p>
+                                At each iteration \(m\), the new tree \(h_m(x)\) is trained to predict the <strong>negative gradient</strong> of the loss function. For our Least Squares loss function, this is the residual:
+                            </p>
+                            <div class="math-block text-center">
+                                $$ r_i = - \frac{\partial L(y_i, F_{m-1}(x_i))}{\partial F_{m-1}(x_i)} = y_i - F_{m-1}(x_i) $$
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5>2. Python Implementation</h5>
+                    <p>Below are core snippets from the <code>process_data.py</code> script that powers this dashboard. This script is automated via GitHub Actions to fetch data, train models, and generate the JSON payload used by the charts above.</p>
+
+                    <h6 class="mt-4"><strong>A. Dynamic Configuration & API Strategy</strong></h6>
+                    <p>We use a configuration dictionary to map simple keys (e.g., 'covid_hospital') to specific API parameters. This allows the script to handle different aggregation methods ('mean' vs 'sum') depending on whether the metric is a rate or a count.</p>
+<pre><code>METRICS = {
+    <span class="code-comment"># --- INFLUENZA ---</span>
     "positivity": {
         "topic": "Influenza",
         "metric_id": "influenza_testing_positivityByWeek",
-        "agg": "mean",
-        "name": "Flu: PCR Positivity Rate (%)"
+        "agg": "mean" 
     },
-    "hospital": {
-        "topic": "Influenza",
-        "metric_id": "influenza_healthcare_hospitalAdmissionRateByWeek", 
-        "agg": "mean",
-        "name": "Flu: Hospital Admission Rate"
-    },
-    "icu": {
-        "topic": "Influenza",
-        "metric_id": "influenza_healthcare_ICUHDUadmissionRateByWeek",
-        "agg": "mean",
-        "name": "Flu: ICU/HDU Admission Rate"
-    },
-
-    # --- COVID-19 ---
-    "covid_positivity": {
-        "topic": "COVID-19",
-        "metric_id": "COVID-19_testing_positivity7DayRolling",
-        "agg": "mean",
-        "name": "COVID: PCR Positivity Rate (%)"
-    },
+    <span class="code-comment"># --- COVID-19 ---</span>
     "covid_hospital": {
         "topic": "COVID-19",
         "metric_id": "COVID-19_healthcare_admissionByDay", 
-        "agg": "sum",
-        "name": "COVID: Weekly Hospital Admissions"
+        "agg": "sum" <span class="code-comment"># Sum daily counts to get weekly total</span>
     }
-}
+}</code></pre>
 
-API_TEMPLATE = "https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/{topic}/geography_types/Nation/geographies/England/metrics/{metric_id}"
+                    <h6 class="mt-4"><strong>B. Data Fetching & Deduplication</strong></h6>
+                    <p>The UKHSA API often returns multiple rows for a single date (e.g., regional breakdowns or age groups). The script automatically groups these by date and resamples them into clean weekly intervals (Ending Sunday) to ensure consistent time-series inputs for the ML model.</p>
+<pre><code><span class="code-keyword">def</span> fetch_data(config):
+    <span class="code-comment"># ... (Pagination Loop to fetch all pages) ...</span>
 
-def fetch_data(config):
-    url = API_TEMPLATE.format(topic=config['topic'], metric_id=config['metric_id'])
-    print(f"  Fetching {config['topic']} data: {config['metric_id']}...")
-    
-    all_data = []
-    current_url = f"{url}?page_size=365&format=json"
-    
-    while current_url:
-        try:
-            response = requests.get(current_url)
-            if response.status_code == 404:
-                print(f"    Warning: 404 Not Found for {config['metric_id']}")
-                return None
-            response.raise_for_status()
-            data = response.json()
-            all_data.extend(data['results'])
-            current_url = data['next']
-            time.sleep(0.1)
-        except Exception as e:
-            print(f"    Error fetching data: {e}")
-            break
-            
-    if not all_data:
-        return None
-
-    df = pd.DataFrame(all_data)
-    df = df[['date', 'metric_value']].copy()
-    df['date'] = pd.to_datetime(df['date'])
-    
-    # Deduplication
-    if config['agg'] == 'sum':
+    <span class="code-comment"># CRITICAL: Group by date to merge duplicates</span>
+    <span class="code-keyword">if</span> config['agg'] == 'sum':
         df = df.groupby('date')['metric_value'].sum().reset_index()
-    else:
+    <span class="code-keyword">else</span>:
         df = df.groupby('date')['metric_value'].mean().reset_index()
 
-    df.sort_values('date', inplace=True)
-    df.set_index('date', inplace=True)
-    
-    # Weekly Resampling
-    if config['agg'] == 'sum':
+    <span class="code-comment"># Resample Daily data -> Weekly (W-SUN)</span>
+    <span class="code-keyword">if</span> config['agg'] == 'sum':
         df = df.resample('W-SUN')['metric_value'].sum().to_frame()
-    else:
+    <span class="code-keyword">else</span>:
         df = df.resample('W-SUN')['metric_value'].mean().to_frame()
     
-    df = df[df['metric_value'] > 0.001].copy()
-    
-    return df
+    <span class="code-keyword">return</span> df</code></pre>
 
-def evaluate_accuracy(df, weeks_back=52):
-    """
-    Simulates the past year week-by-week to test accuracy.
-    """
-    if len(df) < (weeks_back + 20):
-        weeks_back = max(1, len(df) - 20)
+                    <h6 class="mt-4"><strong>C. Hybrid Training with Quantile Regression (Intervals)</strong></h6>
+                    <p>We train three versions of the model: one for the mean forecast, and two for the 5th and 95th percentiles (using Quantile Loss) to generate the prediction intervals.</p>
+<pre><code><span class="code-keyword">def</span> train_and_forecast(df):
+    <span class="code-comment"># 1. Main Forecast (Squared Error)</span>
+    model_resid = HistGradientBoostingRegressor(loss='squared_error')
+    model_resid.fit(X_train, y_train)
 
-    dates = []
-    actuals = []
-    predictions = []
+    <span class="code-comment"># 2. Upper Bound (95th Percentile)</span>
+    model_upper = HistGradientBoostingRegressor(loss='quantile', quantile=0.95)
+    model_upper.fit(X_train, y_train)
 
-    for i in range(weeks_back, 0, -1):
-        train_end_index = len(df) - i
-        train_df = df.iloc[:train_end_index].copy()
-        
-        target_date = df.index[train_end_index]
-        actual_value = df.iloc[train_end_index]['metric_value']
-        
-        # 1. Seasonal
-        train_df['Week_Number'] = train_df.index.isocalendar().week.astype(int)
-        train_df['Month'] = train_df.index.month
-        seasonal_feats = ['Week_Number', 'Month']
-        
-        model_seasonal = HistGradientBoostingRegressor(categorical_features=[0, 1], random_state=42)
-        model_seasonal.fit(train_df[seasonal_feats], train_df['metric_value'])
-        
-        train_df['Seasonal_Pred'] = model_seasonal.predict(train_df[seasonal_feats])
-        train_df['Residual'] = train_df['metric_value'] - train_df['Seasonal_Pred']
-        
-        # 2. Residual
-        train_df['Res_Lag_1'] = train_df['Residual'].shift(1)
-        train_df['Res_Lag_2'] = train_df['Residual'].shift(2)
-        train_df['Res_Lag_3'] = train_df['Residual'].shift(3)
-        
-        df_resid = train_df.dropna()
-        if len(df_resid) < 10: continue
+    <span class="code-comment"># 3. Lower Bound (5th Percentile)</span>
+    model_lower = HistGradientBoostingRegressor(loss='quantile', quantile=0.05)
+    model_lower.fit(X_train, y_train)</code></pre>
 
-        resid_feats = ['Res_Lag_1', 'Res_Lag_2', 'Res_Lag_3', 'Week_Number']
-        model_resid = HistGradientBoostingRegressor(random_state=42)
-        model_resid.fit(df_resid[resid_feats], df_resid['Residual'])
-        
-        # 3. Predict
-        feat_week = target_date.isocalendar().week
-        feat_month = target_date.month
-        last_residuals = train_df['Residual'].iloc[-3:].tolist()
-        
-        pred_seasonal = model_seasonal.predict(pd.DataFrame([[feat_week, feat_month]], columns=seasonal_feats))[0]
-        pred_resid = model_resid.predict(pd.DataFrame([[last_residuals[-1], last_residuals[-2], last_residuals[-3], feat_week]], columns=resid_feats))[0]
-        
-        final_pred = max(0, pred_seasonal + pred_resid)
-        
-        dates.append(target_date.strftime('%Y-%m-%d'))
-        actuals.append(float(actual_value))
-        predictions.append(float(final_pred))
+                    <hr class="my-4">
 
-    if not actuals: return None
-    
-    mae = mean_absolute_error(actuals, predictions)
-    mape = np.mean(np.abs((np.array(actuals) - np.array(predictions)) / np.maximum(np.array(actuals), 1))) * 100
+                    <div class="alert alert-light border">
+                        <strong>Source References & Further Reading:</strong> 
+                        <ul class="mb-0 mt-2 small">
+                            <li class="mb-1"><a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">Scikit-Learn User Guide: Histogram-Based Gradient Boosting</a></li>
+                            <li class="mb-1"><a href="https://machinelearningmastery.com/histogram-based-gradient-boosting-ensembles/" target="_blank">Machine Learning Mastery: Histogram-Based Gradient Boosting Ensembles</a></li>
+                            <li class="mb-1"><a href="https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/Influenza/geography_types/Nation/geographies/England/metrics/influenza_testing_positivityByWeek" target="_blank">UKHSA API Documentation (JSON Endpoint)</a></li>
+                            <li><a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning" target="_blank">GitHub Repository: Full Python Source Code</a></li>
+                        </ul>
+                    </div>
 
-    return {
-        "dates": dates,
-        "actuals": actuals,
-        "predictions": predictions,
-        "mae": float(mae),
-        "mape": float(mape)
-    }
+                </div>
+            </div>
+        </div>
 
-def train_and_forecast(df):
-    # Feature Engineering
-    df['Week_Number'] = df.index.isocalendar().week.astype(int)
-    df['Month'] = df.index.month
-    seasonal_features = ['Week_Number', 'Month']
-    
-    # --- MODEL 1: MAIN FORECAST (Mean) ---
-    model_seasonal = HistGradientBoostingRegressor(categorical_features=[0, 1], loss='squared_error', random_state=42)
-    model_seasonal.fit(df[seasonal_features], df['metric_value'])
-    df['Seasonal_Pred'] = model_seasonal.predict(df[seasonal_features])
-    df['Residual'] = df['metric_value'] - df['Seasonal_Pred']
+    </div>
 
-    df['Res_Lag_1'] = df['Residual'].shift(1)
-    df['Res_Lag_2'] = df['Residual'].shift(2)
-    df['Res_Lag_3'] = df['Residual'].shift(3)
-    df_resid = df.dropna().copy()
-    resid_features = ['Res_Lag_1', 'Res_Lag_2', 'Res_Lag_3', 'Week_Number']
-    
-    model_resid = HistGradientBoostingRegressor(loss='squared_error', random_state=42)
-    model_resid.fit(df_resid[resid_features], df_resid['Residual'])
-
-    # --- MODEL 2: UPPER BOUND (95th Percentile) ---
-    model_resid_upper = HistGradientBoostingRegressor(loss='quantile', quantile=0.95, random_state=42)
-    model_resid_upper.fit(df_resid[resid_features], df_resid['Residual'])
-
-    # --- MODEL 3: LOWER BOUND (5th Percentile) ---
-    model_resid_lower = HistGradientBoostingRegressor(loss='quantile', quantile=0.05, random_state=42)
-    model_resid_lower.fit(df_resid[resid_features], df_resid['Residual'])
-
-    # FORECAST LOOP
-    last_date = df.index[-1]
-    history_residuals = df['Residual'].iloc[-3:].tolist()
-    current_date = last_date
-    future_forecasts = []
-
-    # Bridge point
-    bridge_val = float(df['metric_value'].iloc[-1])
-    future_forecasts.append({
-        'date': last_date.strftime('%Y-%m-%d'),
-        'Seasonal_Base': float(df['Seasonal_Pred'].iloc[-1]),
-        'Final_Forecast': bridge_val,
-        'Lower_Bound': bridge_val,
-        'Upper_Bound': bridge_val
-    })
-
-    for i in range(52):
-        current_date = current_date + pd.Timedelta(days=7)
-        feat_week = current_date.isocalendar().week
-        feat_month = current_date.month
-        
-        # 1. Seasonal Base
-        seasonal_base = model_seasonal.predict(pd.DataFrame([[feat_week, feat_month]], columns=seasonal_features))[0]
-        
-        # 2. Residual Forecast (Main)
-        res_lag_1 = history_residuals[-1]
-        res_lag_2 = history_residuals[-2]
-        res_lag_3 = history_residuals[-3]
-        
-        lag_features = pd.DataFrame([[res_lag_1, res_lag_2, res_lag_3, feat_week]], columns=resid_features)
-        
-        pred_residual = model_resid.predict(lag_features)[0]
-        pred_residual_upper = model_resid_upper.predict(lag_features)[0]
-        pred_residual_lower = model_resid_lower.predict(lag_features)[0]
-        
-        # 3. Combine
-        final_pred = max(0, seasonal_base + pred_residual)
-        upper_bound = max(0, seasonal_base + pred_residual_upper)
-        lower_bound = max(0, seasonal_base + pred_residual_lower)
-
-        # Update lags for next step
-        history_residuals.append(pred_residual)
-        
-        future_forecasts.append({
-            'date': current_date.strftime('%Y-%m-%d'),
-            'Seasonal_Base': float(seasonal_base),
-            'Final_Forecast': float(final_pred),
-            'Lower_Bound': float(lower_bound),
-            'Upper_Bound': float(upper_bound)
-        })
-        
-    return future_forecasts
-
-# -------------------------------------------------------
-# MAIN EXECUTION
-# -------------------------------------------------------
-full_dashboard_data = {}
-print("Starting Multi-Virus Forecast Job (With Intervals)...")
-
-for key, config in METRICS.items():
-    print(f"\nProcessing: {config['name']}")
-    df = fetch_data(config)
-    
-    if df is not None and not df.empty:
-        if len(df) < 20:
-             print("  Skipping (Not enough data points).")
-             continue
-        
-        # 1. Generate Future Forecast (Now includes Intervals)
-        forecasts = train_and_forecast(df)
-        
-        # 2. Evaluate Past Accuracy
-        accuracy_data = evaluate_accuracy(df, weeks_back=52)
-
-        full_dashboard_data[key] = {
-            "meta": {"name": config['name'], "topic": config['topic']},
-            "history": {
-                "dates": df.index.strftime('%Y-%m-%d').tolist(),
-                "values": df['metric_value'].tolist()
-            },
-            "forecast": {
-                "dates": [x['date'] for x in forecasts],
-                "values": [x['Final_Forecast'] for x in forecasts],
-                "baseline": [x['Seasonal_Base'] for x in forecasts],
-                "lower": [x['Lower_Bound'] for x in forecasts],
-                "upper": [x['Upper_Bound'] for x in forecasts]
-            },
-            "accuracy": accuracy_data
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Helper to convert hex to rgba for shading
+        function hexToRgba(hex, alpha) {
+            let c;
+            if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+                c= hex.substring(1).split('');
+                if(c.length== 3){
+                    c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+                }
+                c= '0x'+c.join('');
+                return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+','+alpha+')';
+            }
+            return hex;
         }
-    else:
-        print("  Skipping (No data found).")
 
-with open('dashboard_data.json', 'w') as f:
-    json.dump(full_dashboard_data, f)
+        // CONFIGURATION FOR ALL 5 CHARTS
+        const chartsConfig = [
+            // --- INFLUENZA ---
+            { key: 'positivity',       divId: 'chart-positivity',       color: '#007bff' }, // Blue
+            { key: 'hospital',         divId: 'chart-hospital',         color: '#dc3545' }, // Red
+            { key: 'icu',              divId: 'chart-icu',              color: '#ffc107' }, // Yellow
+            
+            // --- COVID-19 ---
+            { key: 'covid_positivity', divId: 'chart-covid-positivity', color: '#6610f2' }, // Purple
+            { key: 'covid_hospital',   divId: 'chart-covid-hospital',   color: '#e83e8c' }  // Pink
+        ];
 
-print("\nSuccess: 'dashboard_data.json' updated with Intervals.")
+        fetch('dashboard_data.json')
+            .then(response => response.json())
+            .then(data => {
+                
+                document.getElementById('last-updated').innerText = new Date().toLocaleDateString('en-GB');
+
+                // 1. RENDER MAIN FORECAST CHARTS
+                chartsConfig.forEach(config => {
+                    const metricData = data[config.key];
+                    const divElement = document.getElementById(config.divId);
+
+                    if (!metricData) {
+                        divElement.innerHTML = `<div class="loading-msg"><i class="fas fa-sync fa-spin me-2"></i> Waiting for data update...</div>`;
+                        return;
+                    }
+
+                    const history = metricData.history;
+                    const forecast = metricData.forecast;
+
+                    // Baseline (Seasonal Norm)
+                    const traceBaseline = {
+                        x: forecast.dates, y: forecast.baseline,
+                        type: 'scatter', mode: 'lines', name: 'Seasonal Norm',
+                        line: { color: 'rgba(128, 128, 128, 0.4)', width: 2, dash: 'dot' },
+                        hoverinfo: 'y'
+                    };
+
+                    // PREDICTION INTERVALS (The "Cone")
+                    // Upper Bound (Invisible line)
+                    const traceUpper = {
+                        x: forecast.dates,
+                        y: forecast.upper,
+                        type: 'scatter',
+                        mode: 'lines',
+                        line: { width: 0 },
+                        showlegend: false,
+                        hoverinfo: 'skip'
+                    };
+
+                    // Lower Bound (Fills up to the Upper Bound)
+                    const traceLower = {
+                        x: forecast.dates,
+                        y: forecast.lower,
+                        type: 'scatter',
+                        mode: 'lines',
+                        fill: 'tonexty', // Fill area between this trace and the previous one (Upper)
+                        fillcolor: hexToRgba(config.color, 0.2), // 20% opacity
+                        line: { width: 0 },
+                        showlegend: false,
+                        hoverinfo: 'skip'
+                    };
+
+                    // Main Forecast (Dashed Line)
+                    const traceForecast = {
+                        x: forecast.dates, y: forecast.values,
+                        type: 'scatter', mode: 'lines', name: 'Forecast',
+                        line: { color: config.color, width: 3, dash: 'dash' }
+                    };
+
+                    // History (Solid Line)
+                    const traceHistory = {
+                        x: history.dates, y: history.values,
+                        type: 'scatter', mode: 'lines', name: 'Actuals',
+                        line: { color: '#212529', width: 2 },
+                        fill: 'tozeroy', fillcolor: 'rgba(33, 37, 41, 0.05)'
+                    };
+                    
+                    const lastHistoryDate = history.dates[history.dates.length - 1];
+                    const layout = {
+                        font: { family: 'Roboto, sans-serif' },
+                        margin: { t: 20, b: 40, l: 50, r: 20 },
+                        xaxis: { showgrid: true, gridcolor: '#f1f3f5' },
+                        yaxis: { showgrid: true, gridcolor: '#f1f3f5' },
+                        shapes: [{
+                            type: 'line',
+                            x0: lastHistoryDate, y0: 0,
+                            x1: lastHistoryDate, y1: 1,
+                            yref: 'paper',
+                            line: { color: '#dc3545', width: 1.5, dash: 'dot' }
+                        }],
+                        showlegend: true, legend: { orientation: 'h', y: 1.1 },
+                        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+                    };
+
+                    // Order matters: Upper -> Lower (fill) -> Baseline -> Forecast -> History
+                    // Only plot intervals if data exists
+                    const traces = [traceBaseline];
+                    if(forecast.upper && forecast.lower) {
+                        traces.push(traceUpper, traceLower);
+                    }
+                    traces.push(traceForecast, traceHistory);
+
+                    Plotly.newPlot(config.divId, traces, layout);
+                });
+
+                // 2. RENDER ACCURACY CHART
+                const accuracyData = data['hospital'].accuracy;
+                if (accuracyData) {
+                    const traceActuals = {
+                        x: accuracyData.dates,
+                        y: accuracyData.actuals,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Actual Reported',
+                        line: { color: '#212529', width: 2 }
+                    };
+
+                    const tracePreds = {
+                        x: accuracyData.dates,
+                        y: accuracyData.predictions,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Model Prediction',
+                        line: { color: '#198754', width: 2, dash: 'dot' }
+                    };
+                    
+                    const layoutAcc = {
+                        title: { 
+                            text: `Backtest Accuracy: ${accuracyData.mape.toFixed(1)}% Error (Past 52 Weeks)`, 
+                            font: { size: 16, color: '#198754' } 
+                        },
+                        font: { family: 'Roboto, sans-serif' },
+                        margin: { t: 40, b: 40, l: 50, r: 20 },
+                        xaxis: { title: 'Date' },
+                        yaxis: { title: 'Admissions' },
+                        showlegend: true,
+                        legend: { orientation: 'h', y: 1.1 },
+                        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+                    };
+                    
+                    Plotly.newPlot('chart-accuracy', [traceActuals, tracePreds], layoutAcc);
+                }
+
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                document.querySelector('.dashboard-container').innerHTML += 
+                    `<div class="alert alert-danger">Error loading data.json. Ensure the Python script has run successfully.</div>`;
+            });
+    </script>
+</body>
+</html>
