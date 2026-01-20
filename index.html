@@ -18,7 +18,7 @@
         .header-title { font-weight: 700; color: #1a202c; letter-spacing: -0.5px; }
         
         .chart-container { height: 400px; width: 100%; }
-        .accuracy-container { height: 250px; width: 100%; }
+        .accuracy-container { height: 300px; width: 100%; }
         
         .metric-card-header { background: #fff; border-bottom: 1px solid #eee; padding: 15px 20px; border-radius: 12px 12px 0 0; }
         .metric-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; margin: 0; }
@@ -126,12 +126,12 @@
             </div>
         </div>
 
-        <h3 class="section-header accuracy-header"><i class="fas fa-bullseye me-2 text-success"></i>Model Accuracy (Live Validation)</h3>
+        <h3 class="section-header accuracy-header"><i class="fas fa-bullseye me-2 text-success"></i>Model Accuracy (Historical Backtest)</h3>
         <div class="row">
             <div class="col-lg-12">
                 <div class="card p-4">
                     <p class="small text-muted mb-3">
-                        Every week, the model performs a <strong>Walk-Forward Validation</strong> on the most recent 12 weeks of data. It re-trains on past data, predicts one week ahead, and compares the result to the actual reported value. The chart below shows the <strong>Absolute Error</strong> (Deviation) for the 'Flu Hospital Admissions' model over time.
+                        We continuously monitor performance by running a <strong>52-Week Rolling Backtest</strong>. This simulates how the model would have performed every week for the past year using only data available at that time.
                     </p>
                     <div id="chart-accuracy" class="accuracy-container"></div>
                 </div>
@@ -259,15 +259,6 @@
         <span class="code-comment"># Step 4: Feed prediction back into history for next loop</span>
         history_residuals.append(pred_residual)</code></pre>
 
-                    <div class="alert alert-light border mt-4">
-                        <strong>Source References:</strong> 
-                        <ul class="mb-0 mt-2 small">
-                            <li><a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">Scikit-Learn User Guide: Histogram-Based Gradient Boosting</a></li>
-                            <li><a href="https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/Influenza/geography_types/Nation/geographies/England/metrics/influenza_testing_positivityByWeek" target="_blank">UKHSA API Endpoint (JSON)</a></li>
-                            <li><a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning/blob/main/process_data.py" target="_blank">View Python Source Code (GitHub)</a></li>
-                        </ul>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -347,29 +338,44 @@
                     Plotly.newPlot(config.divId, [traceBaseline, traceForecast, traceHistory], layout);
                 });
 
-                // 2. RENDER ACCURACY CHART (Using Flu Hospital Data)
+                // 2. RENDER ACCURACY CHART (Flu Hospital Data)
                 const accuracyData = data['hospital'].accuracy;
                 if (accuracyData) {
-                    const errors = accuracyData.actuals.map((act, i) => Math.abs(act - accuracyData.predictions[i]));
-                    
-                    const traceError = {
+                    // Create Trace: Actuals
+                    const traceActuals = {
                         x: accuracyData.dates,
-                        y: errors,
-                        type: 'bar',
-                        name: 'Absolute Error',
-                        marker: { color: '#198754' }
+                        y: accuracyData.actuals,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Actual Reported',
+                        line: { color: '#212529', width: 2 }
+                    };
+
+                    // Create Trace: Predictions (what the model said would happen)
+                    const tracePreds = {
+                        x: accuracyData.dates,
+                        y: accuracyData.predictions,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: 'Model Prediction',
+                        line: { color: '#198754', width: 2, dash: 'dot' }
                     };
                     
                     const layoutAcc = {
-                        title: { text: `MAE: ${accuracyData.mae.toFixed(2)} (Last 12 Weeks)`, font: { size: 14 } },
+                        title: { 
+                            text: `Backtest Accuracy: ${accuracyData.mape.toFixed(1)}% Error (Past 52 Weeks)`, 
+                            font: { size: 16, color: '#198754' } 
+                        },
                         font: { family: 'Roboto, sans-serif' },
-                        margin: { t: 30, b: 40, l: 50, r: 20 },
-                        xaxis: { title: 'Validation Week' },
-                        yaxis: { title: 'Prediction Error (Diff)' },
+                        margin: { t: 40, b: 40, l: 50, r: 20 },
+                        xaxis: { title: 'Date' },
+                        yaxis: { title: 'Admissions' },
+                        showlegend: true,
+                        legend: { orientation: 'h', y: 1.1 },
                         paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
                     };
                     
-                    Plotly.newPlot('chart-accuracy', [traceError], layoutAcc);
+                    Plotly.newPlot('chart-accuracy', [traceActuals, tracePreds], layoutAcc);
                 }
 
             })
