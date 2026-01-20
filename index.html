@@ -17,18 +17,20 @@
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: white; margin-bottom: 25px; }
         .header-title { font-weight: 700; color: #1a202c; letter-spacing: -0.5px; }
         
-        .chart-container { height: 400px; width: 100%; } /* Slightly smaller to fit more charts */
+        .chart-container { height: 400px; width: 100%; }
         .metric-card-header { background: #fff; border-bottom: 1px solid #eee; padding: 15px 20px; border-radius: 12px 12px 0 0; }
         .metric-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; margin: 0; }
         
         .section-header { border-left: 5px solid #007bff; padding-left: 15px; margin: 40px 0 20px 0; color: #1a202c; }
-        .covid-header { border-left-color: #6610f2; } /* Purple for COVID */
+        .covid-header { border-left-color: #6610f2; }
         
         .description-text { font-size: 0.95rem; line-height: 1.6; color: #495057; }
         .description-text a { text-decoration: none; font-weight: 500; }
         
         .tech-section h5 { font-weight: 700; color: #2c3e50; margin-top: 20px; }
         .math-block { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin: 15px 0; overflow-x: auto; }
+        
+        .loading-msg { display: flex; align-items: center; justify-content: center; height: 100%; color: #adb5bd; font-style: italic; }
     </style>
 </head>
 <body>
@@ -209,9 +211,12 @@
 
                 chartsConfig.forEach(config => {
                     const metricData = data[config.key];
-                    
+                    const divElement = document.getElementById(config.divId);
+
+                    // Check if data exists. If not, show "Waiting for update" message.
                     if (!metricData) {
                         console.warn(`No data found for ${config.key}`);
+                        divElement.innerHTML = `<div class="loading-msg"><i class="fas fa-sync fa-spin me-2"></i> Waiting for data update (Run Action)...</div>`;
                         return;
                     }
 
