@@ -10,26 +10,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
+    
     <style>
         body { background-color: #f0f2f5; font-family: 'Roboto', sans-serif; color: #333; }
         .dashboard-container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: white; margin-bottom: 25px; }
         .header-title { font-weight: 700; color: #1a202c; letter-spacing: -0.5px; }
-
+        
         .chart-container { height: 400px; width: 100%; }
         .metric-card-header { background: #fff; border-bottom: 1px solid #eee; padding: 15px 20px; border-radius: 12px 12px 0 0; }
         .metric-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; margin: 0; }
-
+        
         .section-header { border-left: 5px solid #007bff; padding-left: 15px; margin: 40px 0 20px 0; color: #1a202c; }
         .covid-header { border-left-color: #6610f2; }
-
+        
         .description-text { font-size: 0.95rem; line-height: 1.6; color: #495057; }
         .description-text a { text-decoration: none; font-weight: 500; }
-
+        
         .tech-section h5 { font-weight: 700; color: #2c3e50; margin-top: 20px; }
         .math-block { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin: 15px 0; overflow-x: auto; }
-
+        
         .loading-msg { display: flex; align-items: center; justify-content: center; height: 100%; color: #adb5bd; font-style: italic; }
     </style>
 </head>
@@ -55,7 +55,7 @@
     </nav>
 
     <div class="dashboard-container">
-
+        
         <div class="row mb-4">
             <div class="col-lg-9">
                 <h1 class="header-title mb-2">England Respiratory Virus Forecast Dashboard</h1>
@@ -65,80 +65,109 @@
 
                 <div class="description-text">
                     <p>
-                        This dashboard provides a comprehensive 52-week forecast for <strong>Influenza (Flu)</strong> and <strong>COVID-19</strong> in England. By analysing trends in PCR Positivity, Hospital Admissions, and severity metrics (ICU/Deaths), these models aim to support healthcare resource planning—helping hospitals and A&E departments anticipate potential winter surges.
+                        This dashboard provides a comprehensive 52-week forecast for <strong>Influenza (Flu)</strong> and <strong>COVID-19</strong> in England. By analysing trends in PCR Positivity and Hospital Admissions, these models aim to support healthcare resource planning—helping hospitals and A&E departments anticipate potential winter surges.
                     </p>
                     <p>
                         The predictions are generated using a <strong>Hybrid Machine Learning strategy</strong> (<a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">HistGradientBoostingRegressor</a>). The system is fully automated: it retrieves live data directly from the UKHSA public API and retrains all models every week via GitHub Actions.
-@@ -115,8 +115,8 @@
-            </div>
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="metric-card-header"><h5 class="metric-title">Deaths (28 Days)</h5></div>
-                    <div class="card-body"><div id="chart-covid-deaths" class="chart-container"></div></div>
+                    </p>
+                    <p class="text-muted small mt-3">
+                        <i class="fas fa-info-circle me-1"></i> Data represents specimen dates (date of sample collection). Last updated: <span id="last-updated" class="fw-bold">...</span>.
+                    </p>
                 </div>
             </div>
         </div>
-@@ -132,47 +132,9 @@
+
+        <h3 class="section-header"><i class="fas fa-virus me-2 text-primary"></i>Influenza (Flu) Forecast</h3>
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="metric-card-header"><h5 class="metric-title">PCR Positivity Rate</h5></div>
+                    <div class="card-body"><div id="chart-positivity" class="chart-container"></div></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="metric-card-header"><h5 class="metric-title">Hospital Admissions</h5></div>
+                    <div class="card-body"><div id="chart-hospital" class="chart-container"></div></div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="metric-card-header"><h5 class="metric-title">ICU / HDU Admissions</h5></div>
+                    <div class="card-body"><div id="chart-icu" class="chart-container"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-header covid-header"><i class="fas fa-lungs-virus me-2" style="color: #6610f2;"></i>COVID-19 Forecast</h3>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="metric-card-header"><h5 class="metric-title">PCR Positivity Rate</h5></div>
+                    <div class="card-body"><div id="chart-covid-positivity" class="chart-container"></div></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="metric-card-header"><h5 class="metric-title">Weekly Hospital Admissions</h5></div>
+                    <div class="card-body"><div id="chart-covid-hospital" class="chart-container"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card p-5 tech-section">
+                    <h4 class="fw-bold text-primary mb-4"><i class="fas fa-cogs me-2"></i>Technical Methodology</h4>
+                    
+                    <p>Our forecasting engine utilises a <strong>Hybrid Approach</strong>. We first isolate the predictable seasonal cycle, and then use Scikit-Learn's <code>HistGradientBoostingRegressor</code> to model the residuals (the difference between the seasonal baseline and reality).</p>
+
+                    <hr class="my-4">
 
                     <h5>1. Histogram-Based Gradient Boosting (HGBR)</h5>
                     <p>
-                        Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point. This binning process significantly accelerates the training phase, making the model exceptionally capable of handling large-scale datasets without sacrificing accuracy. By constructing an ensemble of decision trees where each new tree attempts to correct the errors of its predecessors, the algorithm effectively captures intricate, non-linear patterns within the data.
+                        Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point. This binning process significantly accelerates the training phase, making the model exceptionally capable of handling large-scale datasets without sacrificing accuracy.
                     </p>
-                    <p>
-                        When applied to forecasting future trends, such as predicting flu outbreaks, the model uses a technique often called a 'sliding window' to interpret time-series data. Rather than simply reading dates, it utilises historical figures—such as infection rates from previous weeks—as input features to predict future values. Its major advantage is the ability to combine these historical lag features with external variables, such as seasonal weather changes or school term dates. This holistic approach allows the model to anticipate future surges in cases based on complex combinations of past behaviours, enabling more proactive planning and resource allocation.
-                    </p>
-                    <p>
-                        The <code>HistGradientBoostingRegressor</code> is an implementation of Gradient Boosted Decision Trees (GBDT), inspired by LightGBM. It is significantly faster than traditional GBDT for large datasets because it uses <strong>histogram binning</strong>.
-                    </p>
-
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6><strong>Step A: Data Discretisation (Binning)</strong></h6>
-                            <p>Standard decision trees sort the feature values at every node split, which has a complexity of \(O(N \log N)\). HGBR instead discretises the continuous input features into integer-valued bins (max 255 bins).</p>
-                            <div class="math-block">
-                                $$ X_{binned} = \text{digitize}(X, \text{bins}) \in \{0, \dots, 255\} $$
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><strong>Step B: The Additive Model</strong></h6>
-                            <p>The model is an ensemble of \(M\) decision trees. It is an additive model where the prediction at step \(m\), denoted as \(F_m(x)\), is the sum of the previous prediction and a new tree \(h_m(x)\).</p>
-                            <div class="math-block">
-                                $$ F_m(x) = F_{m-1}(x) + \nu \cdot h_m(x) $$
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <h6><strong>Step C: Gradient Descent Optimisation</strong></h6>
-                            <p>
-                                At each iteration \(m\), the new tree \(h_m(x)\) is trained to predict the <strong>negative gradient</strong> of the loss function. For our Least Squares loss function, this is the residual:
-                            </p>
-                            <div class="math-block text-center">
-                                $$ r_i = - \frac{\partial L(y_i, F_{m-1}(x_i))}{\partial F_{m-1}(x_i)} = y_i - F_{m-1}(x_i) $$
-                            </div>
-                            <p>
-                                By fitting the new tree to these residuals \(r_i\), the model iteratively corrects its own mistakes.
-                            </p>
-                        </div>
-                    </div>
-
+                    
                     <div class="alert alert-light border mt-4">
                         <strong>Source References:</strong> 
                         <ul class="mb-0 mt-2 small">
-@@ -200,7 +162,7 @@
+                            <li><a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">Scikit-Learn User Guide: Histogram-Based Gradient Boosting</a></li>
+                            <li><a href="https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/Influenza/geography_types/Nation/geographies/England/metrics/influenza_testing_positivityByWeek" target="_blank">UKHSA API Endpoint (JSON)</a></li>
+                            <li><a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning/blob/main/process_data.py" target="_blank">View Python Source Code (GitHub)</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // CONFIGURATION FOR ALL 5 CHARTS (Removed 6th)
+        const chartsConfig = [
+            // --- INFLUENZA ---
+            { key: 'positivity',       divId: 'chart-positivity',       color: '#007bff' }, // Blue
+            { key: 'hospital',         divId: 'chart-hospital',         color: '#dc3545' }, // Red
+            { key: 'icu',              divId: 'chart-icu',              color: '#ffc107' }, // Yellow
+            
             // --- COVID-19 ---
             { key: 'covid_positivity', divId: 'chart-covid-positivity', color: '#6610f2' }, // Purple
-            { key: 'covid_hospital',   divId: 'chart-covid-hospital',   color: '#e83e8c' }, // Pink
-            { key: 'covid_deaths',     divId: 'chart-covid-deaths',     color: '#20c997' }  // Teal
+            { key: 'covid_hospital',   divId: 'chart-covid-hospital',   color: '#e83e8c' }  // Pink
         ];
 
         fetch('dashboard_data.json')
-@@ -213,78 +175,77 @@
+            .then(response => response.json())
+            .then(data => {
+                
+                document.getElementById('last-updated').innerText = new Date().toLocaleDateString('en-GB');
+
+                chartsConfig.forEach(config => {
                     const metricData = data[config.key];
                     const divElement = document.getElementById(config.divId);
 
-                    // Check if data exists. If not, show "Waiting for update" message.
                     if (!metricData) {
                         console.warn(`No data found for ${config.key}`);
                         divElement.innerHTML = `<div class="loading-msg"><i class="fas fa-sync fa-spin me-2"></i> Waiting for data update (Run Action)...</div>`;
@@ -212,3 +241,4 @@
             });
     </script>
 </body>
+</html>
