@@ -8,10 +8,8 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 # -------------------------------------------------------
 # CONFIGURATION
 # -------------------------------------------------------
-# We now define the "topic" for each metric so the URL builder knows
-# whether to look in the "Influenza" folder or the "COVID-19" folder.
 METRICS = {
-    # --- INFLUENZA METRICS ---
+    # --- INFLUENZA METRICS (These were already working) ---
     "positivity": {
         "topic": "Influenza",
         "metric_id": "influenza_testing_positivityByWeek",
@@ -28,21 +26,24 @@ METRICS = {
         "name": "Flu: ICU/HDU Admission Rate"
     },
 
-    # --- COVID-19 METRICS ---
+    # --- COVID-19 METRICS (FIXED IDs) ---
     "covid_positivity": {
         "topic": "COVID-19",
-        "metric_id": "COVID-19_testing_positivityByWeek",
+        # FIXED: COVID uses '7DayRolling' instead of 'ByWeek' for positivity
+        "metric_id": "COVID-19_testing_positivity7DayRolling",
         "name": "COVID: PCR Positivity Rate (%)"
     },
     "covid_hospital": {
         "topic": "COVID-19",
-        "metric_id": "COVID-19_healthcare_admissionRateByWeek",
+        # FIXED: Added 'hospital' to the ID to match the Influenza pattern
+        "metric_id": "COVID-19_healthcare_hospitalAdmissionRateByWeek",
         "name": "COVID: Hospital Admission Rate"
     },
     "covid_deaths": {
         "topic": "COVID-19",
-        "metric_id": "COVID-19_deaths_deathWith28DaysByWeek",
-        "name": "COVID: Deaths (within 28 days)"
+        # FIXED: Changed to the standard ONS weekly registered deaths metric
+        "metric_id": "COVID-19_deaths_ONSRegisteredByWeek",
+        "name": "COVID: Deaths (ONS Weekly)"
     }
 }
 
