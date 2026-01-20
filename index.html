@@ -65,7 +65,7 @@
 
                 <div class="description-text">
                     <p>
-                        This dashboard provides a comprehensive 52-week forecast for <strong>Influenza (Flu)</strong> and <strong>COVID-19</strong> in England. By analysing trends in PCR Positivity, Hospital Admissions, and Confirmed Cases, these models aim to support healthcare resource planning—helping hospitals and A&E departments anticipate potential winter surges.
+                        This dashboard provides a comprehensive 52-week forecast for <strong>Influenza (Flu)</strong> and <strong>COVID-19</strong> in England. By analysing trends in PCR Positivity and Hospital Admissions, these models aim to support healthcare resource planning—helping hospitals and A&E departments anticipate potential winter surges.
                     </p>
                     <p>
                         The predictions are generated using a <strong>Hybrid Machine Learning strategy</strong> (<a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">HistGradientBoostingRegressor</a>). The system is fully automated: it retrieves live data directly from the UKHSA public API and retrains all models every week via GitHub Actions.
@@ -101,22 +101,16 @@
 
         <h3 class="section-header covid-header"><i class="fas fa-lungs-virus me-2" style="color: #6610f2;"></i>COVID-19 Forecast</h3>
         <div class="row">
-            <div class="col-lg-4">
+            <div class="col-lg-6">
                 <div class="card">
                     <div class="metric-card-header"><h5 class="metric-title">PCR Positivity Rate</h5></div>
                     <div class="card-body"><div id="chart-covid-positivity" class="chart-container"></div></div>
                 </div>
             </div>
-            <div class="col-lg-4">
+            <div class="col-lg-6">
                 <div class="card">
-                    <div class="metric-card-header"><h5 class="metric-title">Hospital Admissions</h5></div>
+                    <div class="metric-card-header"><h5 class="metric-title">Weekly Hospital Admissions</h5></div>
                     <div class="card-body"><div id="chart-covid-hospital" class="chart-container"></div></div>
-                </div>
-            </div>
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="metric-card-header"><h5 class="metric-title">Weekly Confirmed Cases</h5></div>
-                    <div class="card-body"><div id="chart-covid-cases" class="chart-container"></div></div>
                 </div>
             </div>
         </div>
@@ -152,7 +146,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // CONFIGURATION FOR ALL 6 CHARTS
+        // CONFIGURATION FOR ALL 5 CHARTS (Removed 6th)
         const chartsConfig = [
             // --- INFLUENZA ---
             { key: 'positivity',       divId: 'chart-positivity',       color: '#007bff' }, // Blue
@@ -161,8 +155,7 @@
             
             // --- COVID-19 ---
             { key: 'covid_positivity', divId: 'chart-covid-positivity', color: '#6610f2' }, // Purple
-            { key: 'covid_hospital',   divId: 'chart-covid-hospital',   color: '#e83e8c' }, // Pink
-            { key: 'covid_cases',      divId: 'chart-covid-cases',      color: '#20c997' }  // Teal
+            { key: 'covid_hospital',   divId: 'chart-covid-hospital',   color: '#e83e8c' }  // Pink
         ];
 
         fetch('dashboard_data.json')
