@@ -27,6 +27,7 @@
         .description-text { font-size: 0.95rem; line-height: 1.6; color: #495057; }
         .description-text a { text-decoration: none; font-weight: 500; }
         
+        /* Tech Section Styles */
         .tech-section h5 { font-weight: 700; color: #2c3e50; margin-top: 20px; }
         .math-block { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin: 15px 0; overflow-x: auto; }
         
@@ -125,10 +126,52 @@
                     <hr class="my-4">
 
                     <h5>1. Histogram-Based Gradient Boosting (HGBR)</h5>
+                    
                     <p>
-                        Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point. This binning process significantly accelerates the training phase, making the model exceptionally capable of handling large-scale datasets without sacrificing accuracy.
+                        Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point. This binning process significantly accelerates the training phase, making the model exceptionally capable of handling large-scale datasets without sacrificing accuracy. By constructing an ensemble of decision trees where each new tree attempts to correct the errors of its predecessors, the algorithm effectively captures intricate, non-linear patterns within the data.
+                    </p>
+                    <p>
+                        When applied to forecasting future trends, such as predicting flu outbreaks, the model uses a technique often called a 'sliding window' to interpret time-series data. Rather than simply reading dates, it utilises historical figures—such as infection rates from previous weeks—as input features to predict future values. Its major advantage is the ability to combine these historical lag features with external variables, such as seasonal weather changes or school term dates. This holistic approach allows the model to anticipate future surges in cases based on complex combinations of past behaviours, enabling more proactive planning and resource allocation.
                     </p>
                     
+                    
+
+                    <p>
+                        The <code>HistGradientBoostingRegressor</code> is an implementation of Gradient Boosted Decision Trees (GBDT), inspired by LightGBM. It is significantly faster than traditional GBDT for large datasets because it uses <strong>histogram binning</strong>.
+                    </p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><strong>Step A: Data Discretisation (Binning)</strong></h6>
+                            <p>Standard decision trees sort the feature values at every node split, which has a complexity of \(O(N \log N)\). HGBR instead discretises the continuous input features into integer-valued bins (max 255 bins).</p>
+                            <div class="math-block">
+                                $$ X_{binned} = \text{digitize}(X, \text{bins}) \in \{0, \dots, 255\} $$
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><strong>Step B: The Additive Model</strong></h6>
+                            <p>The model is an ensemble of \(M\) decision trees. It is an additive model where the prediction at step \(m\), denoted as \(F_m(x)\), is the sum of the previous prediction and a new tree \(h_m(x)\).</p>
+                            <div class="math-block">
+                                $$ F_m(x) = F_{m-1}(x) + \nu \cdot h_m(x) $$
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6><strong>Step C: Gradient Descent Optimisation</strong></h6>
+                            <p>
+                                At each iteration \(m\), the new tree \(h_m(x)\) is trained to predict the <strong>negative gradient</strong> of the loss function. For our Least Squares loss function, this is the residual:
+                            </p>
+                            <div class="math-block text-center">
+                                $$ r_i = - \frac{\partial L(y_i, F_{m-1}(x_i))}{\partial F_{m-1}(x_i)} = y_i - F_{m-1}(x_i) $$
+                            </div>
+                            <p>
+                                By fitting the new tree to these residuals \(r_i\), the model iteratively corrects its own mistakes.
+                            </p>
+                        </div>
+                    </div>
+
                     <div class="alert alert-light border mt-4">
                         <strong>Source References:</strong> 
                         <ul class="mb-0 mt-2 small">
@@ -146,7 +189,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // CONFIGURATION FOR ALL 5 CHARTS (Removed 6th)
+        // CONFIGURATION FOR ALL 5 CHARTS
         const chartsConfig = [
             // --- INFLUENZA ---
             { key: 'positivity',       divId: 'chart-positivity',       color: '#007bff' }, // Blue
@@ -169,8 +212,7 @@
                     const divElement = document.getElementById(config.divId);
 
                     if (!metricData) {
-                        console.warn(`No data found for ${config.key}`);
-                        divElement.innerHTML = `<div class="loading-msg"><i class="fas fa-sync fa-spin me-2"></i> Waiting for data update (Run Action)...</div>`;
+                        divElement.innerHTML = `<div class="loading-msg"><i class="fas fa-sync fa-spin me-2"></i> Waiting for data update...</div>`;
                         return;
                     }
 
