@@ -14,7 +14,7 @@ METRICS = {
         "topic": "Influenza",
         "metric_id": "influenza_testing_positivityByWeek",
         "name": "Flu: PCR Positivity Rate (%)",
-        "agg": "mean" # Already weekly, but good practice
+        "agg": "mean" 
     },
     "hospital": {
         "topic": "Influenza",
@@ -34,21 +34,21 @@ METRICS = {
         "topic": "COVID-19",
         "metric_id": "COVID-19_testing_positivity7DayRolling",
         "name": "COVID: PCR Positivity Rate (%)",
-        "agg": "mean" # Average the daily rates for the week
+        "agg": "mean" 
     },
     "covid_hospital": {
         "topic": "COVID-19",
-        # FIXED: Uses the daily admission count
+        # VERIFIED: Daily count of admissions (We sum this to get weekly)
         "metric_id": "COVID-19_healthcare_admissionByDay",
         "name": "COVID: Weekly Hospital Admissions",
-        "agg": "sum" # Sum up daily admissions to get weekly total
+        "agg": "sum"
     },
     "covid_deaths": {
         "topic": "COVID-19",
-        # FIXED: Uses the daily ONS death count
+        # VERIFIED: Daily count of ONS deaths (We sum this to get weekly)
         "metric_id": "COVID-19_deaths_ONSByDay",
         "name": "COVID: Weekly Deaths (ONS)",
-        "agg": "sum" # Sum up daily deaths to get weekly total
+        "agg": "sum"
     }
 }
 
@@ -83,22 +83,28 @@ def fetch_data(config):
     df = pd.DataFrame(all_data)
     df = df[['date', 'metric_value']].copy()
     df['date'] = pd.to_datetime(df['date'])
+    
+    # --- CRITICAL FIX: Handle potential duplicate dates from API ---
+    # Sometimes the API returns multiple rows per date (e.g. different age groups).
+    # We group by date first to get a single clean value per day.
+    if config['agg'] == 'sum':
+        df = df.groupby('date')['metric_value'].sum().reset_index()
+    else:
+        df = df.groupby('date')['metric_value'].mean().reset_index()
+
     df.sort_values('date', inplace=True)
     df.set_index('date', inplace=True)
     
-    # --- RESAMPLING LOGIC (New) ---
-    # Ensure all data is Weekly (Ending on Sunday) to match the ML model structure
-    # This handles the mix of Daily (COVID) and Weekly (Flu) data seamlessly.
-    original_rows = len(df)
+    # --- RESAMPLING LOGIC ---
+    # We use 'W-SUN' (Weekly ending Sunday) to align daily COVID data with weekly Flu data
     if config['agg'] == 'sum':
         df = df.resample('W-SUN')['metric_value'].sum().to_frame()
     else:
         df = df.resample('W-SUN')['metric_value'].mean().to_frame()
     
-    # Remove any weeks with 0 data that might be artifacts of resampling empty future dates
+    # Clean up artifacts (weeks with 0 data at the very start/end)
     df = df[df['metric_value'] > 0].copy()
     
-    print(f"    processed {original_rows} raw rows into {len(df)} weekly points.")
     return df
 
 def train_and_forecast(df):
@@ -175,7 +181,7 @@ for key, config in METRICS.items():
     df = fetch_data(config)
     
     if df is not None and not df.empty:
-        # Handle cases where data might be too short for ML (e.g. beginning of a dataset)
+        # Check for sufficient data points
         if len(df) < 10:
              print("  Skipping (Not enough data points for ML).")
              continue
