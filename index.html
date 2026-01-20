@@ -18,11 +18,14 @@
         .header-title { font-weight: 700; color: #1a202c; letter-spacing: -0.5px; }
         
         .chart-container { height: 400px; width: 100%; }
+        .accuracy-container { height: 250px; width: 100%; }
+        
         .metric-card-header { background: #fff; border-bottom: 1px solid #eee; padding: 15px 20px; border-radius: 12px 12px 0 0; }
         .metric-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; margin: 0; }
         
         .section-header { border-left: 5px solid #007bff; padding-left: 15px; margin: 40px 0 20px 0; color: #1a202c; }
         .covid-header { border-left-color: #6610f2; }
+        .accuracy-header { border-left-color: #198754; }
         
         .description-text { font-size: 0.95rem; line-height: 1.6; color: #495057; }
         .description-text a { text-decoration: none; font-weight: 500; }
@@ -119,6 +122,18 @@
                 <div class="card">
                     <div class="metric-card-header"><h5 class="metric-title">Weekly Hospital Admissions</h5></div>
                     <div class="card-body"><div id="chart-covid-hospital" class="chart-container"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-header accuracy-header"><i class="fas fa-bullseye me-2 text-success"></i>Model Accuracy (Live Validation)</h3>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card p-4">
+                    <p class="small text-muted mb-3">
+                        Every week, the model performs a <strong>Walk-Forward Validation</strong> on the most recent 12 weeks of data. It re-trains on past data, predicts one week ahead, and compares the result to the actual reported value. The chart below shows the <strong>Absolute Error</strong> (Deviation) for the 'Flu Hospital Admissions' model over time.
+                    </p>
+                    <div id="chart-accuracy" class="accuracy-container"></div>
                 </div>
             </div>
         </div>
@@ -279,6 +294,7 @@
                 
                 document.getElementById('last-updated').innerText = new Date().toLocaleDateString('en-GB');
 
+                // 1. RENDER MAIN FORECAST CHARTS
                 chartsConfig.forEach(config => {
                     const metricData = data[config.key];
                     const divElement = document.getElementById(config.divId);
@@ -291,46 +307,32 @@
                     const history = metricData.history;
                     const forecast = metricData.forecast;
 
-                    // 1. Seasonal Baseline
                     const traceBaseline = {
-                        x: forecast.dates,
-                        y: forecast.baseline,
-                        type: 'scatter',
-                        mode: 'lines',
-                        name: 'Seasonal Norm',
+                        x: forecast.dates, y: forecast.baseline,
+                        type: 'scatter', mode: 'lines', name: 'Seasonal Norm',
                         line: { color: 'rgba(128, 128, 128, 0.4)', width: 2, dash: 'dot' },
                         hoverinfo: 'y'
                     };
 
-                    // 2. Forecast (Dashed Line)
                     const traceForecast = {
-                        x: forecast.dates,
-                        y: forecast.values,
-                        type: 'scatter',
-                        mode: 'lines',
-                        name: 'Forecast',
+                        x: forecast.dates, y: forecast.values,
+                        type: 'scatter', mode: 'lines', name: 'Forecast',
                         line: { color: config.color, width: 3, dash: 'dash' }
                     };
 
-                    // 3. History (Solid Line)
                     const traceHistory = {
-                        x: history.dates,
-                        y: history.values,
-                        type: 'scatter',
-                        mode: 'lines', 
-                        name: 'Actuals',
+                        x: history.dates, y: history.values,
+                        type: 'scatter', mode: 'lines', name: 'Actuals',
                         line: { color: '#212529', width: 2 },
-                        fill: 'tozeroy',
-                        fillcolor: 'rgba(33, 37, 41, 0.05)'
+                        fill: 'tozeroy', fillcolor: 'rgba(33, 37, 41, 0.05)'
                     };
-
+                    
                     const lastHistoryDate = history.dates[history.dates.length - 1];
-
                     const layout = {
                         font: { family: 'Roboto, sans-serif' },
                         margin: { t: 20, b: 40, l: 50, r: 20 },
                         xaxis: { showgrid: true, gridcolor: '#f1f3f5' },
-                        yaxis: { showgrid: true, gridcolor: '#f1f3f5', zeroline: false },
+                        yaxis: { showgrid: true, gridcolor: '#f1f3f5' },
                         shapes: [{
                             type: 'line',
                             x0: lastHistoryDate, y0: 0,
@@ -338,14 +340,37 @@
                             yref: 'paper',
                             line: { color: '#dc3545', width: 1.5, dash: 'dot' }
                         }],
-                        showlegend: true,
-                        legend: { orientation: 'h', y: 1.1 },
-                        paper_bgcolor: 'rgba(0,0,0,0)',
-                        plot_bgcolor: 'rgba(0,0,0,0)'
+                        showlegend: true, legend: { orientation: 'h', y: 1.1 },
+                        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
                     };
 
                     Plotly.newPlot(config.divId, [traceBaseline, traceForecast, traceHistory], layout);
                 });
+
+                // 2. RENDER ACCURACY CHART (Using Flu Hospital Data)
+                const accuracyData = data['hospital'].accuracy;
+                if (accuracyData) {
+                    const errors = accuracyData.actuals.map((act, i) => Math.abs(act - accuracyData.predictions[i]));
+                    
+                    const traceError = {
+                        x: accuracyData.dates,
+                        y: errors,
+                        type: 'bar',
+                        name: 'Absolute Error',
+                        marker: { color: '#198754' }
+                    };
+                    
+                    const layoutAcc = {
+                        title: { text: `MAE: ${accuracyData.mae.toFixed(2)} (Last 12 Weeks)`, font: { size: 14 } },
+                        font: { family: 'Roboto, sans-serif' },
+                        margin: { t: 30, b: 40, l: 50, r: 20 },
+                        xaxis: { title: 'Validation Week' },
+                        yaxis: { title: 'Prediction Error (Diff)' },
+                        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+                    };
+                    
+                    Plotly.newPlot('chart-accuracy', [traceError], layoutAcc);
+                }
 
             })
             .catch(err => {
