@@ -14,20 +14,21 @@
     <style>
         body { background-color: #f0f2f5; font-family: 'Roboto', sans-serif; color: #333; }
         .dashboard-container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: white; margin-bottom: 25px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: white; margin-bottom: 30px; }
         .header-title { font-weight: 700; color: #1a202c; letter-spacing: -0.5px; }
         
-        .chart-container { height: 400px; width: 100%; }
-        .accuracy-container { height: 300px; width: 100%; }
+        /* INCREASED HEIGHT FOR BETTER VISIBILITY */
+        .chart-container { height: 500px; width: 100%; }
+        .accuracy-container { height: 350px; width: 100%; }
         
         .metric-card-header { background: #fff; border-bottom: 1px solid #eee; padding: 15px 20px; border-radius: 12px 12px 0 0; }
-        .metric-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; margin: 0; }
+        .metric-title { font-size: 1.25rem; font-weight: 700; color: #2c3e50; margin: 0; }
         
-        .section-header { border-left: 5px solid #007bff; padding-left: 15px; margin: 40px 0 20px 0; color: #1a202c; }
+        .section-header { border-left: 5px solid #007bff; padding-left: 15px; margin: 50px 0 25px 0; color: #1a202c; font-size: 1.75rem; }
         .covid-header { border-left-color: #6610f2; }
         .accuracy-header { border-left-color: #198754; }
         
-        .description-text { font-size: 0.95rem; line-height: 1.6; color: #495057; }
+        .description-text { font-size: 1rem; line-height: 1.6; color: #495057; }
         .description-text a { text-decoration: none; font-weight: 500; }
         
         /* Tech Section Styles */
@@ -35,7 +36,7 @@
         .math-block { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin: 15px 0; overflow-x: auto; }
         
         /* Code Block Styles */
-        pre { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+        pre { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
         code { font-family: 'Consolas', 'Monaco', monospace; }
         .code-comment { color: #75715e; }
         .code-keyword { color: #66d9ef; }
@@ -68,8 +69,8 @@
     <div class="dashboard-container">
         
         <div class="row mb-4">
-            <div class="col-lg-9">
-                <h1 class="header-title mb-2">England Respiratory Virus Forecast Dashboard</h1>
+            <div class="col-lg-10">
+                <h1 class="header-title mb-3">England Respiratory Virus Forecast Dashboard</h1>
                 <p class="mb-3 text-muted">
                     By <a href="https://www.linkedin.com/in/tom-knight-340784151/" target="_blank" class="text-decoration-none fw-bold" style="color: #0077b5;"><i class="fab fa-linkedin me-1"></i>Tom Knight</a>
                 </p>
@@ -90,19 +91,19 @@
 
         <h3 class="section-header"><i class="fas fa-virus me-2 text-primary"></i>Influenza (Flu) Forecast</h3>
         <div class="row">
-            <div class="col-lg-4">
+            <div class="col-12">
                 <div class="card">
                     <div class="metric-card-header"><h5 class="metric-title">PCR Positivity Rate</h5></div>
                     <div class="card-body"><div id="chart-positivity" class="chart-container"></div></div>
                 </div>
             </div>
-            <div class="col-lg-4">
+            <div class="col-12">
                 <div class="card">
                     <div class="metric-card-header"><h5 class="metric-title">Hospital Admissions</h5></div>
                     <div class="card-body"><div id="chart-hospital" class="chart-container"></div></div>
                 </div>
             </div>
-            <div class="col-lg-4">
+            <div class="col-12">
                 <div class="card">
                     <div class="metric-card-header"><h5 class="metric-title">ICU / HDU Admissions</h5></div>
                     <div class="card-body"><div id="chart-icu" class="chart-container"></div></div>
@@ -112,13 +113,13 @@
 
         <h3 class="section-header covid-header"><i class="fas fa-lungs-virus me-2" style="color: #6610f2;"></i>COVID-19 Forecast</h3>
         <div class="row">
-            <div class="col-lg-6">
+            <div class="col-12">
                 <div class="card">
                     <div class="metric-card-header"><h5 class="metric-title">PCR Positivity Rate</h5></div>
                     <div class="card-body"><div id="chart-covid-positivity" class="chart-container"></div></div>
                 </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col-12">
                 <div class="card">
                     <div class="metric-card-header"><h5 class="metric-title">Weekly Hospital Admissions</h5></div>
                     <div class="card-body"><div id="chart-covid-hospital" class="chart-container"></div></div>
@@ -128,7 +129,7 @@
 
         <h3 class="section-header accuracy-header"><i class="fas fa-bullseye me-2 text-success"></i>Model Accuracy (Historical Backtest)</h3>
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-12">
                 <div class="card p-4">
                     <p class="small text-muted mb-2">
                         We continuously monitor performance by running a <strong>52-Week Rolling Backtest</strong>. This simulates how the model would have performed every week for the past year using only data available at that time.
@@ -148,7 +149,7 @@
             </div>
         </div>
 
-        <div class="row mt-4">
+        <div class="row mt-5">
             <div class="col-12">
                 <div class="card p-5 tech-section">
                     <h4 class="fw-bold text-primary mb-4"><i class="fas fa-cogs me-2"></i>Technical Methodology</h4>
@@ -161,20 +162,19 @@
                     <p>
                         Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point. This binning process significantly accelerates the training phase, making the model exceptionally capable of handling large-scale datasets without sacrificing accuracy.
                     </p>
-                    
                     <p>
                         <strong>Uncertainty Quantification:</strong> To provide 90% prediction intervals (the shaded cones in the charts above), we train the model three times using Quantile Loss functions. We model the median (0.5), the lower bound (0.05), and the upper bound (0.95), allowing us to quantify the range of likely outcomes rather than relying on a single point estimate.
                     </p>
                     
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-lg-6">
                             <h6><strong>Step A: Data Discretisation (Binning)</strong></h6>
                             <p>Standard decision trees sort the feature values at every node split, which has a complexity of \(O(N \log N)\). HGBR instead discretises the continuous input features into integer-valued bins (max 255 bins).</p>
                             <div class="math-block">
                                 $$ X_{binned} = \text{digitize}(X, \text{bins}) \in \{0, \dots, 255\} $$
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-lg-6">
                             <h6><strong>Step B: The Additive Model</strong></h6>
                             <p>The model is an ensemble of \(M\) decision trees. It is an additive model where the prediction at step \(m\), denoted as \(F_m(x)\), is the sum of the previous prediction and a new tree \(h_m(x)\).</p>
                             <div class="math-block">
