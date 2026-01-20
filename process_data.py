@@ -1,181 +1,171 @@
-#1. IMPORTING LIBRARIES 
-#This section loads the necessary tools. We need Pandas to handle data tables, Requests to talk to the API, and Scikit-Learn for the actual machine learning algorithm.
-
-import pandas as pd
-import numpy as np
-import json
-import requests
-import time
-from sklearn.ensemble import HistGradientBoostingRegressor
-
-#2. CONFIGURATION
-# This acts as the "settings menu" for your script. instead of hard-coding URLs later on, we define them here.
-# This allows you to scale. If you wanted to add a 4th chart (e.g., "Deaths"), you would just add one line here, and the rest of the script would automatically train a new machine learning model for it without any extra coding.
-
-METRICS = {
-    "positivity": {
-        "url_suffix": "influenza_testing_positivityByWeek",
-        "name": "PCR Positivity Rate (%)"
-    },
-    "hospital": {
-        "url_suffix": "influenza_healthcare_hospitalAdmissionRateByWeek", 
-        "name": "Hospital Admission Rate (per 100k)"
-    },
-    "icu": {
-        "url_suffix": "influenza_healthcare_ICUHDUadmissionRateByWeek",
-        "name": "ICU/HDU Admission Rate (per 100k)"
-    }
-}
-
-BASE_URL = "https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/Influenza/geography_types/Nation/geographies/England/metrics/"
-
-#3. DATA FETCHING FUNCTION
-# Machine learning requires clean, historical data. This function handles the logistics of getting that data from the government API.
-# Pagination: The API doesn't send all data at once; it sends it in "pages." The while loop ensures we collect every single page before moving on.
-# Data Cleaning: The last few lines convert the text dates (e.g., "2024-01-01") into actual datetime objects and sort them chronologically. ML models strictly require time-series data to be in the correct order.
-
-def fetch_data(metric_suffix):
-    url = f"{BASE_URL}{metric_suffix}"
-    print(f"  Fetching data from: {metric_suffix}...")
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influenza Prediction Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
-    all_data = []
-    current_url = f"{url}?page_size=365&format=json"
-    
-    while current_url:
-        try:
-            response = requests.get(current_url)
-            if response.status_code == 404:
-                return None
-            response.raise_for_status()
-            data = response.json()
-            all_data.extend(data['results'])
-            current_url = data['next']
-            time.sleep(0.2)
-        except Exception as e:
-            print(f"    Error fetching data: {e}")
-            break
-            
-    if not all_data:
-        return None
-
-    df = pd.DataFrame(all_data)
-    df = df[['date', 'metric_value']].copy()
-    df['date'] = pd.to_datetime(df['date'])
-    df.sort_values('date', inplace=True)
-    df.set_index('date', inplace=True)
-    return df
-
-#4. FEATURE ENGINEERING (PREPARING THE MODEL)
-#This is the start of the core logic. Raw dates (like "2024-01-01") are hard for a model to interpret mathematically. We convert them into Cyclical Features.
-# We extract the Week Number (1-52) and Month (1-12). This tells the model that "Week 52" (December) is similar to "Week 1" (January), helping it learn the annual winter peak of influenza.
-
-def train_and_forecast(df):
-    # 1. Feature Engineering
-    df['Week_Number'] = df.index.isocalendar().week.astype(int)
-    df['Month'] = df.index.month
-    
-    seasonal_features = ['Week_Number', 'Month']
-    target = 'metric_value'
-
-#5. TRAINING MODEL 1: THE SEASONAL BASELINE 
-# We use a Hybrid Strategy. First, we train a model to learn the general yearly pattern (seasonality).
-# The model looks at years of history to understand that flu generally rises in winter and falls in summer.
-# We subtract this "General Prediction" from the "Actual Data." The result (Residual) is the "unexpected" part of the flu season—the spikes or drops that are specific to this specific year.
-    
-    # 2. Train Seasonal Baseline
-    model_seasonal = HistGradientBoostingRegressor(categorical_features=[0, 1], random_state=42)
-    model_seasonal.fit(df[seasonal_features], df[target])
-    
-    df['Seasonal_Pred'] = model_seasonal.predict(df[seasonal_features])
-    df['Residual'] = df['metric_value'] - df['Seasonal_Pred']
-
-#6. TRAINING MODEL 2: THE RESIDUAL MODEL
-# Now we train a second model to predict those specific deviations (Residuals) using Lag Features.
-# shift(1): This creates a column representing "Last week's error."
-# The Logic: The model learns that if the residuals were high for the last 3 weeks (meaning the flu is spreading faster than the seasonal norm), next week is also likely to be high. This allows the model to react to current trends.
-
-    # 3. Train Residual Model (Lags)
-    df['Res_Lag_1'] = df['Residual'].shift(1)
-    df['Res_Lag_2'] = df['Residual'].shift(2)
-    df['Res_Lag_3'] = df['Residual'].shift(3)
-    
-    df_resid = df.dropna().copy()
-    resid_features = ['Res_Lag_1', 'Res_Lag_2', 'Res_Lag_3', 'Week_Number']
-    
-    model_resid = HistGradientBoostingRegressor(random_state=42)
-    model_resid.fit(df_resid[resid_features], df_resid['Residual'])
-
-# 7. RECURSIVE FORECASTING LOOP
-# This is how we predict 52 weeks into the future when we don't have data yet. We use a Sliding Window technique.
-
-    # 4. Generate Future Forecast (52 Weeks)
-    last_date = df.index[-1]
-    history_residuals = df['Residual'].iloc[-3:].tolist()
-    current_date = last_date
-    future_forecasts = []
-
-    # BRIDGE: Start forecast from the last actual point to ensure lines connect visually
-    future_forecasts.append({
-        'date': last_date.strftime('%Y-%m-%d'),
-        'Seasonal_Base': float(df['Seasonal_Pred'].iloc[-1]),
-        'Final_Forecast': float(df['metric_value'].iloc[-1]) # Start at actual
-    })
-
-    for i in range(52):
-        current_date = current_date + pd.Timedelta(days=7)
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Roboto', sans-serif; color: #333; }
+        .dashboard-container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: white; margin-bottom: 25px; }
+        .header-title { font-weight: 700; color: #1a202c; letter-spacing: -0.5px; }
         
-        feat_week = current_date.isocalendar().week
-        feat_month = current_date.month
-        seasonal_base = model_seasonal.predict(pd.DataFrame([[feat_week, feat_month]], columns=seasonal_features))[0]
+        .chart-container { height: 450px; width: 100%; }
+        .metric-card-header { background: #fff; border-bottom: 1px solid #eee; padding: 15px 20px; border-radius: 12px 12px 0 0; }
+        .metric-title { font-size: 1.1rem; font-weight: 700; color: #2c3e50; margin: 0; }
         
-        res_lag_1 = history_residuals[-1]
-        res_lag_2 = history_residuals[-2]
-        res_lag_3 = history_residuals[-3]
-        pred_residual = model_resid.predict(pd.DataFrame([[res_lag_1, res_lag_2, res_lag_3, feat_week]], columns=resid_features))[0]
+        .description-text { font-size: 0.95rem; line-height: 1.6; color: #495057; }
+        .description-text a { text-decoration: none; font-weight: 500; }
         
-        final_pred = seasonal_base + pred_residual
-        final_pred = max(0, final_pred)
+        /* Tech Section Styles */
+        .tech-section h5 { font-weight: 700; color: #2c3e50; margin-top: 20px; }
+        .math-block { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin: 15px 0; overflow-x: auto; }
+    </style>
+</head>
+<body>
 
-        history_residuals.append(pred_residual)
-        future_forecasts.append({
-            'date': current_date.strftime('%Y-%m-%d'),
-            'Seasonal_Base': float(seasonal_base),
-            'Final_Forecast': float(final_pred)
-        })
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1 fw-bold"><i class="fas fa-virus me-2"></i>UKHSA Influenza Forecast</span>
+            <div class="d-flex gap-2">
+                <div class="dropdown">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-database me-1"></i> Data Options
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="https://ukhsa-dashboard.data.gov.uk/respiratory-viruses/influenza" target="_blank">Official UKHSA Dashboard</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning/blob/main/process_data.py" target="_blank"><i class="fas fa-code me-2 text-muted"></i>View Python Code</a></li>
+                    </ul>
+                </div>
+                <a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning" class="btn btn-light btn-sm fw-bold">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
         
-    return future_forecasts
+        <div class="row mb-4">
+            <div class="col-lg-9">
+                <h1 class="header-title mb-2">England Influenza (Flu) Case Forecast Dashboard using Machine Learning</h1>
+                
+                <p class="mb-3 text-muted">
+                    By <a href="https://www.linkedin.com/in/tom-knight-340784151/" target="_blank" class="text-decoration-none fw-bold" style="color: #0077b5;"><i class="fab fa-linkedin me-1"></i>Tom Knight</a>
+                </p>
 
-#8.  MAIN EXECUTION
-# This final block orchestrates the whole process.
-# Automation: It loops through the dictionary defined at the start, runs the ML pipeline for each one, and dumps the result into a single dashboard_data.json file that your HTML page reads to display the graphs.
+                <div class="description-text">
+                    <p>
+                        This dashboard provides a comprehensive 52-week forecast for Influenza in England, tracking the virus's progression from community transmission to critical care demand. By analysing trends in <strong>PCR Positivity</strong>, <strong>Hospital Admissions</strong>, and <strong>ICU/HDU Admissions</strong>, these models aim to support healthcare resource planning—helping hospitals and A&E departments anticipate potential winter surges.
+                    </p>
+                    <p>
+                        The predictions are generated using a <strong>Hybrid Machine Learning strategy</strong> (<a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">HistGradientBoostingRegressor</a>). This approach captures both the standard seasonal cycle of the flu and the unique, non-linear deviations of the current year.
+                    </p>
+                    <p>
+                        The system is fully automated: it retrieves live data directly from the UKHSA public API and retrains all models every week via GitHub Actions, ensuring the forecast is always based on the latest available statistics.
+                    </p>
+                    <p class="text-muted small mt-3">
+                        <i class="fas fa-info-circle me-1"></i> Data represents specimen dates (date of sample collection). Last updated: <span id="last-updated" class="fw-bold">...</span>.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-3 text-lg-end mt-3 mt-lg-0">
+                <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill">
+                    <i class="fas fa-check-circle me-1"></i> Multi-Model Active
+                </span>
+            </div>
+        </div>
 
-full_dashboard_data = {}
-print("Starting Multi-Metric Forecast Job...")
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="metric-card-header d-flex justify-content-between align-items-center">
+                        <h5 class="metric-title"><i class="fas fa-vial text-primary me-2"></i>PCR Positivity Rate</h5>
+                        <span class="badge bg-light text-dark border">% of tests positive</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-positivity" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
 
-for key, config in METRICS.items():
-    print(f"\nProcessing: {config['name']}")
-    df = fetch_data(config['url_suffix'])
-    
-    if df is not None and not df.empty:
-        forecasts = train_and_forecast(df)
-        
-        full_dashboard_data[key] = {
-            "meta": {"name": config['name']},
-            "history": {
-                "dates": df.index.strftime('%Y-%m-%d').tolist(),
-                "values": df['metric_value'].tolist()
-            },
-            "forecast": {
-                "dates": [x['date'] for x in forecasts],
-                "values": [x['Final_Forecast'] for x in forecasts],
-                "baseline": [x['Seasonal_Base'] for x in forecasts]
-            }
-        }
-    else:
-        print("  Skipping (No data found).")
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="metric-card-header d-flex justify-content-between align-items-center">
+                        <h5 class="metric-title"><i class="fas fa-hospital text-danger me-2"></i>Hospital Admissions</h5>
+                        <span class="badge bg-light text-dark border">Rate per 100,000</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-hospital" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
 
-with open('dashboard_data.json', 'w') as f:
-    json.dump(full_dashboard_data, f)
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="metric-card-header d-flex justify-content-between align-items-center">
+                        <h5 class="metric-title"><i class="fas fa-procedures text-warning me-2"></i>ICU / HDU Admissions</h5>
+                        <span class="badge bg-light text-dark border">Rate per 100,000</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-icu" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-print("\nSuccess: 'dashboard_data.json' updated.")
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card p-5 tech-section">
+                    <h4 class="fw-bold text-primary mb-4"><i class="fas fa-cogs me-2"></i>Technical Methodology</h4>
+                    
+                    <p>Our forecasting engine utilises a <strong>Hybrid Approach</strong>. We first isolate the predictable seasonal cycle, and then use Scikit-Learn's <code>HistGradientBoostingRegressor</code> to model the residuals (the difference between the seasonal baseline and reality).</p>
 
+                    <hr class="my-4">
+
+                    <h5>1. Histogram-Based Gradient Boosting (HGBR)</h5>
+                    
+                    <p>
+                        Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point. This binning process significantly accelerates the training phase, making the model exceptionally capable of handling large-scale datasets without sacrificing accuracy. By constructing an ensemble of decision trees where each new tree attempts to correct the errors of its predecessors, the algorithm effectively captures intricate, non-linear patterns within the data.
+                    </p>
+                    <p>
+                        When applied to forecasting future trends, such as predicting flu outbreaks, the model uses a technique often called a 'sliding window' to interpret time-series data. Rather than simply reading dates, it utilises historical figures—such as infection rates from previous weeks—as input features to predict future values. Its major advantage is the ability to combine these historical lag features with external variables, such as seasonal weather changes or school term dates. This holistic approach allows the model to anticipate future surges in cases based on complex combinations of past behaviours, enabling more proactive planning and resource allocation.
+                    </p>
+
+                    <p>
+                        The <code>HistGradientBoostingRegressor</code> is an implementation of Gradient Boosted Decision Trees (GBDT), inspired by LightGBM. It is significantly faster than traditional GBDT for large datasets because it uses <strong>histogram binning</strong>.
+                    </p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><strong>Step A: Data Discretisation (Binning)</strong></h6>
+                            <p>Standard decision trees sort the feature values at every node split, which has a complexity of \(O(N \log N)\). HGBR instead discretises the continuous input features into integer-valued bins (max 255 bins).</p>
+                            <div class="math-block">
+                                $$ X_{binned} = \text{digitize}(X, \text{bins}) \in \{0, \dots, 255\} $$
+                            </div>
+                            <p class="small text-muted">This reduces the complexity of finding the best split to \(O(N)\).</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><strong>Step B: The Additive Model</strong></h6>
+                            <p>The model is an ensemble of \(M\) decision trees. It is an additive model where the prediction at step \(m\), denoted as \(F_m(x)\), is the sum of the previous prediction and a new tree \(h_m(x)\).</p>
+                            <div class="math-block">
+                                $$ F_m(x) = F_{m-1}(x) + \nu \cdot h_m(x) $$
+                            </div>
+                            <p class="small text-muted">Where \(\nu\) is the learning rate (shrinkage) that controls how strongly each new tree corrects the previous errors.</p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6><strong>Step C: Gradient Descent Optimisation</strong></h6>
+                            <p>
+                                At each iteration \(m\), the new tree \(h_m(x)\) is trained to predict the <strong>negative gradient</strong> of the loss function. For our Least Squares loss function, this is the residual:
+                            </p>
+                            <div class="math-block text-center">
+                                $$ r_i = - \frac{\partial L(y_i, F_{m-1}(x_i))}{\partial F
