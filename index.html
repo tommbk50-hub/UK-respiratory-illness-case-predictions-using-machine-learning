@@ -41,6 +41,8 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="https://ukhsa-dashboard.data.gov.uk/respiratory-viruses/influenza" target="_blank">Official UKHSA Dashboard</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning/blob/main/process_data.py" target="_blank"><i class="fas fa-code me-2 text-muted"></i>View Python Code</a></li>
                     </ul>
                 </div>
                 <a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning" class="btn btn-light btn-sm fw-bold">GitHub</a>
@@ -135,6 +137,7 @@
                     <p>
                         When applied to forecasting future trends, such as predicting flu outbreaks, the model uses a technique often called a 'sliding window' to interpret time-series data. Rather than simply reading dates, it utilises historical figures—such as infection rates from previous weeks—as input features to predict future values. Its major advantage is the ability to combine these historical lag features with external variables, such as seasonal weather changes or school term dates. This holistic approach allows the model to anticipate future surges in cases based on complex combinations of past behaviours, enabling more proactive planning and resource allocation.
                     </p>
+
                     <p>
                         The <code>HistGradientBoostingRegressor</code> is an implementation of Gradient Boosted Decision Trees (GBDT), inspired by LightGBM. It is significantly faster than traditional GBDT for large datasets because it uses <strong>histogram binning</strong>.
                     </p>
