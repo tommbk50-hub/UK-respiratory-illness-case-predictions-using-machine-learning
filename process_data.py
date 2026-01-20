@@ -9,40 +9,46 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 # CONFIGURATION
 # -------------------------------------------------------
 METRICS = {
-    # --- INFLUENZA METRICS ---
+    # --- INFLUENZA (Weekly Data) ---
     "positivity": {
         "topic": "Influenza",
         "metric_id": "influenza_testing_positivityByWeek",
-        "name": "Flu: PCR Positivity Rate (%)"
+        "name": "Flu: PCR Positivity Rate (%)",
+        "agg": "mean" # Already weekly, but good practice
     },
     "hospital": {
         "topic": "Influenza",
         "metric_id": "influenza_healthcare_hospitalAdmissionRateByWeek", 
-        "name": "Flu: Hospital Admission Rate"
+        "name": "Flu: Hospital Admission Rate",
+        "agg": "mean"
     },
     "icu": {
         "topic": "Influenza",
         "metric_id": "influenza_healthcare_ICUHDUadmissionRateByWeek",
-        "name": "Flu: ICU/HDU Admission Rate"
+        "name": "Flu: ICU/HDU Admission Rate",
+        "agg": "mean"
     },
 
-    # --- COVID-19 METRICS (VERIFIED IDs) ---
+    # --- COVID-19 (Daily Data -> Needs Weekly Aggregation) ---
     "covid_positivity": {
         "topic": "COVID-19",
         "metric_id": "COVID-19_testing_positivity7DayRolling",
-        "name": "COVID: PCR Positivity Rate (%)"
+        "name": "COVID: PCR Positivity Rate (%)",
+        "agg": "mean" # Average the daily rates for the week
     },
     "covid_hospital": {
         "topic": "COVID-19",
-        # FIXED: Uses 'admissionByDay' (Daily count) as RateByWeek does not exist for COVID
+        # FIXED: Uses the daily admission count
         "metric_id": "COVID-19_healthcare_admissionByDay",
-        "name": "COVID: Hospital Admissions (Daily)"
+        "name": "COVID: Weekly Hospital Admissions",
+        "agg": "sum" # Sum up daily admissions to get weekly total
     },
     "covid_deaths": {
         "topic": "COVID-19",
-        # FIXED: Removed 'Registered' from the ID
-        "metric_id": "COVID-19_deaths_ONSByWeek",
-        "name": "COVID: Deaths (ONS Weekly)"
+        # FIXED: Uses the daily ONS death count
+        "metric_id": "COVID-19_deaths_ONSByDay",
+        "name": "COVID: Weekly Deaths (ONS)",
+        "agg": "sum" # Sum up daily deaths to get weekly total
     }
 }
 
@@ -79,6 +85,20 @@ def fetch_data(config):
     df['date'] = pd.to_datetime(df['date'])
     df.sort_values('date', inplace=True)
     df.set_index('date', inplace=True)
+    
+    # --- RESAMPLING LOGIC (New) ---
+    # Ensure all data is Weekly (Ending on Sunday) to match the ML model structure
+    # This handles the mix of Daily (COVID) and Weekly (Flu) data seamlessly.
+    original_rows = len(df)
+    if config['agg'] == 'sum':
+        df = df.resample('W-SUN')['metric_value'].sum().to_frame()
+    else:
+        df = df.resample('W-SUN')['metric_value'].mean().to_frame()
+    
+    # Remove any weeks with 0 data that might be artifacts of resampling empty future dates
+    df = df[df['metric_value'] > 0].copy()
+    
+    print(f"    processed {original_rows} raw rows into {len(df)} weekly points.")
     return df
 
 def train_and_forecast(df):
@@ -155,6 +175,11 @@ for key, config in METRICS.items():
     df = fetch_data(config)
     
     if df is not None and not df.empty:
+        # Handle cases where data might be too short for ML (e.g. beginning of a dataset)
+        if len(df) < 10:
+             print("  Skipping (Not enough data points for ML).")
+             continue
+
         forecasts = train_and_forecast(df)
         
         full_dashboard_data[key] = {
