@@ -1,3 +1,6 @@
+#1. IMPORTING LIBRARIES 
+#This section loads the necessary tools. We need Pandas to handle data tables, Requests to talk to the API, and Scikit-Learn for the actual machine learning algorithm.
+
 import pandas as pd
 import numpy as np
 import json
@@ -5,9 +8,10 @@ import requests
 import time
 from sklearn.ensemble import HistGradientBoostingRegressor
 
-# -------------------------------------------------------
-# CONFIGURATION
-# -------------------------------------------------------
+#2. CONFIGURATION
+# This acts as the "settings menu" for your script. instead of hard-coding URLs later on, we define them here.
+# This allows you to scale. If you wanted to add a 4th chart (e.g., "Deaths"), you would just add one line here, and the rest of the script would automatically train a new machine learning model for it without any extra coding.
+
 METRICS = {
     "positivity": {
         "url_suffix": "influenza_testing_positivityByWeek",
@@ -24,6 +28,11 @@ METRICS = {
 }
 
 BASE_URL = "https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/Influenza/geography_types/Nation/geographies/England/metrics/"
+
+#3. DATA FETCHING FUNCTION
+# Machine learning requires clean, historical data. This function handles the logistics of getting that data from the government API.
+# Pagination: The API doesn't send all data at once; it sends it in "pages." The while loop ensures we collect every single page before moving on.
+# Data Cleaning: The last few lines convert the text dates (e.g., "2024-01-01") into actual datetime objects and sort them chronologically. ML models strictly require time-series data to be in the correct order.
 
 def fetch_data(metric_suffix):
     url = f"{BASE_URL}{metric_suffix}"
@@ -56,6 +65,10 @@ def fetch_data(metric_suffix):
     df.set_index('date', inplace=True)
     return df
 
+#4. FEATURE ENGINEERING (PREPARING THE MODEL)
+#This is the start of the core logic. Raw dates (like "2024-01-01") are hard for a model to interpret mathematically. We convert them into Cyclical Features.
+# We extract the Week Number (1-52) and Month (1-12). This tells the model that "Week 52" (December) is similar to "Week 1" (January), helping it learn the annual winter peak of influenza.
+
 def train_and_forecast(df):
     # 1. Feature Engineering
     df['Week_Number'] = df.index.isocalendar().week.astype(int)
@@ -64,12 +77,22 @@ def train_and_forecast(df):
     seasonal_features = ['Week_Number', 'Month']
     target = 'metric_value'
 
+#5. TRAINING MODEL 1: THE SEASONAL BASELINE 
+# We use a Hybrid Strategy. First, we train a model to learn the general yearly pattern (seasonality).
+# The model looks at years of history to understand that flu generally rises in winter and falls in summer.
+# We subtract this "General Prediction" from the "Actual Data." The result (Residual) is the "unexpected" part of the flu season—the spikes or drops that are specific to this specific year.
+    
     # 2. Train Seasonal Baseline
     model_seasonal = HistGradientBoostingRegressor(categorical_features=[0, 1], random_state=42)
     model_seasonal.fit(df[seasonal_features], df[target])
     
     df['Seasonal_Pred'] = model_seasonal.predict(df[seasonal_features])
     df['Residual'] = df['metric_value'] - df['Seasonal_Pred']
+
+#6. TRAINING MODEL 2: THE RESIDUAL MODEL
+# Now we train a second model to predict those specific deviations (Residuals) using Lag Features.
+# shift(1): This creates a column representing "Last week's error."
+# The Logic: The model learns that if the residuals were high for the last 3 weeks (meaning the flu is spreading faster than the seasonal norm), next week is also likely to be high. This allows the model to react to current trends.
 
     # 3. Train Residual Model (Lags)
     df['Res_Lag_1'] = df['Residual'].shift(1)
@@ -81,6 +104,9 @@ def train_and_forecast(df):
     
     model_resid = HistGradientBoostingRegressor(random_state=42)
     model_resid.fit(df_resid[resid_features], df_resid['Residual'])
+
+# 7. RECURSIVE FORECASTING LOOP
+# This is how we predict 52 weeks into the future when we don't have data yet. We use a Sliding Window technique.
 
     # 4. Generate Future Forecast (52 Weeks)
     last_date = df.index[-1]
@@ -119,9 +145,10 @@ def train_and_forecast(df):
         
     return future_forecasts
 
-# -------------------------------------------------------
-# MAIN EXECUTION
-# -------------------------------------------------------
+#8.  MAIN EXECUTION
+# This final block orchestrates the whole process.
+# Automation: It loops through the dictionary defined at the start, runs the ML pipeline for each one, and dumps the result into a single dashboard_data.json file that your HTML page reads to display the graphs.
+
 full_dashboard_data = {}
 print("Starting Multi-Metric Forecast Job...")
 
@@ -151,3 +178,4 @@ with open('dashboard_data.json', 'w') as f:
     json.dump(full_dashboard_data, f)
 
 print("\nSuccess: 'dashboard_data.json' updated.")
+
