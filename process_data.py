@@ -95,34 +95,38 @@ def fetch_data(config):
     
     return df
 
-# --- NEW FUNCTION: Walk-Forward Validation ---
-def evaluate_accuracy(df, weeks_back=12):
+# --- IMPROVED BACKTESTING FUNCTION ---
+def evaluate_accuracy(df, weeks_back=52):
     """
-    Performs a rolling backtest over the last 'weeks_back' weeks.
-    Returns lists of dates, actuals, and predictions for accuracy plotting.
+    Simulates the past year week-by-week to test accuracy.
     """
-    if len(df) < (weeks_back + 10):
-        return None 
+    # We need enough history to train (at least 20 weeks) + the backtest period
+    if len(df) < (weeks_back + 20):
+        print("    Not enough data for full backtest, shortening window...")
+        weeks_back = max(1, len(df) - 20)
 
     dates = []
     actuals = []
     predictions = []
 
+    print(f"    Running backtest on last {weeks_back} weeks...")
+
     # Loop through the past X weeks
     for i in range(weeks_back, 0, -1):
-        # 1. Split data: Train on everything BEFORE this week
+        # 1. Define the "Current" date in the simulation
         train_end_index = len(df) - i
+        
+        # 2. Split data: Model only sees data BEFORE this date
         train_df = df.iloc[:train_end_index].copy()
         
-        # The specific week we want to predict (the "Test" week)
+        # The target we are trying to predict
         target_date = df.index[train_end_index]
         actual_value = df.iloc[train_end_index]['metric_value']
         
-        # 2. Feature Engineering (On Training Set)
+        # 3. Train Model (Identical logic to main forecast)
         train_df['Week_Number'] = train_df.index.isocalendar().week.astype(int)
         train_df['Month'] = train_df.index.month
         
-        # 3. Train Model (Same logic as main forecast)
         seasonal_feats = ['Week_Number', 'Month']
         model_seasonal = HistGradientBoostingRegressor(categorical_features=[0, 1], random_state=42)
         model_seasonal.fit(train_df[seasonal_feats], train_df['metric_value'])
@@ -130,43 +134,49 @@ def evaluate_accuracy(df, weeks_back=12):
         train_df['Seasonal_Pred'] = model_seasonal.predict(train_df[seasonal_feats])
         train_df['Residual'] = train_df['metric_value'] - train_df['Seasonal_Pred']
         
-        # Create Lags
         train_df['Res_Lag_1'] = train_df['Residual'].shift(1)
         train_df['Res_Lag_2'] = train_df['Residual'].shift(2)
         train_df['Res_Lag_3'] = train_df['Residual'].shift(3)
         
         df_resid = train_df.dropna()
+        if len(df_resid) < 10: continue # Skip if not enough lag data yet
+
         resid_feats = ['Res_Lag_1', 'Res_Lag_2', 'Res_Lag_3', 'Week_Number']
-        
         model_resid = HistGradientBoostingRegressor(random_state=42)
         model_resid.fit(df_resid[resid_feats], df_resid['Residual'])
         
-        # 4. Predict the target week
+        # 4. Predict
         feat_week = target_date.isocalendar().week
         feat_month = target_date.month
-        
-        # Get lags from the very end of the training set
-        last_residuals = train_df['Residual'].iloc[-3:].tolist() # [Lag3, Lag2, Lag1]
+        last_residuals = train_df['Residual'].iloc[-3:].tolist()
         
         pred_seasonal = model_seasonal.predict(pd.DataFrame([[feat_week, feat_month]], columns=seasonal_feats))[0]
         pred_resid = model_resid.predict(pd.DataFrame([[last_residuals[-1], last_residuals[-2], last_residuals[-3], feat_week]], columns=resid_feats))[0]
         
         final_pred = max(0, pred_seasonal + pred_resid)
         
-        # 5. Store Results
         dates.append(target_date.strftime('%Y-%m-%d'))
         actuals.append(float(actual_value))
         predictions.append(float(final_pred))
+
+    # Calculate Metrics
+    if not actuals: return None
+    
+    mae = mean_absolute_error(actuals, predictions)
+    
+    # Calculate Mean Absolute Percentage Error (MAPE)
+    # Avoid division by zero
+    mape = np.mean(np.abs((np.array(actuals) - np.array(predictions)) / np.maximum(np.array(actuals), 1))) * 100
 
     return {
         "dates": dates,
         "actuals": actuals,
         "predictions": predictions,
-        "mae": float(mean_absolute_error(actuals, predictions))
+        "mae": float(mae),
+        "mape": float(mape)
     }
 
 def train_and_forecast(df):
-    # (Standard Forecasting Logic - unchanged)
     df['Week_Number'] = df.index.isocalendar().week.astype(int)
     df['Month'] = df.index.month
     seasonal_features = ['Week_Number', 'Month']
@@ -190,7 +200,6 @@ def train_and_forecast(df):
     current_date = last_date
     future_forecasts = []
 
-    # Bridge point
     future_forecasts.append({
         'date': last_date.strftime('%Y-%m-%d'),
         'Seasonal_Base': float(df['Seasonal_Pred'].iloc[-1]),
@@ -235,8 +244,9 @@ for key, config in METRICS.items():
         # 1. Generate Future Forecast
         forecasts = train_and_forecast(df)
         
-        # 2. Evaluate Past Accuracy (Walk-Forward Validation)
-        accuracy_data = evaluate_accuracy(df, weeks_back=12)
+        # 2. Evaluate Past Accuracy (52-Week Backtest)
+        # This simulates predicting every single week of the past year.
+        accuracy_data = evaluate_accuracy(df, weeks_back=52)
 
         full_dashboard_data[key] = {
             "meta": {"name": config['name'], "topic": config['topic']},
@@ -249,7 +259,7 @@ for key, config in METRICS.items():
                 "values": [x['Final_Forecast'] for x in forecasts],
                 "baseline": [x['Seasonal_Base'] for x in forecasts]
             },
-            "accuracy": accuracy_data  # Save accuracy metrics to JSON
+            "accuracy": accuracy_data
         }
     else:
         print("  Skipping (No data found).")
