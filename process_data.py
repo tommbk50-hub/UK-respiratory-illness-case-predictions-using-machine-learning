@@ -9,7 +9,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 # CONFIGURATION
 # -------------------------------------------------------
 METRICS = {
-    # --- INFLUENZA (3 Charts) ---
+    # --- INFLUENZA ---
     "positivity": {
         "topic": "Influenza",
         "metric_id": "influenza_testing_positivityByWeek",
@@ -29,7 +29,7 @@ METRICS = {
         "agg": "mean"
     },
 
-    # --- COVID-19 (2 Charts Only - CLEANED) ---
+    # --- COVID-19 ---
     "covid_positivity": {
         "topic": "COVID-19",
         "metric_id": "COVID-19_testing_positivity7DayRolling",
@@ -38,7 +38,6 @@ METRICS = {
     },
     "covid_hospital": {
         "topic": "COVID-19",
-        # Use Daily admissions to ensure we get full history
         "metric_id": "COVID-19_healthcare_admissionByDay", 
         "name": "COVID: Weekly Hospital Admissions",
         "agg": "sum"
@@ -64,7 +63,7 @@ def fetch_data(config):
             data = response.json()
             all_data.extend(data['results'])
             current_url = data['next']
-            time.sleep(0.2)
+            time.sleep(0.1)
         except Exception as e:
             print(f"    Error fetching data: {e}")
             break
@@ -76,25 +75,27 @@ def fetch_data(config):
     df = df[['date', 'metric_value']].copy()
     df['date'] = pd.to_datetime(df['date'])
     
-    # --- DEDUPLICATION ---
-    # Group by date to merge age-group duplicates into a single daily value
+    # --- CRITICAL FIX: DEDUPLICATION ---
+    # The API returns multiple rows per date (different age groups/regions).
+    # We MUST group by date to squash them into a single number.
     if config['agg'] == 'sum':
         df = df.groupby('date')['metric_value'].sum().reset_index()
     else:
+        # For rates/percentages, we use mean (average)
         df = df.groupby('date')['metric_value'].mean().reset_index()
 
     df.sort_values('date', inplace=True)
     df.set_index('date', inplace=True)
     
-    # --- WEEKLY RESAMPLING ---
-    # Convert Daily COVID data to Weekly (Ending Sunday)
+    # --- RESAMPLING ---
+    # Ensure regular weekly intervals (Ending Sundays)
     if config['agg'] == 'sum':
         df = df.resample('W-SUN')['metric_value'].sum().to_frame()
     else:
         df = df.resample('W-SUN')['metric_value'].mean().to_frame()
     
-    # Remove empty weeks (artifacts of resampling)
-    df = df[df['metric_value'] > 0].copy()
+    # Remove zeros (artifacts from resampling empty weeks)
+    df = df[df['metric_value'] > 0.001].copy()
     
     return df
 
@@ -156,6 +157,7 @@ for key, config in METRICS.items():
     df = fetch_data(config)
     
     if df is not None and not df.empty:
+        # Require minimum data points
         if len(df) < 10:
              print("  Skipping (Not enough data points).")
              continue
