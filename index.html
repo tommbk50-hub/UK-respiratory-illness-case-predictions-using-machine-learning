@@ -28,8 +28,15 @@
         .description-text a { text-decoration: none; font-weight: 500; }
         
         /* Tech Section Styles */
-        .tech-section h5 { font-weight: 700; color: #2c3e50; margin-top: 20px; }
+        .tech-section h5 { font-weight: 700; color: #2c3e50; margin-top: 30px; margin-bottom: 15px; }
         .math-block { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin: 15px 0; overflow-x: auto; }
+        
+        /* Code Block Styles */
+        pre { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+        code { font-family: 'Consolas', 'Monaco', monospace; }
+        .code-comment { color: #75715e; }
+        .code-keyword { color: #66d9ef; }
+        .code-string { color: #e6db74; }
         
         .loading-msg { display: flex; align-items: center; justify-content: center; height: 100%; color: #adb5bd; font-style: italic; }
     </style>
@@ -126,16 +133,12 @@
                     <hr class="my-4">
 
                     <h5>1. Histogram-Based Gradient Boosting (HGBR)</h5>
-                    
                     <p>
-                        Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point. This binning process significantly accelerates the training phase, making the model exceptionally capable of handling large-scale datasets without sacrificing accuracy. By constructing an ensemble of decision trees where each new tree attempts to correct the errors of its predecessors, the algorithm effectively captures intricate, non-linear patterns within the data.
+                        Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point. This binning process significantly accelerates the training phase, making the model exceptionally capable of handling large-scale datasets without sacrificing accuracy.
                     </p>
                     <p>
                         When applied to forecasting future trends, such as predicting flu outbreaks, the model uses a technique often called a 'sliding window' to interpret time-series data. Rather than simply reading dates, it utilises historical figures—such as infection rates from previous weeks—as input features to predict future values. Its major advantage is the ability to combine these historical lag features with external variables, such as seasonal weather changes or school term dates. This holistic approach allows the model to anticipate future surges in cases based on complex combinations of past behaviours, enabling more proactive planning and resource allocation.
                     </p>
-                    
-                    
-
                     <p>
                         The <code>HistGradientBoostingRegressor</code> is an implementation of Gradient Boosted Decision Trees (GBDT), inspired by LightGBM. It is significantly faster than traditional GBDT for large datasets because it uses <strong>histogram binning</strong>.
                     </p>
@@ -166,11 +169,80 @@
                             <div class="math-block text-center">
                                 $$ r_i = - \frac{\partial L(y_i, F_{m-1}(x_i))}{\partial F_{m-1}(x_i)} = y_i - F_{m-1}(x_i) $$
                             </div>
-                            <p>
-                                By fitting the new tree to these residuals \(r_i\), the model iteratively corrects its own mistakes.
-                            </p>
                         </div>
                     </div>
+
+                    <hr class="my-4">
+
+                    <h5>2. Python Implementation</h5>
+                    <p>Below are core snippets from the <code>process_data.py</code> script that powers this dashboard. This script is automated via GitHub Actions to fetch data, train models, and generate the JSON payload used by the charts above.</p>
+
+                    <h6 class="mt-4"><strong>A. Dynamic Configuration & API Strategy</strong></h6>
+                    <p>We use a configuration dictionary to map simple keys (e.g., 'covid_hospital') to specific API parameters. This allows the script to handle different aggregation methods ('mean' vs 'sum') depending on whether the metric is a rate or a count.</p>
+<pre><code>METRICS = {
+    <span class="code-comment"># --- INFLUENZA ---</span>
+    "positivity": {
+        "topic": "Influenza",
+        "metric_id": "influenza_testing_positivityByWeek",
+        "agg": "mean" 
+    },
+    <span class="code-comment"># --- COVID-19 ---</span>
+    "covid_hospital": {
+        "topic": "COVID-19",
+        "metric_id": "COVID-19_healthcare_admissionByDay", 
+        "agg": "sum" <span class="code-comment"># Sum daily counts to get weekly total</span>
+    }
+}</code></pre>
+
+                    <h6 class="mt-4"><strong>B. Data Fetching & Deduplication</strong></h6>
+                    <p>The UKHSA API often returns multiple rows for a single date (e.g., regional breakdowns or age groups). The script automatically groups these by date and resamples them into clean weekly intervals (Ending Sunday) to ensure consistent time-series inputs for the ML model.</p>
+<pre><code><span class="code-keyword">def</span> fetch_data(config):
+    <span class="code-comment"># ... (Pagination Loop to fetch all pages) ...</span>
+
+    <span class="code-comment"># CRITICAL: Group by date to merge duplicates</span>
+    <span class="code-keyword">if</span> config['agg'] == 'sum':
+        df = df.groupby('date')['metric_value'].sum().reset_index()
+    <span class="code-keyword">else</span>:
+        df = df.groupby('date')['metric_value'].mean().reset_index()
+
+    <span class="code-comment"># Resample Daily data -> Weekly (W-SUN)</span>
+    <span class="code-keyword">if</span> config['agg'] == 'sum':
+        df = df.resample('W-SUN')['metric_value'].sum().to_frame()
+    <span class="code-keyword">else</span>:
+        df = df.resample('W-SUN')['metric_value'].mean().to_frame()
+    
+    <span class="code-keyword">return</span> df</code></pre>
+
+                    <h6 class="mt-4"><strong>C. Hybrid Training Logic</strong></h6>
+                    <p>We train two separate models. First, a <strong>Seasonal Model</strong> learns the yearly pattern based on Week Number and Month. Second, a <strong>Residual Model</strong> learns to correct the errors of the first model by looking at recent trends (Lags).</p>
+<pre><code><span class="code-keyword">def</span> train_and_forecast(df):
+    <span class="code-comment"># 1. Train Seasonal Baseline</span>
+    model_seasonal = HistGradientBoostingRegressor(categorical_features=[0, 1])
+    model_seasonal.fit(df[['Week', 'Month']], df['metric_value'])
+    
+    <span class="code-comment"># Calculate Residuals (Real Value - Seasonal Prediction)</span>
+    df['Residual'] = df['metric_value'] - df['Seasonal_Pred']
+
+    <span class="code-comment"># 2. Train Residual Model (Using Lags)</span>
+    model_resid = HistGradientBoostingRegressor()
+    model_resid.fit(df[['Lag_1', 'Lag_2', 'Lag_3']], df['Residual'])</code></pre>
+
+                    <h6 class="mt-4"><strong>D. Recursive Forecasting Loop</strong></h6>
+                    <p>To predict 52 weeks out, we use a "sliding window" approach. The prediction for Week 1 becomes the historical input for Week 2, allowing the model to project trends far into the future.</p>
+<pre><code>    history_residuals = df['Residual'].iloc[-3:].tolist()
+
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(52):
+        <span class="code-comment"># Step 1: Predict standard seasonal baseline for this date</span>
+        seasonal_base = model_seasonal.predict(future_date)
+        
+        <span class="code-comment"># Step 2: Predict deviation based on recent history</span>
+        pred_residual = model_resid.predict([history_residuals[-3:]])
+        
+        <span class="code-comment"># Step 3: Combine</span>
+        final_pred = seasonal_base + pred_residual
+
+        <span class="code-comment"># Step 4: Feed prediction back into history for next loop</span>
+        history_residuals.append(pred_residual)</code></pre>
 
                     <div class="alert alert-light border mt-4">
                         <strong>Source References:</strong> 
