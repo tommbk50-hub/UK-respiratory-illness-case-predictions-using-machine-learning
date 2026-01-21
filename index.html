@@ -31,7 +31,9 @@
         .description-text { font-size: 1rem; line-height: 1.6; color: #495057; }
         .description-text a { text-decoration: none; font-weight: 500; }
         
-        .tech-section h5 { font-weight: 700; color: #2c3e50; margin-top: 30px; margin-bottom: 15px; }
+        /* Tech Section Styles */
+        .tech-section h5 { font-weight: 700; color: #2c3e50; margin-top: 40px; margin-bottom: 15px; font-size: 1.3rem; }
+        .tech-section h6 { font-weight: 700; color: #495057; margin-top: 20px; font-size: 1.1rem; }
         .math-block { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin: 15px 0; overflow-x: auto; }
         
         pre { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; }
@@ -73,7 +75,7 @@
 
                 <div class="description-text">
                     <p>
-                        This dashboard provides a comprehensive 52-week forecast for <strong>Influenza (Flu)</strong> and <strong>COVID-19</strong> in England. By analysing trends in PCR Positivity and Hospital Admissions, these models aim to support healthcare resource planning.
+                        This dashboard provides a comprehensive 52-week forecast for <strong>Influenza (Flu)</strong> and <strong>COVID-19</strong> in England. By analysing trends in PCR Positivity and Hospital Admissions, these models aim to support healthcare resource planning—helping hospitals and A&E departments anticipate potential winter surges.
                     </p>
                     <p>
                         The predictions are generated using a <strong>Hybrid Machine Learning strategy</strong> (<a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">HistGradientBoostingRegressor</a>). The system is fully automated: it retrieves live data directly from the UKHSA public API and retrains all models every week via GitHub Actions.
@@ -126,15 +128,69 @@
             <div class="col-12">
                 <div class="card p-5 tech-section">
                     <h4 class="fw-bold text-primary mb-4"><i class="fas fa-cogs me-2"></i>Technical Methodology</h4>
-                    <p>Our forecasting engine utilises a <strong>Hybrid Approach</strong>. We first isolate the predictable seasonal cycle, and then use Scikit-Learn's <code>HistGradientBoostingRegressor</code> to model the residuals.</p>
                     
+                    <p>Our forecasting engine utilises a <strong>Hybrid Approach</strong>. We first isolate the predictable seasonal cycle, and then use Scikit-Learn's <code>HistGradientBoostingRegressor</code> to model the residuals (the difference between the seasonal baseline and reality).</p>
+
                     <hr class="my-4">
+
                     <h5>1. Histogram-Based Gradient Boosting (HGBR)</h5>
-                    <p>The model uses a technique often called a 'sliding window' to interpret time-series data. Rather than simply reading dates, it utilises historical figures—such as infection rates from previous weeks—as input features.</p>
-                    <p><strong>Uncertainty Quantification:</strong> To provide 90% prediction intervals, we train the model three times using Quantile Loss functions (0.05, 0.5, 0.95).</p>
+                    <p>
+                        Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point. This binning process significantly accelerates the training phase, making the model exceptionally capable of handling large-scale datasets without sacrificing accuracy.
+                    </p>
+                    <p>
+                        When applied to forecasting future trends, such as predicting flu outbreaks, the model uses a technique often called a 'sliding window' to interpret time-series data. Rather than simply reading dates, it utilises historical figures—such as infection rates from previous weeks—as input features to predict future values. Its major advantage is the ability to combine these historical lag features with external variables, such as seasonal weather changes or school term dates. This holistic approach allows the model to anticipate future surges in cases based on complex combinations of past behaviours, enabling more proactive planning and resource allocation.
+                    </p>
                     
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h6><strong>Step A: Data Discretisation (Binning)</strong></h6>
+                            <p>Standard decision trees sort the feature values at every node split, which has a complexity of \(O(N \log N)\). HGBR instead discretises the continuous input features into integer-valued bins (max 255 bins).</p>
+                            <div class="math-block">
+                                $$ X_{binned} = \text{digitize}(X, \text{bins}) \in \{0, \dots, 255\} $$
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <h6><strong>Step B: The Additive Model</strong></h6>
+                            <p>The model is an ensemble of \(M\) decision trees. It is an additive model where the prediction at step \(m\), denoted as \(F_m(x)\), is the sum of the previous prediction and a new tree \(h_m(x)\).</p>
+                            <div class="math-block">
+                                $$ F_m(x) = F_{m-1}(x) + \nu \cdot h_m(x) $$
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6><strong>Step C: Gradient Descent Optimisation</strong></h6>
+                            <p>
+                                At each iteration \(m\), the new tree \(h_m(x)\) is trained to predict the <strong>negative gradient</strong> of the loss function. For our Least Squares loss function, this is the residual:
+                            </p>
+                            <div class="math-block text-center">
+                                $$ r_i = - \frac{\partial L(y_i, F_{m-1}(x_i))}{\partial F_{m-1}(x_i)} = y_i - F_{m-1}(x_i) $$
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mt-5">2. Uncertainty Quantification</h5>
+                    <p>
+                        A single point forecast (the "mean") implies 100% certainty, which is scientifically inaccurate. To address this, we generate <strong>90% Prediction Intervals</strong> (the shaded cones). We train three separate instances of the model using different loss functions:
+                    </p>
+                    <ul>
+                        <li><strong>Median (0.5):</strong> The most likely outcome.</li>
+                        <li><strong>Lower Bound (0.05):</strong> The 5th percentile (optimistic scenario).</li>
+                        <li><strong>Upper Bound (0.95):</strong> The 95th percentile (worst-case scenario).</li>
+                    </ul>
+
+                    <h5 class="mt-5">3. Explainable AI (Feature Importance)</h5>
+                    <p>
+                        To demystify the "Black Box" nature of machine learning, we employ a technique called **Permutation Importance**. This evaluates the significance of each input feature (e.g., "Last Week's Cases" vs. "Seasonal Month") by randomly shuffling its values and measuring the resulting drop in model accuracy.
+                    </p>
+                    <p>
+                        If shuffling a specific feature causes the model's error to spike, that feature is considered highly important. This validates that the model is making decisions based on reactive trends (Lag features) rather than just guessing based on the time of year.
+                    </p>
+
                     <hr class="my-4">
-                    <h5>2. Python Implementation</h5>
+
+                    <h5>4. Python Implementation</h5>
                     <p>Below are core snippets from the <code>process_data.py</code> script.</p>
 
                     <h6 class="mt-4"><strong>A. Dynamic Configuration</strong></h6>
@@ -143,7 +199,7 @@
     "hospital": { "topic": "Influenza", "metric_id": "influenza_healthcare_hospitalAdmissionRateByWeek" }
 }</code></pre>
 
-                    <h6 class="mt-4"><strong>B. Generating Prediction Intervals</strong></h6>
+                    <h6 class="mt-4"><strong>B. Generating Prediction Intervals (Quantile Regression)</strong></h6>
 <pre><code><span class="code-keyword">def</span> train_and_forecast(df):
     <span class="code-comment"># 1. Main Forecast</span>
     model_resid = HistGradientBoostingRegressor(loss='squared_error')
@@ -152,14 +208,30 @@
     <span class="code-comment"># 3. Lower Bound (5th Percentile)</span>
     model_lower = HistGradientBoostingRegressor(loss='quantile', quantile=0.05)</code></pre>
 
+                    <h6 class="mt-4"><strong>C. Explainable AI (Permutation Importance)</strong></h6>
+                    <p>We use Scikit-Learn's inspection module to calculate importance scores on the hold-out residuals.</p>
+<pre><code><span class="code-keyword">from</span> sklearn.inspection <span class="code-keyword">import</span> permutation_importance
+
+<span class="code-comment"># Calculate importance on the Residual Model</span>
+result = permutation_importance(
+    model_resid, 
+    X_train, 
+    y_train, 
+    n_repeats=10, 
+    random_state=42
+)
+
+<span class="code-comment"># Sort features by their impact on model accuracy</span>
+importance_scores = result.importances_mean</code></pre>
+
                     <hr class="my-4">
                     <div class="alert alert-light border">
-                        <strong>Source References:</strong> 
+                        <strong>Source References & Further Reading:</strong> 
                         <ul class="mb-0 mt-2 small">
-                            <li><a href="https://scikit-learn.org/stable/modules/ensemble.html" target="_blank">Scikit-Learn User Guide</a></li>
-                            <li><a href="https://machinelearningmastery.com/histogram-based-gradient-boosting-ensembles/" target="_blank">Machine Learning Mastery</a></li>
+                            <li><a href="https://scikit-learn.org/stable/modules/ensemble.html" target="_blank">Scikit-Learn User Guide: HGBR</a></li>
+                            <li><a href="https://machinelearningmastery.com/histogram-based-gradient-boosting-ensembles/" target="_blank">Machine Learning Mastery: Gradient Boosting Ensembles</a></li>
                             <li><a href="https://api.ukhsa-dashboard.data.gov.uk/" target="_blank">UKHSA API Documentation</a></li>
-                            <li><a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning" target="_blank">GitHub Repository</a></li>
+                            <li><a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning" target="_blank">GitHub Repository: Source Code</a></li>
                         </ul>
                     </div>
                 </div>
@@ -222,7 +294,7 @@
                         xaxis: { showgrid: true, gridcolor: '#f1f3f5' },
                         yaxis: { showgrid: true, gridcolor: '#f1f3f5' },
                         shapes: [{ type: 'line', x0: history.dates[history.dates.length - 1], y0: 0, x1: history.dates[history.dates.length - 1], y1: 1, yref: 'paper', line: { color: '#dc3545', width: 1.5, dash: 'dot' } }],
-                        showlegend: true, legend: { orientation: 'h', y: -0.2 }, // LEGEND MOVED TO BOTTOM
+                        showlegend: true, legend: { orientation: 'h', y: -0.2 },
                         paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
                     };
 
@@ -243,7 +315,7 @@
                         font: { family: 'Roboto, sans-serif' },
                         margin: { t: 40, b: 40, l: 50, r: 20 },
                         xaxis: { title: 'Date' }, yaxis: { title: 'Admissions' },
-                        showlegend: true, legend: { orientation: 'h', y: -0.2 }, // LEGEND MOVED TO BOTTOM
+                        showlegend: true, legend: { orientation: 'h', y: -0.2 },
                         paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
                     };
                     Plotly.newPlot('chart-accuracy', [traceActuals, tracePreds], layoutAcc);
