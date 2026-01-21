@@ -17,7 +17,6 @@
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: white; margin-bottom: 30px; }
         .header-title { font-weight: 700; color: #1a202c; letter-spacing: -0.5px; }
         
-        /* INCREASED HEIGHT FOR BETTER VISIBILITY */
         .chart-container { height: 500px; width: 100%; }
         .accuracy-container { height: 350px; width: 100%; }
         
@@ -27,6 +26,7 @@
         .section-header { border-left: 5px solid #007bff; padding-left: 15px; margin: 50px 0 25px 0; color: #1a202c; font-size: 1.75rem; }
         .covid-header { border-left-color: #6610f2; }
         .accuracy-header { border-left-color: #198754; }
+        .importance-header { border-left-color: #fd7e14; }
         
         .description-text { font-size: 1rem; line-height: 1.6; color: #495057; }
         .description-text a { text-decoration: none; font-weight: 500; }
@@ -127,24 +127,24 @@
             </div>
         </div>
 
-        <h3 class="section-header accuracy-header"><i class="fas fa-bullseye me-2 text-success"></i>Model Accuracy (Historical Backtest)</h3>
         <div class="row">
-            <div class="col-12">
-                <div class="card p-4">
+            <div class="col-lg-6">
+                <h3 class="section-header accuracy-header mt-0"><i class="fas fa-bullseye me-2 text-success"></i>Model Accuracy</h3>
+                <div class="card p-4 h-100">
                     <p class="small text-muted mb-2">
-                        We continuously monitor performance by running a <strong>52-Week Rolling Backtest</strong>. This simulates how the model would have performed every week for the past year using only data available at that time.
-                    </p>
-                    <p class="small text-muted mb-2">
-                        This chart is designed to be a "truth test." It displays two lines covering the past 52 weeks:
-                    </p>
-                    <ul class="small text-muted mb-3">
-                        <li><strong>Solid Black Line (Actuals):</strong> The real number of hospital admissions reported by the UKHSA.</li>
-                        <li><strong>Dotted Green Line (Model Prediction):</strong> What the model would have predicted for that week if it traveled back in time, using only the data available back then.</li>
-                    </ul>
-                    <p class="small text-muted mb-0">
-                        When the Green line tracks closely with the Black line, it proves the model understands the patterns. If they diverge significantly (e.g., during a sudden outbreak), it visualizes the "Error Gap."
+                        <strong>52-Week Rolling Backtest:</strong> This chart compares the model's past predictions (green dotted line) against actual reported data (black line).
                     </p>
                     <div id="chart-accuracy" class="accuracy-container"></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <h3 class="section-header importance-header mt-0"><i class="fas fa-lightbulb me-2 text-warning"></i>Explainable AI</h3>
+                <div class="card p-4 h-100">
+                    <p class="small text-muted mb-2">
+                        <strong>Feature Importance:</strong> Which variables drive the model's decisions? We use Permutation Importance to score features. High scores indicate the model relies heavily on that data point.
+                    </p>
+                    <div id="chart-importance" class="accuracy-container"></div>
                 </div>
             </div>
         </div>
@@ -161,9 +161,6 @@
                     <h5>1. Histogram-Based Gradient Boosting (HGBR)</h5>
                     <p>
                         Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point. This binning process significantly accelerates the training phase, making the model exceptionally capable of handling large-scale datasets without sacrificing accuracy.
-                    </p>
-                    <p>
-                        <strong>Uncertainty Quantification:</strong> To provide 90% prediction intervals (the shaded cones in the charts above), we train the model three times using Quantile Loss functions. We model the median (0.5), the lower bound (0.05), and the upper bound (0.95), allowing us to quantify the range of likely outcomes rather than relying on a single point estimate.
                     </p>
                     
                     <div class="row">
@@ -198,10 +195,9 @@
                     <hr class="my-4">
 
                     <h5>2. Python Implementation</h5>
-                    <p>Below are core snippets from the <code>process_data.py</code> script that powers this dashboard. This script is automated via GitHub Actions to fetch data, train models, and generate the JSON payload used by the charts above.</p>
+                    <p>Below are core snippets from the <code>process_data.py</code> script that powers this dashboard.</p>
 
                     <h6 class="mt-4"><strong>A. Dynamic Configuration & API Strategy</strong></h6>
-                    <p>We use a configuration dictionary to map simple keys (e.g., 'covid_hospital') to specific API parameters. This allows the script to handle different aggregation methods ('mean' vs 'sum') depending on whether the metric is a rate or a count.</p>
 <pre><code>METRICS = {
     <span class="code-comment"># --- INFLUENZA ---</span>
     "positivity": {
@@ -217,35 +213,10 @@
     }
 }</code></pre>
 
-                    <h6 class="mt-4"><strong>B. Data Fetching & Deduplication</strong></h6>
-                    <p>The UKHSA API often returns multiple rows for a single date (e.g., regional breakdowns or age groups). The script automatically groups these by date and resamples them into clean weekly intervals (Ending Sunday) to ensure consistent time-series inputs for the ML model.</p>
-<pre><code><span class="code-keyword">def</span> fetch_data(config):
-    <span class="code-comment"># ... (Pagination Loop to fetch all pages) ...</span>
-
-    <span class="code-comment"># CRITICAL: Group by date to merge duplicates</span>
-    <span class="code-keyword">if</span> config['agg'] == 'sum':
-        df = df.groupby('date')['metric_value'].sum().reset_index()
-    <span class="code-keyword">else</span>:
-        df = df.groupby('date')['metric_value'].mean().reset_index()
-
-    <span class="code-comment"># Resample Daily data -> Weekly (W-SUN)</span>
-    <span class="code-keyword">if</span> config['agg'] == 'sum':
-        df = df.resample('W-SUN')['metric_value'].sum().to_frame()
-    <span class="code-keyword">else</span>:
-        df = df.resample('W-SUN')['metric_value'].mean().to_frame()
-    
-    <span class="code-keyword">return</span> df</code></pre>
-
-                    <h6 class="mt-4"><strong>C. Generating Prediction Intervals (Confidence Cones)</strong></h6>
+                    <h6 class="mt-4"><strong>B. Generating Prediction Intervals (Confidence Cones)</strong></h6>
                     <p>
                         To generate the shaded confidence cone (Confidence Cone 90%), we train <strong>three separate models</strong> using Quantile Regression logic.
                     </p>
-                    <ul>
-                        <li><strong>Model 1 (Mean Forecast):</strong> Uses <code>loss='squared_error'</code> to predict the most likely central value.</li>
-                        <li><strong>Model 2 (Upper Bound):</strong> Uses <code>loss='quantile', quantile=0.95</code> to predict the value that 95% of data points will likely fall below.</li>
-                        <li><strong>Model 3 (Lower Bound):</strong> Uses <code>loss='quantile', quantile=0.05</code> to predict the value that only 5% of data points will fall below.</li>
-                    </ul>
-                    <p>The area between Model 2 and Model 3 represents our 90% Confidence Interval.</p>
 <pre><code><span class="code-keyword">def</span> train_and_forecast(df):
     <span class="code-comment"># 1. Main Forecast (Squared Error - The dashed line)</span>
     model_resid = HistGradientBoostingRegressor(loss='squared_error')
@@ -295,14 +266,11 @@
 
         // CONFIGURATION FOR ALL 5 CHARTS
         const chartsConfig = [
-            // --- INFLUENZA ---
-            { key: 'positivity',       divId: 'chart-positivity',       color: '#007bff' }, // Blue
-            { key: 'hospital',         divId: 'chart-hospital',         color: '#dc3545' }, // Red
-            { key: 'icu',              divId: 'chart-icu',              color: '#ffc107' }, // Yellow
-            
-            // --- COVID-19 ---
-            { key: 'covid_positivity', divId: 'chart-covid-positivity', color: '#6610f2' }, // Purple
-            { key: 'covid_hospital',   divId: 'chart-covid-hospital',   color: '#e83e8c' }  // Pink
+            { key: 'positivity',       divId: 'chart-positivity',       color: '#007bff' },
+            { key: 'hospital',         divId: 'chart-hospital',         color: '#dc3545' },
+            { key: 'icu',              divId: 'chart-icu',              color: '#ffc107' },
+            { key: 'covid_positivity', divId: 'chart-covid-positivity', color: '#6610f2' },
+            { key: 'covid_hospital',   divId: 'chart-covid-hospital',   color: '#e83e8c' }
         ];
 
         fetch('dashboard_data.json')
@@ -324,7 +292,6 @@
                     const history = metricData.history;
                     const forecast = metricData.forecast;
 
-                    // Baseline (Seasonal Norm)
                     const traceBaseline = {
                         x: forecast.dates, y: forecast.baseline,
                         type: 'scatter', mode: 'lines', name: 'Seasonal Norm',
@@ -332,40 +299,25 @@
                         hoverinfo: 'y'
                     };
 
-                    // PREDICTION INTERVALS (The "Cone")
-                    // Upper Bound (Invisible line)
                     const traceUpper = {
-                        x: forecast.dates,
-                        y: forecast.upper,
-                        type: 'scatter',
-                        mode: 'lines',
-                        line: { width: 0 },
-                        showlegend: false,
-                        hoverinfo: 'skip'
+                        x: forecast.dates, y: forecast.upper,
+                        type: 'scatter', mode: 'lines', line: { width: 0 },
+                        showlegend: false, hoverinfo: 'skip'
                     };
 
-                    // Lower Bound (Fills up to the Upper Bound)
                     const traceLower = {
-                        x: forecast.dates,
-                        y: forecast.lower,
-                        type: 'scatter',
-                        mode: 'lines',
-                        fill: 'tonexty', // Fill area between this trace and the previous one (Upper)
-                        fillcolor: hexToRgba(config.color, 0.2), // 20% opacity
-                        line: { width: 0 },
-                        showlegend: true,  // CHANGED: Now visible in legend
-                        name: 'Confidence Cone (90%)', // CHANGED: Clear label
-                        hoverinfo: 'skip'
+                        x: forecast.dates, y: forecast.lower,
+                        type: 'scatter', mode: 'lines',
+                        fill: 'tonexty', fillcolor: hexToRgba(config.color, 0.2),
+                        line: { width: 0 }, showlegend: true, name: 'Confidence Cone (90%)', hoverinfo: 'skip'
                     };
 
-                    // Main Forecast (Dashed Line)
                     const traceForecast = {
                         x: forecast.dates, y: forecast.values,
                         type: 'scatter', mode: 'lines', name: 'Forecast',
                         line: { color: config.color, width: 3, dash: 'dash' }
                     };
 
-                    // History (Solid Line)
                     const traceHistory = {
                         x: history.dates, y: history.values,
                         type: 'scatter', mode: 'lines', name: 'Actuals',
@@ -380,22 +332,15 @@
                         xaxis: { showgrid: true, gridcolor: '#f1f3f5' },
                         yaxis: { showgrid: true, gridcolor: '#f1f3f5' },
                         shapes: [{
-                            type: 'line',
-                            x0: lastHistoryDate, y0: 0,
-                            x1: lastHistoryDate, y1: 1,
-                            yref: 'paper',
+                            type: 'line', x0: lastHistoryDate, y0: 0, x1: lastHistoryDate, y1: 1, yref: 'paper',
                             line: { color: '#dc3545', width: 1.5, dash: 'dot' }
                         }],
                         showlegend: true, legend: { orientation: 'h', y: 1.1 },
                         paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
                     };
 
-                    // Order matters: Upper -> Lower (fill) -> Baseline -> Forecast -> History
-                    // Only plot intervals if data exists
                     const traces = [traceBaseline];
-                    if(forecast.upper && forecast.lower) {
-                        traces.push(traceUpper, traceLower);
-                    }
+                    if(forecast.upper && forecast.lower) { traces.push(traceUpper, traceLower); }
                     traces.push(traceForecast, traceHistory);
 
                     Plotly.newPlot(config.divId, traces, layout);
@@ -405,38 +350,44 @@
                 const accuracyData = data['hospital'].accuracy;
                 if (accuracyData) {
                     const traceActuals = {
-                        x: accuracyData.dates,
-                        y: accuracyData.actuals,
-                        type: 'scatter',
-                        mode: 'lines',
-                        name: 'Actual Reported',
+                        x: accuracyData.dates, y: accuracyData.actuals,
+                        type: 'scatter', mode: 'lines', name: 'Actual Reported',
                         line: { color: '#212529', width: 2 }
                     };
-
                     const tracePreds = {
-                        x: accuracyData.dates,
-                        y: accuracyData.predictions,
-                        type: 'scatter',
-                        mode: 'lines',
-                        name: 'Model Prediction',
+                        x: accuracyData.dates, y: accuracyData.predictions,
+                        type: 'scatter', mode: 'lines', name: 'Model Prediction',
                         line: { color: '#198754', width: 2, dash: 'dot' }
                     };
-                    
                     const layoutAcc = {
-                        title: { 
-                            text: `Backtest Accuracy: ${accuracyData.mape.toFixed(1)}% Error (Past 52 Weeks)`, 
-                            font: { size: 16, color: '#198754' } 
-                        },
+                        title: { text: `Backtest Accuracy: ${accuracyData.mape.toFixed(1)}% Error (Past 52 Weeks)`, font: { size: 14 } },
                         font: { family: 'Roboto, sans-serif' },
                         margin: { t: 40, b: 40, l: 50, r: 20 },
-                        xaxis: { title: 'Date' },
-                        yaxis: { title: 'Admissions' },
-                        showlegend: true,
-                        legend: { orientation: 'h', y: 1.1 },
+                        xaxis: { title: 'Date' }, yaxis: { title: 'Admissions' },
+                        showlegend: true, legend: { orientation: 'h', y: 1.2 },
                         paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
                     };
-                    
                     Plotly.newPlot('chart-accuracy', [traceActuals, tracePreds], layoutAcc);
+                }
+
+                // 3. RENDER IMPORTANCE CHART (NEW)
+                const importanceData = data['hospital'].importance;
+                if (importanceData) {
+                    const traceImp = {
+                        y: importanceData.map(d => d.name),
+                        x: importanceData.map(d => d.score),
+                        type: 'bar', orientation: 'h',
+                        marker: { color: '#fd7e14' }
+                    };
+                    const layoutImp = {
+                        title: { text: "What Drives the Model?", font: { size: 14 } },
+                        font: { family: 'Roboto, sans-serif' },
+                        margin: { t: 40, b: 40, l: 150, r: 20 }, // Left margin for labels
+                        xaxis: { title: 'Relative Importance Score' },
+                        yaxis: { automargin: true },
+                        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+                    };
+                    Plotly.newPlot('chart-importance', [traceImp], layoutImp);
                 }
 
             })
