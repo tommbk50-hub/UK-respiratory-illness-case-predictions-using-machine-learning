@@ -5,13 +5,12 @@ import requests
 import time
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error
-from sklearn.inspection import permutation_importance # NEW IMPORT
+from sklearn.inspection import permutation_importance
 
 # -------------------------------------------------------
 # CONFIGURATION
 # -------------------------------------------------------
 METRICS = {
-    # --- INFLUENZA ---
     "positivity": {
         "topic": "Influenza",
         "metric_id": "influenza_testing_positivityByWeek",
@@ -30,8 +29,6 @@ METRICS = {
         "agg": "mean",
         "name": "Flu: ICU/HDU Admission Rate"
     },
-
-    # --- COVID-19 ---
     "covid_positivity": {
         "topic": "COVID-19",
         "metric_id": "COVID-19_testing_positivity7DayRolling",
@@ -77,7 +74,6 @@ def fetch_data(config):
     df = df[['date', 'metric_value']].copy()
     df['date'] = pd.to_datetime(df['date'])
     
-    # Deduplication
     if config['agg'] == 'sum':
         df = df.groupby('date')['metric_value'].sum().reset_index()
     else:
@@ -86,7 +82,6 @@ def fetch_data(config):
     df.sort_values('date', inplace=True)
     df.set_index('date', inplace=True)
     
-    # Weekly Resampling
     if config['agg'] == 'sum':
         df = df.resample('W-SUN')['metric_value'].sum().to_frame()
     else:
@@ -97,15 +92,13 @@ def fetch_data(config):
     return df
 
 def evaluate_accuracy(df, weeks_back=52):
-    """
-    Simulates the past year week-by-week to test accuracy.
-    """
     if len(df) < (weeks_back + 20):
         weeks_back = max(1, len(df) - 20)
 
     dates = []
     actuals = []
     predictions = []
+    residuals = [] # NEW: Store individual errors
 
     for i in range(weeks_back, 0, -1):
         train_end_index = len(df) - i
@@ -114,7 +107,6 @@ def evaluate_accuracy(df, weeks_back=52):
         target_date = df.index[train_end_index]
         actual_value = df.iloc[train_end_index]['metric_value']
         
-        # 1. Seasonal
         train_df['Week_Number'] = train_df.index.isocalendar().week.astype(int)
         train_df['Month'] = train_df.index.month
         seasonal_feats = ['Week_Number', 'Month']
@@ -125,7 +117,6 @@ def evaluate_accuracy(df, weeks_back=52):
         train_df['Seasonal_Pred'] = model_seasonal.predict(train_df[seasonal_feats])
         train_df['Residual'] = train_df['metric_value'] - train_df['Seasonal_Pred']
         
-        # 2. Residual
         train_df['Res_Lag_1'] = train_df['Residual'].shift(1)
         train_df['Res_Lag_2'] = train_df['Residual'].shift(2)
         train_df['Res_Lag_3'] = train_df['Residual'].shift(3)
@@ -137,7 +128,6 @@ def evaluate_accuracy(df, weeks_back=52):
         model_resid = HistGradientBoostingRegressor(random_state=42)
         model_resid.fit(df_resid[resid_feats], df_resid['Residual'])
         
-        # 3. Predict
         feat_week = target_date.isocalendar().week
         feat_month = target_date.month
         last_residuals = train_df['Residual'].iloc[-3:].tolist()
@@ -150,6 +140,9 @@ def evaluate_accuracy(df, weeks_back=52):
         dates.append(target_date.strftime('%Y-%m-%d'))
         actuals.append(float(actual_value))
         predictions.append(float(final_pred))
+        
+        # Calculate Residual (Error)
+        residuals.append(float(actual_value - final_pred))
 
     if not actuals: return None
     
@@ -160,17 +153,16 @@ def evaluate_accuracy(df, weeks_back=52):
         "dates": dates,
         "actuals": actuals,
         "predictions": predictions,
+        "residuals": residuals, # NEW: List of errors for histogram
         "mae": float(mae),
         "mape": float(mape)
     }
 
 def train_and_forecast(df):
-    # Feature Engineering
     df['Week_Number'] = df.index.isocalendar().week.astype(int)
     df['Month'] = df.index.month
     seasonal_features = ['Week_Number', 'Month']
     
-    # --- MODEL 1: MAIN FORECAST (Mean) ---
     model_seasonal = HistGradientBoostingRegressor(categorical_features=[0, 1], loss='squared_error', random_state=42)
     model_seasonal.fit(df[seasonal_features], df['metric_value'])
     df['Seasonal_Pred'] = model_seasonal.predict(df[seasonal_features])
@@ -185,27 +177,19 @@ def train_and_forecast(df):
     model_resid = HistGradientBoostingRegressor(loss='squared_error', random_state=42)
     model_resid.fit(df_resid[resid_features], df_resid['Residual'])
 
-    # --- FEATURE IMPORTANCE (New) ---
-    # We analyze the Residual Model to see what drives the deviations from the seasonal norm
+    # Feature Importance
     perm_importance = permutation_importance(model_resid, df_resid[resid_features], df_resid['Residual'], n_repeats=10, random_state=42)
-    
-    # Create readable list
     feature_names = ['Last Week (Lag 1)', '2 Weeks Ago (Lag 2)', '3 Weeks Ago (Lag 3)', 'Seasonal Offset (Week)']
     importance_scores = perm_importance.importances_mean.tolist()
-    
-    # Pair and sort
     importance_list = [{"name": n, "score": s} for n, s in zip(feature_names, importance_scores)]
     importance_list.sort(key=lambda x: x['score'], reverse=True)
 
-    # --- MODEL 2: UPPER BOUND (95th Percentile) ---
     model_resid_upper = HistGradientBoostingRegressor(loss='quantile', quantile=0.95, random_state=42)
     model_resid_upper.fit(df_resid[resid_features], df_resid['Residual'])
 
-    # --- MODEL 3: LOWER BOUND (5th Percentile) ---
     model_resid_lower = HistGradientBoostingRegressor(loss='quantile', quantile=0.05, random_state=42)
     model_resid_lower.fit(df_resid[resid_features], df_resid['Residual'])
 
-    # FORECAST LOOP
     last_date = df.index[-1]
     history_residuals = df['Residual'].iloc[-3:].tolist()
     current_date = last_date
@@ -268,10 +252,7 @@ for key, config in METRICS.items():
              print("  Skipping (Not enough data points).")
              continue
         
-        # 1. Generate Future Forecast & Get Importances
         forecasts, importances = train_and_forecast(df)
-        
-        # 2. Evaluate Past Accuracy
         accuracy_data = evaluate_accuracy(df, weeks_back=52)
 
         full_dashboard_data[key] = {
@@ -288,7 +269,7 @@ for key, config in METRICS.items():
                 "upper": [x['Upper_Bound'] for x in forecasts]
             },
             "accuracy": accuracy_data,
-            "importance": importances # SAVE THIS TO JSON
+            "importance": importances
         }
     else:
         print("  Skipping (No data found).")
@@ -296,4 +277,4 @@ for key, config in METRICS.items():
 with open('dashboard_data.json', 'w') as f:
     json.dump(full_dashboard_data, f)
 
-print("\nSuccess: 'dashboard_data.json' updated with Feature Importance.")
+print("\nSuccess: 'dashboard_data.json' updated with Residuals.")
