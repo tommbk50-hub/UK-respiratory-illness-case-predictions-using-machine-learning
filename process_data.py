@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import json
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import time
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error
@@ -57,9 +59,15 @@ def fetch_data(config):
         'Accept': 'application/json'
     }
 
+    retry = Retry(total=5, backoff_factor=2, status_forcelist=[403, 429, 500, 502, 503, 504])
+    adapter = HTTPAdapter(max_retries=retry)
+    session = requests.Session()
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+
     while current_url:
         try:
-            response = requests.get(current_url, headers=headers, timeout=15)
+            response = session.get(current_url, headers=headers, timeout=15)
             if response.status_code != 200:
                 print(f"    Warning: HTTP {response.status_code} for {config['metric_id']}: {response.text[:250]}")
                 return None
