@@ -420,97 +420,138 @@ importance_scores = result.importances_mean</code></pre>
         ];
 
         fetch('dashboard_data.json')
-            .then(response => response.json())
+            .then(response => {
+                console.log('dashboard_data.json fetch status:', response.status, response.statusText);
+                if (!response.ok) {
+                    throw new Error(`Network response was not OK: ${response.status} ${response.statusText}`);
+                }
+                return response.json();
+            })
             .then(data => {
-                document.getElementById('last-updated').innerText = new Date().toLocaleDateString('en-GB');
+                try {
+                    document.getElementById('last-updated').innerText = new Date().toLocaleDateString('en-GB');
 
-                // 1. RENDER MAIN CHARTS
-                chartsConfig.forEach(config => {
-                    const metricData = data[config.key];
-                    const divElement = document.getElementById(config.divId);
-                    if (!metricData) { divElement.innerHTML = `<div class="loading-msg">Waiting for data...</div>`; return; }
+                    // 1. RENDER MAIN CHARTS
+                    chartsConfig.forEach(config => {
+                        const metricData = data[config.key];
+                        const divElement = document.getElementById(config.divId);
+                        if (!metricData) {
+                            divElement.innerHTML = `<div class="loading-msg text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Data currently unavailable from UKHSA</div>`;
+                            return;
+                        }
 
-                    const history = metricData.history;
-                    const forecast = metricData.forecast;
+                        try {
+                            const history = metricData.history;
+                            const forecast = metricData.forecast;
 
-                    const traceBaseline = {
-                        x: forecast.dates, y: forecast.baseline,
-                        type: 'scatter', mode: 'lines', name: 'Seasonal Norm',
-                        line: { color: 'rgba(128, 128, 128, 0.4)', width: 2, dash: 'dot' }, hoverinfo: 'y'
-                    };
-                    const traceUpper = { x: forecast.dates, y: forecast.upper, type: 'scatter', mode: 'lines', line: { width: 0 }, showlegend: false, hoverinfo: 'skip' };
-                    const traceLower = {
-                        x: forecast.dates, y: forecast.lower, type: 'scatter', mode: 'lines',
-                        fill: 'tonexty', fillcolor: hexToRgba(config.color, 0.2),
-                        line: { width: 0 }, showlegend: true, name: 'Confidence Cone (90%)', hoverinfo: 'skip'
-                    };
-                    const traceForecast = { x: forecast.dates, y: forecast.values, type: 'scatter', mode: 'lines', name: 'Forecast', line: { color: config.color, width: 3, dash: 'dash' } };
-                    const traceHistory = { x: history.dates, y: history.values, type: 'scatter', mode: 'lines', name: 'Actuals', line: { color: '#0f172a', width: 2 } };
-                    
-                    const layout = {
-                        font: { family: 'Inter, sans-serif' },
-                        margin: { t: 20, b: 40, l: 50, r: 20 },
-                        xaxis: { showgrid: true, gridcolor: '#f1f5f9' },
-                        yaxis: { showgrid: true, gridcolor: '#f1f5f9' },
-                        shapes: [{ type: 'line', x0: history.dates[history.dates.length - 1], y0: 0, x1: history.dates[history.dates.length - 1], y1: 1, yref: 'paper', line: { color: '#ef4444', width: 1.5, dash: 'dot' } }],
-                        showlegend: true, legend: { orientation: 'h', y: -0.15 },
-                        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
-                    };
+                            const traceBaseline = {
+                                x: forecast.dates, y: forecast.baseline,
+                                type: 'scatter', mode: 'lines', name: 'Seasonal Norm',
+                                line: { color: 'rgba(128, 128, 128, 0.4)', width: 2, dash: 'dot' }, hoverinfo: 'y'
+                            };
+                            const traceUpper = { x: forecast.dates, y: forecast.upper, type: 'scatter', mode: 'lines', line: { width: 0 }, showlegend: false, hoverinfo: 'skip' };
+                            const traceLower = {
+                                x: forecast.dates, y: forecast.lower, type: 'scatter', mode: 'lines',
+                                fill: 'tonexty', fillcolor: hexToRgba(config.color, 0.2),
+                                line: { width: 0 }, showlegend: true, name: 'Confidence Cone (90%)', hoverinfo: 'skip'
+                            };
+                            const traceForecast = { x: forecast.dates, y: forecast.values, type: 'scatter', mode: 'lines', name: 'Forecast', line: { color: config.color, width: 3, dash: 'dash' } };
+                            const traceHistory = { x: history.dates, y: history.values, type: 'scatter', mode: 'lines', name: 'Actuals', line: { color: '#0f172a', width: 2 } };
 
-                    const traces = [traceBaseline];
-                    if(forecast.upper && forecast.lower) { traces.push(traceUpper, traceLower); }
-                    traces.push(traceForecast, traceHistory);
-                    Plotly.newPlot(config.divId, traces, layout);
-                });
+                            const layout = {
+                                font: { family: 'Inter, sans-serif' },
+                                margin: { t: 20, b: 40, l: 50, r: 20 },
+                                xaxis: { showgrid: true, gridcolor: '#f1f5f9' },
+                                yaxis: { showgrid: true, gridcolor: '#f1f5f9' },
+                                shapes: [{ type: 'line', x0: history.dates[history.dates.length - 1], y0: 0, x1: history.dates[history.dates.length - 1], y1: 1, yref: 'paper', line: { color: '#ef4444', width: 1.5, dash: 'dot' } }],
+                                showlegend: true, legend: { orientation: 'h', y: -0.15 },
+                                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+                            };
 
-                // 2. RENDER ACCURACY CHART
-                const accuracyData = data['hospital'].accuracy;
-                if (accuracyData) {
-                    const traceActuals = { x: accuracyData.dates, y: accuracyData.actuals, type: 'scatter', mode: 'lines', name: 'Actual', line: { color: '#0f172a', width: 2 } };
-                    const tracePreds = { x: accuracyData.dates, y: accuracyData.predictions, type: 'scatter', mode: 'lines', name: 'Model', line: { color: '#10b981', width: 2, dash: 'dot' } };
-                    const layoutAcc = {
-                        font: { family: 'Inter, sans-serif' },
-                        margin: { t: 20, b: 30, l: 40, r: 20 },
-                        xaxis: { showgrid: false }, yaxis: { showgrid: true, gridcolor: '#f1f5f9' },
-                        showlegend: true, legend: { orientation: 'h', y: 1.1 },
-                        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
-                    };
-                    Plotly.newPlot('chart-accuracy', [traceActuals, tracePreds], layoutAcc);
+                            const traces = [traceBaseline];
+                            if (forecast.upper && forecast.lower) { traces.push(traceUpper, traceLower); }
+                            traces.push(traceForecast, traceHistory);
+                            Plotly.newPlot(config.divId, traces, layout);
+                        } catch (chartErr) {
+                            console.error(`Error rendering chart for key "${config.key}":`, chartErr);
+                            divElement.innerHTML = `<div class="loading-msg text-danger"><i class="fas fa-times-circle me-2"></i>Error rendering chart: ${chartErr.message}</div>`;
+                        }
+                    });
 
-                    // 3. RESIDUALS
-                    if (accuracyData.residuals) {
-                        const traceResid = { x: accuracyData.residuals, type: 'histogram', marker: { color: '#64748b' } };
-                        const layoutResid = {
-                            font: { family: 'Inter, sans-serif' },
-                            margin: { t: 20, b: 30, l: 40, r: 20 },
-                            xaxis: { title: 'Error Value' }, yaxis: { showgrid: true, gridcolor: '#f1f5f9' },
-                            paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
-                        };
-                        Plotly.newPlot('chart-residuals', [traceResid], layoutResid);
+                    // 2. RENDER ACCURACY CHART
+                    const hospitalData = data['hospital'];
+                    const accuracyData = hospitalData && hospitalData.accuracy;
+                    if (accuracyData) {
+                        try {
+                            const traceActuals = { x: accuracyData.dates, y: accuracyData.actuals, type: 'scatter', mode: 'lines', name: 'Actual', line: { color: '#0f172a', width: 2 } };
+                            const tracePreds = { x: accuracyData.dates, y: accuracyData.predictions, type: 'scatter', mode: 'lines', name: 'Model', line: { color: '#10b981', width: 2, dash: 'dot' } };
+                            const layoutAcc = {
+                                font: { family: 'Inter, sans-serif' },
+                                margin: { t: 20, b: 30, l: 40, r: 20 },
+                                xaxis: { showgrid: false }, yaxis: { showgrid: true, gridcolor: '#f1f5f9' },
+                                showlegend: true, legend: { orientation: 'h', y: 1.1 },
+                                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+                            };
+                            Plotly.newPlot('chart-accuracy', [traceActuals, tracePreds], layoutAcc);
+
+                            // 3. RESIDUALS
+                            if (accuracyData.residuals) {
+                                const traceResid = { x: accuracyData.residuals, type: 'histogram', marker: { color: '#64748b' } };
+                                const layoutResid = {
+                                    font: { family: 'Inter, sans-serif' },
+                                    margin: { t: 20, b: 30, l: 40, r: 20 },
+                                    xaxis: { title: 'Error Value' }, yaxis: { showgrid: true, gridcolor: '#f1f5f9' },
+                                    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+                                };
+                                Plotly.newPlot('chart-residuals', [traceResid], layoutResid);
+                            } else {
+                                document.getElementById('chart-residuals').innerHTML = `<div class="loading-msg text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Residual data not available</div>`;
+                            }
+                        } catch (accErr) {
+                            console.error('Error rendering accuracy/residuals charts:', accErr);
+                            document.getElementById('chart-accuracy').innerHTML = `<div class="loading-msg text-danger"><i class="fas fa-times-circle me-2"></i>Error rendering chart: ${accErr.message}</div>`;
+                            document.getElementById('chart-residuals').innerHTML = `<div class="loading-msg text-danger"><i class="fas fa-times-circle me-2"></i>Error rendering chart: ${accErr.message}</div>`;
+                        }
+                    } else {
+                        document.getElementById('chart-accuracy').innerHTML = `<div class="loading-msg text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Accuracy data not available</div>`;
+                        document.getElementById('chart-residuals').innerHTML = `<div class="loading-msg text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Residual data not available</div>`;
                     }
-                }
 
-                // 4. IMPORTANCE
-                const importanceData = data['hospital'].importance;
-                if (importanceData) {
-                    const traceImp = {
-                        y: importanceData.map(d => d.name), x: importanceData.map(d => d.score),
-                        type: 'bar', orientation: 'h', marker: { color: '#f59e0b' }
-                    };
-                    const layoutImp = {
-                        font: { family: 'Inter, sans-serif' },
-                        margin: { t: 20, b: 30, l: 140, r: 20 },
-                        xaxis: { showgrid: true, gridcolor: '#f1f5f9' },
-                        paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
-                    };
-                    Plotly.newPlot('chart-importance', [traceImp], layoutImp);
-                } else {
-                    document.getElementById('chart-importance').innerHTML = `<div class="loading-msg text-danger">Run Update Action</div>`;
-                }
+                    // 4. IMPORTANCE
+                    const importanceData = hospitalData && hospitalData.importance;
+                    if (importanceData) {
+                        try {
+                            const traceImp = {
+                                y: importanceData.map(d => d.name), x: importanceData.map(d => d.score),
+                                type: 'bar', orientation: 'h', marker: { color: '#f59e0b' }
+                            };
+                            const layoutImp = {
+                                font: { family: 'Inter, sans-serif' },
+                                margin: { t: 20, b: 30, l: 140, r: 20 },
+                                xaxis: { showgrid: true, gridcolor: '#f1f5f9' },
+                                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+                            };
+                            Plotly.newPlot('chart-importance', [traceImp], layoutImp);
+                        } catch (impErr) {
+                            console.error('Error rendering importance chart:', impErr);
+                            document.getElementById('chart-importance').innerHTML = `<div class="loading-msg text-danger"><i class="fas fa-times-circle me-2"></i>Error rendering chart: ${impErr.message}</div>`;
+                        }
+                    } else {
+                        document.getElementById('chart-importance').innerHTML = `<div class="loading-msg text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Importance data not available</div>`;
+                    }
 
+                } catch (parseErr) {
+                    console.error('Fatal error parsing or rendering dashboard data:', parseErr);
+                    document.querySelector('.dashboard-container').insertAdjacentHTML('afterbegin',
+                        `<div class="alert alert-danger" role="alert"><strong><i class="fas fa-times-circle me-2"></i>Dashboard Error:</strong> Could not render data. ${parseErr.message}</div>`
+                    );
+                }
             })
             .catch(err => {
-                console.error("Error:", err);
+                console.error('Failed to fetch dashboard_data.json:', err);
+                document.querySelector('.dashboard-container').insertAdjacentHTML('afterbegin',
+                    `<div class="alert alert-danger" role="alert"><strong><i class="fas fa-times-circle me-2"></i>Network Error:</strong> Could not load dashboard data. ${err.message}</div>`
+                );
             });
     </script>
 </body>
