@@ -52,17 +52,21 @@ def fetch_data(config):
     all_data = []
     current_url = f"{url}?page_size=365&format=json"
     
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'application/json'
+    }
+
     while current_url:
         try:
-            response = requests.get(current_url)
-            if response.status_code == 404:
-                print(f"    Warning: 404 Not Found for {config['metric_id']}")
+            response = requests.get(current_url, headers=headers, timeout=15)
+            if response.status_code != 200:
+                print(f"    Warning: HTTP {response.status_code} for {config['metric_id']}: {response.text[:250]}")
                 return None
-            response.raise_for_status()
             data = response.json()
             all_data.extend(data['results'])
             current_url = data['next']
-            time.sleep(0.1)
+            time.sleep(0.5)
         except Exception as e:
             print(f"    Error fetching data: {e}")
             break
