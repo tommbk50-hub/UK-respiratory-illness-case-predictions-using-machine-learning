@@ -63,7 +63,6 @@ def fetch_data(config):
             if response.status_code != 200:
                 print(f"    Warning: HTTP {response.status_code} for {config['metric_id']}: {response.text[:250]}")
                 return None
-            response.raise_for_status()
             data = response.json()
             all_data.extend(data['results'])
             current_url = data['next']
