@@ -18,3 +18,13 @@
 ## Technical Constraints
 - Keep `index.html` as a clean, static landing page that acts as the entry point.
 - Do not modify or break automated Python backend scripts or `.yml` workflows unless explicitly requested.
+
+## Embedded Media & 3D Viewers (py3dmol, iframes)
+- **NEVER** leave a 3D canvas or iframe without a constrained parent wrapper.
+- Always wrap interactive viewers in a `.viewer-container` class with a strictly defined `min-height` (e.g., `600px` or `65vh`), `width: 100%`, `position: relative`, and `overflow: hidden`.
+- The embedded element itself must be absolute positioned to fill 100% of the wrapper.
+
+## Typography Integration
+- Any native HTML text generated alongside data visualizations (like legends, axes labels, or instructional text) MUST inherit the 'Inter' font family.
+- Legends and tooltips should be placed inside clean, minimalist cards using `--bg-soft` (`#f8fafc`) and a subtle border. 
+- Always use `--heading` (`#0f172a`) for titles and `--text-muted` (`#475569`) for descriptive text to maintain visual harmony with the main UI.
