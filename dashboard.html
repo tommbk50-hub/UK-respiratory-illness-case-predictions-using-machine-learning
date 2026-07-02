@@ -121,16 +121,32 @@
         
         .loading-msg { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-light); font-style: italic; }
 
-        /* Live Data Beacon: pulses on the SVG marker of the last "Actuals" point */
-        @keyframes beaconPulse {
-            0%   { transform: scale(0.85); opacity: 1;   filter: drop-shadow(0 0 0px rgba(239, 68, 68, 0.9)); }
-            50%  { transform: scale(1.25); opacity: 0.65; filter: drop-shadow(0 0 7px rgba(239, 68, 68, 0.95)); }
-            100% { transform: scale(0.85); opacity: 1;   filter: drop-shadow(0 0 0px rgba(239, 68, 68, 0.9)); }
+        /* Live Data Beacon: Plotly native annotation pulsing at the last "Actuals" point */
+        .live-beacon-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
         }
-        .live-beacon {
-            transform-box: fill-box;
-            transform-origin: center;
-            animation: beaconPulse 1.8s ease-in-out infinite;
+        .beacon-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #ef4444; /* Red */
+            border-radius: 50%;
+            animation: sync-pulse 2s infinite;
+        }
+        .beacon-text {
+            color: #ef4444;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: sync-pulse 2s infinite;
+        }
+        @keyframes sync-pulse {
+            0% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+            50% { opacity: 0.4; box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
     </style>
 </head>
@@ -478,14 +494,16 @@ importance_scores = result.importances_mean</code></pre>
                                 line: { color: '#10b981', width: 2, dash: 'dot' }
                             } : null;
 
-                            // Live data beacon: single point at the last "Actuals" coordinate
+                            // Live data beacon: Plotly native annotation at the last "Actuals" coordinate
                             const hasHistoryPoint = history.dates && history.dates.length && history.values && history.values.length;
-                            const traceBeacon = hasHistoryPoint ? {
-                                x: [history.dates[history.dates.length - 1]],
-                                y: [history.values[history.values.length - 1]],
-                                type: 'scatter', mode: 'markers', name: 'Live Edge',
-                                showlegend: false, hoverinfo: 'skip',
-                                marker: { color: '#ef4444', size: 12, line: { color: '#ffffff', width: 2 } }
+                            const beaconAnnotation = hasHistoryPoint ? {
+                                x: history.dates[history.dates.length - 1],
+                                y: history.values[history.values.length - 1],
+                                xref: 'x', yref: 'y',
+                                showarrow: false,
+                                xanchor: 'left', yanchor: 'middle',
+                                xshift: 10,
+                                text: '<div class="live-beacon-container"><span class="beacon-dot"></span><span class="beacon-text">Live Tracking</span></div>'
                             } : null;
 
                             const layout = {
@@ -494,6 +512,7 @@ importance_scores = result.importances_mean</code></pre>
                                 xaxis: { showgrid: true, gridcolor: '#f1f5f9' },
                                 yaxis: { showgrid: true, gridcolor: '#f1f5f9' },
                                 shapes: [{ type: 'line', x0: history.dates[history.dates.length - 1], y0: 0, x1: history.dates[history.dates.length - 1], y1: 1, yref: 'paper', line: { color: '#ef4444', width: 1.5, dash: 'dot' } }],
+                                annotations: beaconAnnotation ? [beaconAnnotation] : [],
                                 showlegend: true, legend: { orientation: 'h', y: -0.15 },
                                 paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
                             };
@@ -502,14 +521,7 @@ importance_scores = result.importances_mean</code></pre>
                             if (forecast.upper && forecast.lower) { traces.push(traceUpper, traceLower); }
                             if (traceBacktest) { traces.push(traceBacktest); }
                             traces.push(traceForecast, traceHistory);
-                            // Beacon added last so it is the final scatter trace (easy to target in the SVG)
-                            if (traceBeacon) { traces.push(traceBeacon); }
-                            Plotly.newPlot(config.divId, traces, layout).then(gd => {
-                                // Attach the pulse animation to the beacon point's SVG node
-                                if (!traceBeacon) { return; }
-                                const points = gd.querySelectorAll('.scatterlayer > g.trace:last-of-type path.point');
-                                points.forEach(pt => pt.classList.add('live-beacon'));
-                            });
+                            Plotly.newPlot(config.divId, traces, layout);
                         } catch (chartErr) {
                             console.error(`Error rendering chart for key "${config.key}":`, chartErr);
                             divElement.innerHTML = `<div class="loading-msg text-danger"><i class="fas fa-times-circle me-2"></i>Error rendering chart: ${chartErr.message}</div>`;
