@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Respiratory Virus Forecast | UKHSA Data</title>
+    <title>UK Respiratory Illness Forecast | Home</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
+
     <style>
         :root {
             --primary-color: #0f172a; /* Slate 900 */
@@ -21,538 +18,150 @@
             --text-light: #64748b; /* Slate 500 */
         }
 
-        body { 
-            background-color: var(--bg-color); 
-            font-family: 'Inter', sans-serif; 
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Inter', sans-serif;
             color: var(--text-main);
             -webkit-font-smoothing: antialiased;
+            margin: 0;
         }
 
-        /* Navbar Styling */
-        .navbar {
-            background-color: var(--card-bg) !important;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-            border-bottom: 1px solid #e2e8f0;
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1e293b 100%);
+            color: #ffffff;
+            padding: 6rem 1rem 5rem;
+            text-align: center;
         }
-        .navbar-brand {
-            color: var(--primary-color) !important;
+
+        .hero h1 {
             font-weight: 700;
-            font-size: 1.25rem;
+            font-size: clamp(2rem, 5vw, 3.25rem);
+            margin-bottom: 1rem;
         }
 
-        .dashboard-container { max-width: 1400px; margin: 40px auto; padding: 0 24px; }
-
-        /* Typography */
-        .header-title { 
-            font-weight: 800; 
-            color: var(--primary-color); 
-            letter-spacing: -0.025em;
-            font-size: 2.25rem;
+        .hero p {
+            color: #cbd5e1;
+            font-size: 1.15rem;
+            max-width: 720px;
+            margin: 0 auto 2rem;
         }
-        .section-header { 
-            font-weight: 700;
-            color: var(--primary-color);
-            margin: 60px 0 20px 0; 
-            font-size: 1.5rem;
+
+        .btn-launch {
+            background-color: var(--accent-color);
+            border: none;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 0.85rem 2rem;
+            border-radius: 0.65rem;
+            font-size: 1.05rem;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn-launch:hover {
+            background-color: #2563eb;
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .features {
+            max-width: 1100px;
+            margin: -3rem auto 4rem;
+            padding: 0 1rem;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            height: 100%;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+        }
+
+        .feature-card .icon {
+            width: 3rem;
+            height: 3rem;
             display: flex;
             align-items: center;
-        }
-        .section-header i { margin-right: 12px; }
-        
-        .description-text { font-size: 1.05rem; line-height: 1.7; color: var(--text-light); max-width: 800px; }
-        .description-text a { text-decoration: none; font-weight: 600; color: var(--accent-color); }
-
-        /* Card Styling */
-        .card { 
-            border: 1px solid #e2e8f0; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); 
-            background: var(--card-bg); 
-            margin-bottom: 24px; 
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            justify-content: center;
+            border-radius: 0.75rem;
+            background-color: rgba(59, 130, 246, 0.12);
+            color: var(--accent-color);
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
         }
 
-        .metric-card-header { 
-            background: transparent; 
-            border-bottom: 1px solid #f1f5f9; 
-            padding: 20px 24px; 
-        }
-        .metric-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin: 0; }
-        .metric-subtitle { font-size: 0.85rem; color: var(--text-light); font-weight: 400; margin-top: 4px; }
-
-        .chart-container { height: 450px; width: 100%; }
-        .accuracy-container { height: 320px; width: 100%; }
-
-        /* Badges */
-        .badge-live {
-            background-color: #dcfce7;
-            color: #166534;
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            border-radius: 6px;
+        .feature-card h3 {
+            font-size: 1.15rem;
             font-weight: 600;
-            margin-left: 10px;
-            vertical-align: middle;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
         }
 
-        /* Tech Section */
-        .tech-section { background: #fff; border: 1px solid #e2e8f0; }
-        .tech-section h5 { font-weight: 700; color: var(--primary-color); margin-top: 40px; margin-bottom: 15px; font-size: 1.2rem; }
-        .tech-section h6 { font-weight: 600; color: var(--text-main); margin-top: 20px; font-size: 1rem; }
-        
-        .math-block { 
-            background: #f8fafc; 
-            padding: 20px; 
-            border-radius: 8px; 
-            border: 1px solid #e2e8f0; 
-            margin: 15px 0; 
-            overflow-x: auto;
-            color: var(--text-main);
+        .feature-card p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin: 0;
         }
-        
-        /* Code Blocks */
-        pre { background: #1e293b; color: #f8fafc; padding: 20px; border-radius: 8px; font-size: 0.9rem; }
-        code { font-family: 'Menlo', 'Monaco', monospace; }
-        .code-comment { color: #94a3b8; } .code-keyword { color: #60a5fa; } .code-string { color: #a3e635; }
-        
-        .loading-msg { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-light); font-style: italic; }
+
+        footer {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            padding: 2rem 1rem 3rem;
+        }
+
+        footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
-
-    <nav class="navbar navbar-expand-lg navbar-light py-3">
-        <div class="container-fluid">
-            <span class="navbar-brand"><i class="fas fa-chart-line me-2 text-primary"></i>Respiratory Virus Forecast</span>
-            <div class="d-flex gap-2">
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-database me-1"></i> Data Source
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                        <li><a class="dropdown-item" href="https://ukhsa-dashboard.data.gov.uk/" target="_blank">Official UKHSA Dashboard</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning/blob/main/process_data.py" target="_blank"><i class="fas fa-code me-2 text-muted"></i>View Python Code</a></li>
-                    </ul>
-                </div>
-                <a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning" class="btn btn-dark btn-sm fw-bold">GitHub</a>
-            </div>
+    <section class="hero">
+        <div class="container">
+            <h1>UK Respiratory Illness Forecast</h1>
+            <p>
+                Machine learning powered 52-week forecasts for Influenza and COVID-19 in England,
+                built on live surveillance data from the UK Health Security Agency.
+            </p>
+            <a href="dashboard.html" class="btn btn-launch">
+                <i class="fas fa-chart-line me-2"></i>Launch Dashboard
+            </a>
         </div>
-    </nav>
+    </section>
 
-    <div class="dashboard-container">
-        
-        <div class="row mb-5">
-            <div class="col-lg-10">
-                <h1 class="header-title mb-3">England Respiratory Virus Forecast</h1>
-                <p class="text-muted mb-4">
-                    Developed by <a href="https://www.linkedin.com/in/tom-knight-340784151/" target="_blank" class="fw-bold text-primary">Tom Knight</a>
-                </p>
-
-                <div class="description-text">
-                    <p>
-                        This dashboard provides a comprehensive 52-week forecast for <strong>Influenza</strong> and <strong>COVID-19</strong>. By analysing trends in PCR Positivity, Hospital Admissions, and ICU usage, these models support healthcare resource planning and early warning systems.
-                    </p>
-                    <p>
-                        The predictions are generated using a <strong>Hybrid Machine Learning strategy</strong> (<a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting" target="_blank">HistGradientBoostingRegressor</a>). The system is fully automated: it retrieves live data directly from the UKHSA public API and retrains every week via GitHub Actions.
-                    </p>
-                    <p class="small text-muted mt-3">
-                        <i class="fas fa-clock me-1"></i> Last updated: <span id="last-updated" class="fw-bold">...</span> • Data reflects specimen dates.
-                    </p>
+    <section class="features">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-viruses"></i></div>
+                    <h3>Multi-Virus Coverage</h3>
+                    <p>Track PCR positivity, hospital admissions and ICU rates for both Flu and COVID-19.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-brain"></i></div>
+                    <h3>Hybrid ML Models</h3>
+                    <p>HistGradientBoostingRegressor models combine seasonal patterns with residual learning.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon"><i class="fas fa-sync-alt"></i></div>
+                    <h3>Always Up To Date</h3>
+                    <p>Data is refreshed automatically every week via GitHub Actions from the UKHSA API.</p>
                 </div>
             </div>
         </div>
+    </section>
 
-        <h3 class="section-header"><i class="fas fa-virus text-primary"></i>Influenza (Flu)<span class="badge-live">LIVE FORECAST</span></h3>
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="metric-card-header">
-                        <h5 class="metric-title">PCR Positivity Rate</h5>
-                        <div class="metric-subtitle">Percentage of tests returning positive for Influenza</div>
-                    </div>
-                    <div class="card-body"><div id="chart-positivity" class="chart-container"></div></div>
-                </div>
-            </div>
-            <div class="col-12">
-                <div class="card">
-                    <div class="metric-card-header">
-                        <h5 class="metric-title">Hospital Admission Rate</h5>
-                        <div class="metric-subtitle">Admissions per 100,000 population (Weekly)</div>
-                    </div>
-                    <div class="card-body"><div id="chart-hospital" class="chart-container"></div></div>
-                </div>
-            </div>
-            <div class="col-12">
-                <div class="card">
-                    <div class="metric-card-header">
-                        <h5 class="metric-title">ICU / HDU Admission Rate</h5>
-                        <div class="metric-subtitle">Critical care admissions per 100,000 population</div>
-                    </div>
-                    <div class="card-body"><div id="chart-icu" class="chart-container"></div></div>
-                </div>
-            </div>
-        </div>
-
-        <h3 class="section-header"><i class="fas fa-lungs-virus text-primary"></i>COVID-19<span class="badge-live">LIVE FORECAST</span></h3>
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="metric-card-header">
-                        <h5 class="metric-title">PCR Positivity Rate</h5>
-                        <div class="metric-subtitle">7-Day Rolling Average (%)</div>
-                    </div>
-                    <div class="card-body"><div id="chart-covid-positivity" class="chart-container"></div></div>
-                </div>
-            </div>
-            <div class="col-12">
-                <div class="card">
-                    <div class="metric-card-header">
-                        <h5 class="metric-title">Hospital Admissions</h5>
-                        <div class="metric-subtitle">Total Weekly Count (Sum of Daily Admissions)</div>
-                    </div>
-                    <div class="card-body"><div id="chart-covid-hospital" class="chart-container"></div></div>
-                </div>
-            </div>
-        </div>
-
-        <h3 class="section-header"><i class="fas fa-microscope text-primary"></i>Model Diagnostics</h3>
-        <div class="row">
-            <div class="col-lg-4">
-                <div class="card h-100">
-                    <div class="metric-card-header">
-                        <h5 class="metric-title">Accuracy (Backtest)</h5>
-                        <div class="metric-subtitle">Actual vs Predicted (Past 52 Weeks)</div>
-                    </div>
-                    <div class="card-body">
-                        <div id="chart-accuracy" class="accuracy-container"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <div class="card h-100">
-                    <div class="metric-card-header">
-                        <h5 class="metric-title">Explainable AI</h5>
-                        <div class="metric-subtitle">Feature Importance Drivers</div>
-                    </div>
-                    <div class="card-body">
-                        <div id="chart-importance" class="accuracy-container">
-                            <div class="loading-msg">Waiting for data...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <div class="card h-100">
-                    <div class="metric-card-header">
-                        <h5 class="metric-title">Error Bias</h5>
-                        <div class="metric-subtitle">Residual Distribution (Bell Curve = Good)</div>
-                    </div>
-                    <div class="card-body">
-                        <div id="chart-residuals" class="accuracy-container">
-                            <div class="loading-msg">Waiting for data...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-5">
-            <div class="col-12">
-                <div class="card p-5 tech-section shadow-none">
-                    <h4 class="fw-bold mb-4" style="color: var(--primary-color)"><i class="fas fa-cogs me-2"></i>Technical Methodology</h4>
-                    
-                    <p>Our forecasting engine utilises a <strong>Hybrid Approach</strong>. We first isolate the predictable seasonal cycle, and then use Scikit-Learn's <code>HistGradientBoostingRegressor</code> to model the residuals (the difference between the seasonal baseline and reality).</p>
-
-                    <hr class="my-4">
-
-                    <h5>1. Histogram-Based Gradient Boosting (HGBR)</h5>
-                    <p>
-                        Histogram-Based Gradient Boosting is a sophisticated supervised machine learning algorithm designed to solve complex regression problems efficiently. It is an optimised evolution of traditional Gradient Boosting that groups continuous data into discrete 'bins' (histograms) rather than analysing every individual data point.
-                    </p>
-                    
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <h6><strong>Step A: Data Discretisation (Binning)</strong></h6>
-                            <p>Standard decision trees sort the feature values at every node split, which has a complexity of \(O(N \log N)\). HGBR instead discretises the continuous input features into integer-valued bins (max 255 bins).</p>
-                            <div class="math-block">
-                                $$ X_{binned} = \text{digitize}(X, \text{bins}) \in \{0, \dots, 255\} $$
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <h6><strong>Step B: The Additive Model</strong></h6>
-                            <p>The model is an ensemble of \(M\) decision trees. It is an additive model where the prediction at step \(m\), denoted as \(F_m(x)\), is the sum of the previous prediction and a new tree \(h_m(x)\).</p>
-                            <div class="math-block">
-                                $$ F_m(x) = F_{m-1}(x) + \nu \cdot h_m(x) $$
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <h6><strong>Step C: Gradient Descent Optimisation</strong></h6>
-                            <p>
-                                At each iteration \(m\), the new tree \(h_m(x)\) is trained to predict the <strong>negative gradient</strong> of the loss function. For our Least Squares loss function, this is the residual:
-                            </p>
-                            <div class="math-block text-center">
-                                $$ r_i = - \frac{\partial L(y_i, F_{m-1}(x_i))}{\partial F_{m-1}(x_i)} = y_i - F_{m-1}(x_i) $$
-                            </div>
-                        </div>
-                    </div>
-
-                    <h5 class="mt-5">2. Uncertainty Quantification</h5>
-                    <p>
-                        A single point forecast (the "mean") implies 100% certainty, which is scientifically inaccurate. To address this, we generate <strong>90% Prediction Intervals</strong> (the shaded cones). We train three separate instances of the model using different loss functions:
-                    </p>
-                    <ul>
-                        <li><strong>Median (0.5):</strong> The most likely outcome.</li>
-                        <li><strong>Lower Bound (0.05):</strong> The 5th percentile (optimistic scenario).</li>
-                        <li><strong>Upper Bound (0.95):</strong> The 95th percentile (worst-case scenario).</li>
-                    </ul>
-
-                    <h5 class="mt-5">3. Explainable AI (Feature Importance)</h5>
-                    <p>
-                        To demystify the "Black Box" nature of machine learning, we employ a technique called <strong>Permutation Importance</strong>. This evaluates the significance of each input feature (e.g., "Last Week's Cases" vs. "Seasonal Month") by randomly shuffling its values and measuring the resulting drop in model accuracy.
-                    </p>
-
-                    <hr class="my-4">
-
-                    <h5>4. Python Implementation</h5>
-                    <p>Below are core snippets from the <code>process_data.py</code> script.</p>
-
-                    <h6 class="mt-4"><strong>A. Dynamic Configuration</strong></h6>
-<pre><code>METRICS = {
-    "positivity": { "topic": "Influenza", "metric_id": "influenza_testing_positivityByWeek" },
-    "hospital": { "topic": "Influenza", "metric_id": "influenza_healthcare_hospitalAdmissionRateByWeek" }
-}</code></pre>
-
-                    <h6 class="mt-4"><strong>B. Scikit-Learn HGBR Configuration</strong></h6>
-                    <p>We leverage <code>HistGradientBoostingRegressor</code> due to its speed and native support for missing values (NaNs). We define three distinct model configurations to handle the point forecast (Mean) and uncertainty bounds (Quantiles).</p>
-<pre><code><span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> HistGradientBoostingRegressor
-
-<span class="code-keyword">def</span> train_and_forecast(df):
-    <span class="code-comment"># 1. Main Forecast Model (The Dashed Line)</span>
-    <span class="code-comment"># Uses 'squared_error' (Least Squares) to predict the expected mean value.</span>
-    model_resid = HistGradientBoostingRegressor(
-        loss=<span class="code-string">'squared_error'</span>,
-        learning_rate=0.1,
-        max_iter=100,
-        random_state=42
-    )
-
-    <span class="code-comment"># 2. Upper Bound Model (Top of the Cone)</span>
-    <span class="code-comment"># Uses 'quantile' loss targeting the 95th percentile.</span>
-    <span class="code-comment"># This predicts a value that 95% of future data points should fall below.</span>
-    model_upper = HistGradientBoostingRegressor(
-        loss=<span class="code-string">'quantile'</span>,
-        quantile=0.95,
-        random_state=42
-    )
-
-    <span class="code-comment"># 3. Lower Bound Model (Bottom of the Cone)</span>
-    <span class="code-comment"># Uses 'quantile' loss targeting the 5th percentile.</span>
-    <span class="code-comment"># This predicts a value that only 5% of future data points should fall below.</span>
-    model_lower = HistGradientBoostingRegressor(
-        loss=<span class="code-string">'quantile'</span>,
-        quantile=0.05,
-        random_state=42
-    )
-    
-    <span class="code-comment"># Fit all three models on the same training data (X_train, y_train)</span>
-    model_resid.fit(X_train, y_train)
-    model_upper.fit(X_train, y_train)
-    model_lower.fit(X_train, y_train)</code></pre>
-
-                    <h6 class="mt-4"><strong>C. Explainable AI (Permutation Importance)</strong></h6>
-<pre><code><span class="code-keyword">from</span> sklearn.inspection <span class="code-keyword">import</span> permutation_importance
-
-<span class="code-comment"># Calculate importance on the Residual Model</span>
-result = permutation_importance(
-    model_resid, 
-    X_train, 
-    y_train, 
-    n_repeats=10, 
-    random_state=42
-)
-
-<span class="code-comment"># Sort features by their impact on model accuracy</span>
-importance_scores = result.importances_mean</code></pre>
-
-                    <hr class="my-4">
-                    <div class="alert alert-light border">
-                        <strong>Source References & Further Reading:</strong> 
-                        <ul class="mb-0 mt-2 small">
-                            <li><a href="https://scikit-learn.org/stable/modules/ensemble.html" target="_blank">Scikit-Learn User Guide: HGBR</a></li>
-                            <li><a href="https://machinelearningmastery.com/histogram-based-gradient-boosting-ensembles/" target="_blank">Machine Learning Mastery: Gradient Boosting Ensembles</a></li>
-                            <li><a href="https://api.ukhsa-dashboard.data.gov.uk/" target="_blank">UKHSA API Documentation</a></li>
-                            <li><a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning" target="_blank">GitHub Repository: Source Code</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <footer>
+        Data source:
+        <a href="https://ukhsa-dashboard.data.gov.uk/" target="_blank" rel="noopener">UK Health Security Agency</a>.
+        Shown by specimen date.
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function hexToRgba(hex, alpha) {
-            let c;
-            if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
-                c= hex.substring(1).split('');
-                if(c.length== 3){ c= [c[0], c[0], c[1], c[1], c[2], c[2]]; }
-                c= '0x'+c.join('');
-                return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+','+alpha+')';
-            }
-            return hex;
-        }
-
-        const chartsConfig = [
-            { key: 'positivity',       divId: 'chart-positivity',       color: '#007bff' },
-            { key: 'hospital',         divId: 'chart-hospital',         color: '#dc3545' },
-            { key: 'icu',              divId: 'chart-icu',              color: '#ffc107' },
-            { key: 'covid_positivity', divId: 'chart-covid-positivity', color: '#6610f2' },
-            { key: 'covid_hospital',   divId: 'chart-covid-hospital',   color: '#e83e8c' }
-        ];
-
-        fetch('dashboard_data.json')
-            .then(response => {
-                console.log('dashboard_data.json fetch status:', response.status, response.statusText);
-                if (!response.ok) {
-                    throw new Error(`Network response was not OK: ${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                try {
-                    document.getElementById('last-updated').innerText = new Date().toLocaleDateString('en-GB');
-
-                    // 1. RENDER MAIN CHARTS
-                    chartsConfig.forEach(config => {
-                        const metricData = data[config.key];
-                        const divElement = document.getElementById(config.divId);
-                        if (!metricData) {
-                            divElement.innerHTML = `<div class="loading-msg text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Data currently unavailable from UKHSA</div>`;
-                            return;
-                        }
-
-                        try {
-                            const history = metricData.history;
-                            const forecast = metricData.forecast;
-
-                            const traceBaseline = {
-                                x: forecast.dates, y: forecast.baseline,
-                                type: 'scatter', mode: 'lines', name: 'Seasonal Norm',
-                                line: { color: 'rgba(128, 128, 128, 0.4)', width: 2, dash: 'dot' }, hoverinfo: 'y'
-                            };
-                            const traceUpper = { x: forecast.dates, y: forecast.upper, type: 'scatter', mode: 'lines', line: { width: 0 }, showlegend: false, hoverinfo: 'skip' };
-                            const traceLower = {
-                                x: forecast.dates, y: forecast.lower, type: 'scatter', mode: 'lines',
-                                fill: 'tonexty', fillcolor: hexToRgba(config.color, 0.2),
-                                line: { width: 0 }, showlegend: true, name: 'Confidence Cone (90%)', hoverinfo: 'skip'
-                            };
-                            const traceForecast = { x: forecast.dates, y: forecast.values, type: 'scatter', mode: 'lines', name: 'Forecast', line: { color: config.color, width: 3, dash: 'dash' } };
-                            const traceHistory = { x: history.dates, y: history.values, type: 'scatter', mode: 'lines', name: 'Actuals', line: { color: '#0f172a', width: 2 } };
-
-                            const layout = {
-                                font: { family: 'Inter, sans-serif' },
-                                margin: { t: 20, b: 40, l: 50, r: 20 },
-                                xaxis: { showgrid: true, gridcolor: '#f1f5f9' },
-                                yaxis: { showgrid: true, gridcolor: '#f1f5f9' },
-                                shapes: [{ type: 'line', x0: history.dates[history.dates.length - 1], y0: 0, x1: history.dates[history.dates.length - 1], y1: 1, yref: 'paper', line: { color: '#ef4444', width: 1.5, dash: 'dot' } }],
-                                showlegend: true, legend: { orientation: 'h', y: -0.15 },
-                                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
-                            };
-
-                            const traces = [traceBaseline];
-                            if (forecast.upper && forecast.lower) { traces.push(traceUpper, traceLower); }
-                            traces.push(traceForecast, traceHistory);
-                            Plotly.newPlot(config.divId, traces, layout);
-                        } catch (chartErr) {
-                            console.error(`Error rendering chart for key "${config.key}":`, chartErr);
-                            divElement.innerHTML = `<div class="loading-msg text-danger"><i class="fas fa-times-circle me-2"></i>Error rendering chart: ${chartErr.message}</div>`;
-                        }
-                    });
-
-                    // 2. RENDER ACCURACY CHART
-                    const hospitalData = data['hospital'];
-                    const accuracyData = hospitalData && hospitalData.accuracy;
-                    if (accuracyData) {
-                        try {
-                            const traceActuals = { x: accuracyData.dates, y: accuracyData.actuals, type: 'scatter', mode: 'lines', name: 'Actual', line: { color: '#0f172a', width: 2 } };
-                            const tracePreds = { x: accuracyData.dates, y: accuracyData.predictions, type: 'scatter', mode: 'lines', name: 'Model', line: { color: '#10b981', width: 2, dash: 'dot' } };
-                            const layoutAcc = {
-                                font: { family: 'Inter, sans-serif' },
-                                margin: { t: 20, b: 30, l: 40, r: 20 },
-                                xaxis: { showgrid: false }, yaxis: { showgrid: true, gridcolor: '#f1f5f9' },
-                                showlegend: true, legend: { orientation: 'h', y: 1.1 },
-                                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
-                            };
-                            Plotly.newPlot('chart-accuracy', [traceActuals, tracePreds], layoutAcc);
-
-                            // 3. RESIDUALS
-                            if (accuracyData.residuals) {
-                                const traceResid = { x: accuracyData.residuals, type: 'histogram', marker: { color: '#64748b' } };
-                                const layoutResid = {
-                                    font: { family: 'Inter, sans-serif' },
-                                    margin: { t: 20, b: 30, l: 40, r: 20 },
-                                    xaxis: { title: 'Error Value' }, yaxis: { showgrid: true, gridcolor: '#f1f5f9' },
-                                    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
-                                };
-                                Plotly.newPlot('chart-residuals', [traceResid], layoutResid);
-                            } else {
-                                document.getElementById('chart-residuals').innerHTML = `<div class="loading-msg text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Residual data not available</div>`;
-                            }
-                        } catch (accErr) {
-                            console.error('Error rendering accuracy/residuals charts:', accErr);
-                            document.getElementById('chart-accuracy').innerHTML = `<div class="loading-msg text-danger"><i class="fas fa-times-circle me-2"></i>Error rendering chart: ${accErr.message}</div>`;
-                            document.getElementById('chart-residuals').innerHTML = `<div class="loading-msg text-danger"><i class="fas fa-times-circle me-2"></i>Error rendering chart: ${accErr.message}</div>`;
-                        }
-                    } else {
-                        document.getElementById('chart-accuracy').innerHTML = `<div class="loading-msg text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Accuracy data not available</div>`;
-                        document.getElementById('chart-residuals').innerHTML = `<div class="loading-msg text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Residual data not available</div>`;
-                    }
-
-                    // 4. IMPORTANCE
-                    const importanceData = hospitalData && hospitalData.importance;
-                    if (importanceData) {
-                        try {
-                            const traceImp = {
-                                y: importanceData.map(d => d.name), x: importanceData.map(d => d.score),
-                                type: 'bar', orientation: 'h', marker: { color: '#f59e0b' }
-                            };
-                            const layoutImp = {
-                                font: { family: 'Inter, sans-serif' },
-                                margin: { t: 20, b: 30, l: 140, r: 20 },
-                                xaxis: { showgrid: true, gridcolor: '#f1f5f9' },
-                                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
-                            };
-                            Plotly.newPlot('chart-importance', [traceImp], layoutImp);
-                        } catch (impErr) {
-                            console.error('Error rendering importance chart:', impErr);
-                            document.getElementById('chart-importance').innerHTML = `<div class="loading-msg text-danger"><i class="fas fa-times-circle me-2"></i>Error rendering chart: ${impErr.message}</div>`;
-                        }
-                    } else {
-                        document.getElementById('chart-importance').innerHTML = `<div class="loading-msg text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Importance data not available</div>`;
-                    }
-
-                } catch (parseErr) {
-                    console.error('Fatal error parsing or rendering dashboard data:', parseErr);
-                    document.querySelector('.dashboard-container').insertAdjacentHTML('afterbegin',
-                        `<div class="alert alert-danger" role="alert"><strong><i class="fas fa-times-circle me-2"></i>Dashboard Error:</strong> Could not render data. ${parseErr.message}</div>`
-                    );
-                }
-            })
-            .catch(err => {
-                console.error('Failed to fetch dashboard_data.json:', err);
-                document.querySelector('.dashboard-container').insertAdjacentHTML('afterbegin',
-                    `<div class="alert alert-danger" role="alert"><strong><i class="fas fa-times-circle me-2"></i>Network Error:</strong> Could not load dashboard data. ${err.message}</div>`
-                );
-            });
-    </script>
 </body>
 </html>
