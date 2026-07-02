@@ -6,156 +6,385 @@
     <title>UK Respiratory Illness Forecast | Home</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --primary-color: #0f172a; /* Slate 900 */
-            --accent-color: #3b82f6; /* Blue 500 */
-            --bg-color: #f8fafc; /* Slate 50 */
-            --card-bg: #ffffff;
-            --text-main: #334155; /* Slate 700 */
-            --text-light: #64748b; /* Slate 500 */
+            --accent: #0d9488;        /* Teal 600 */
+            --accent-dark: #0f766e;   /* Teal 700 */
+            --heading: #0f172a;       /* Slate 900 */
+            --text-muted: #475569;    /* Slate 600 */
+            --bg-white: #ffffff;
+            --bg-soft: #f8fafc;       /* Slate 50 */
+            --hero-dark: #0f172a;     /* Slate 900 */
+            --hero-dark-2: #1e293b;   /* Slate 800 */
         }
 
+        * { box-sizing: border-box; }
+
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-white);
             font-family: 'Inter', sans-serif;
-            color: var(--text-main);
+            color: var(--text-muted);
+            font-weight: 400;
             -webkit-font-smoothing: antialiased;
             margin: 0;
         }
 
+        h1, h2, h3 {
+            color: var(--heading);
+            letter-spacing: -0.02em;
+        }
+
+        /* ---------- Hero ---------- */
         .hero {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #1e293b 100%);
+            position: relative;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(13, 148, 136, 0.22) 0%, transparent 45%),
+                linear-gradient(135deg, var(--hero-dark) 0%, var(--hero-dark-2) 100%);
             color: #ffffff;
-            padding: 6rem 1rem 5rem;
-            text-align: center;
+            padding: 7rem 0 8rem;
+            overflow: hidden;
+        }
+
+        /* Abstract network grid mesh overlay with a dark tint for legibility */
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+            background-size: 46px 46px;
+            mask-image: radial-gradient(circle at 30% 40%, #000 0%, transparent 75%);
+            -webkit-mask-image: radial-gradient(circle at 30% 40%, #000 0%, transparent 75%);
+            pointer-events: none;
+        }
+
+        .hero .container { position: relative; z-index: 1; }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #5eead4;
+            background: rgba(13, 148, 136, 0.14);
+            border: 1px solid rgba(94, 234, 212, 0.28);
+            padding: 0.4rem 0.9rem;
+            border-radius: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .hero h1 {
+            color: #ffffff;
             font-weight: 700;
-            font-size: clamp(2rem, 5vw, 3.25rem);
-            margin-bottom: 1rem;
+            font-size: clamp(2.25rem, 5vw, 3.75rem);
+            line-height: 1.08;
+            margin-bottom: 1.25rem;
+            max-width: 780px;
         }
 
-        .hero p {
+        .hero h1 .accent { color: #5eead4; }
+
+        .hero p.lead-copy {
             color: #cbd5e1;
-            font-size: 1.15rem;
-            max-width: 720px;
-            margin: 0 auto 2rem;
+            font-weight: 300;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            max-width: 620px;
+            margin: 0 0 2.5rem;
         }
 
-        .btn-launch {
-            background-color: var(--accent-color);
-            border: none;
+        .cta-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .btn-primary-teal {
+            background-color: var(--accent);
+            border: 1px solid var(--accent);
             color: #ffffff;
             font-weight: 600;
-            padding: 0.85rem 2rem;
-            border-radius: 0.65rem;
-            font-size: 1.05rem;
-            transition: background-color 0.2s ease, transform 0.2s ease;
+            padding: 0.9rem 1.9rem;
+            border-radius: 0.7rem;
+            font-size: 1.02rem;
+            transition: all 0.3s ease-in-out;
         }
 
-        .btn-launch:hover {
-            background-color: #2563eb;
+        .btn-primary-teal:hover {
+            background-color: var(--accent-dark);
+            border-color: var(--accent-dark);
             color: #ffffff;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 14px 30px -8px rgba(13, 148, 136, 0.55);
         }
 
-        .features {
-            max-width: 1100px;
-            margin: -3rem auto 4rem;
-            padding: 0 1rem;
+        .btn-outline-white {
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            color: #ffffff;
+            font-weight: 600;
+            padding: 0.9rem 1.9rem;
+            border-radius: 0.7rem;
+            font-size: 1.02rem;
+            transition: all 0.3s ease-in-out;
         }
 
-        .feature-card {
-            background-color: var(--card-bg);
-            border-radius: 1rem;
-            padding: 2rem;
+        .btn-outline-white:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: #ffffff;
+            color: #ffffff;
+            transform: translateY(-3px);
+        }
+
+        /* ---------- Section shells ---------- */
+        .section { padding: 5.5rem 0; }
+        .section-white { background-color: var(--bg-white); }
+        .section-soft { background-color: var(--bg-soft); }
+
+        .section-heading {
+            font-weight: 700;
+            font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+            margin-bottom: 0.75rem;
+        }
+
+        .section-sub {
+            color: var(--text-muted);
+            font-weight: 300;
+            font-size: 1.1rem;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* ---------- Cards ---------- */
+        .research-card {
+            background-color: var(--bg-white);
+            border: 1px solid #e2e8f0;
+            border-radius: 1.15rem;
+            padding: 2.25rem;
             height: 100%;
-            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s ease-in-out;
         }
 
-        .feature-card .icon {
-            width: 3rem;
-            height: 3rem;
+        .research-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 26px 55px -18px rgba(15, 23, 42, 0.28);
+            border-color: rgba(13, 148, 136, 0.4);
+        }
+
+        /* Spotlight variant for the featured project */
+        .research-card.spotlight {
+            border-top: 4px solid var(--accent);
+        }
+
+        .card-icon {
+            width: 3.25rem;
+            height: 3.25rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 0.75rem;
-            background-color: rgba(59, 130, 246, 0.12);
-            color: var(--accent-color);
-            font-size: 1.25rem;
+            border-radius: 0.85rem;
+            background-color: rgba(13, 148, 136, 0.12);
+            color: var(--accent);
+            font-size: 1.35rem;
+            margin-bottom: 1.35rem;
+        }
+
+        .card-tag {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--accent-dark);
+            background: rgba(13, 148, 136, 0.1);
+            padding: 0.25rem 0.7rem;
+            border-radius: 2rem;
             margin-bottom: 1rem;
         }
 
-        .feature-card h3 {
-            font-size: 1.15rem;
+        .research-card h3 {
+            font-size: 1.3rem;
             font-weight: 600;
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.85rem;
         }
 
-        .feature-card p {
-            color: var(--text-light);
-            font-size: 0.95rem;
-            margin: 0;
+        .research-card p {
+            color: var(--text-muted);
+            font-size: 0.98rem;
+            line-height: 1.65;
+            font-weight: 400;
+            margin-bottom: 1.25rem;
         }
 
+        /* ---------- Learn more / arrow interaction ---------- */
+        .learn-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.98rem;
+            text-decoration: none;
+        }
+
+        .learn-more .arrow {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .learn-more:hover { color: var(--accent-dark); }
+        .learn-more:hover .arrow { transform: translateX(6px); }
+
+        .btn-primary-teal .arrow,
+        .btn-outline-white .arrow {
+            display: inline-block;
+            transition: transform 0.3s ease-in-out;
+        }
+        .btn-primary-teal:hover .arrow,
+        .btn-outline-white:hover .arrow { transform: translateX(6px); }
+
+        /* ---------- Footer ---------- */
         footer {
+            background-color: var(--heading);
             text-align: center;
-            color: var(--text-light);
-            font-size: 0.9rem;
-            padding: 2rem 1rem 3rem;
+            color: #94a3b8;
+            font-size: 0.92rem;
+            padding: 2.75rem 1rem;
         }
 
         footer a {
-            color: var(--accent-color);
+            color: #5eead4;
             text-decoration: none;
+            font-weight: 500;
         }
+
+        footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
+    <!-- ================= Hero ================= -->
     <section class="hero">
         <div class="container">
-            <h1>UK Respiratory Illness Forecast</h1>
-            <p>
+            <span class="hero-eyebrow"><i class="fas fa-wave-square"></i> UKHSA-Powered Forecasting</span>
+            <h1>UK Respiratory Illness <span class="accent">Case Predictions</span> using Machine Learning</h1>
+            <p class="lead-copy">
                 Machine learning powered 52-week forecasts for Influenza and COVID-19 in England,
                 built on live surveillance data from the UK Health Security Agency.
             </p>
-            <a href="dashboard.html" class="btn btn-launch">
-                <i class="fas fa-chart-line me-2"></i>Launch Dashboard
-            </a>
-        </div>
-    </section>
-
-    <section class="features">
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="icon"><i class="fas fa-viruses"></i></div>
-                    <h3>Multi-Virus Coverage</h3>
-                    <p>Track PCR positivity, hospital admissions and ICU rates for both Flu and COVID-19.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="icon"><i class="fas fa-brain"></i></div>
-                    <h3>Hybrid ML Models</h3>
-                    <p>HistGradientBoostingRegressor models combine seasonal patterns with residual learning.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="icon"><i class="fas fa-sync-alt"></i></div>
-                    <h3>Always Up To Date</h3>
-                    <p>Data is refreshed automatically every week via GitHub Actions from the UKHSA API.</p>
-                </div>
+            <div class="cta-group">
+                <a href="dashboard.html" class="btn btn-primary-teal">
+                    <i class="fas fa-chart-line me-2"></i>Launch Live Dashboard
+                </a>
+                <a href="https://github.com/tommbk50-hub/UK-respiratory-illness-case-predictions-using-machine-learning"
+                   class="btn btn-outline-white" target="_blank" rel="noopener">
+                    <i class="fab fa-github me-2"></i>Explore Codebase
+                </a>
             </div>
         </div>
     </section>
 
+    <!-- ================= Featured Research ================= -->
+    <section class="section section-soft">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-heading">Featured Research</h2>
+                <p class="section-sub">
+                    Applied machine learning turning public health surveillance data into
+                    actionable, forward-looking intelligence.
+                </p>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                <!-- Spotlight card -->
+                <div class="col-lg-5 col-md-6">
+                    <div class="research-card spotlight">
+                        <span class="card-tag">Spotlight Project</span>
+                        <div class="card-icon"><i class="fas fa-lungs-virus"></i></div>
+                        <h3>UK Respiratory Illness Case Predictions</h3>
+                        <p>
+                            This system leverages advanced machine learning models &mdash; analysing critical
+                            UKHSA metrics such as PCR positivity, hospital admissions, and ICU bed utilisation &mdash;
+                            to forecast upcoming trendlines for Influenza and COVID-19, directly empowering
+                            healthcare capacity planning.
+                        </p>
+                        <a href="dashboard.html" class="learn-more">
+                            Learn more <span class="arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Supporting card -->
+                <div class="col-lg-5 col-md-6">
+                    <div class="research-card">
+                        <div class="card-icon"><i class="fas fa-brain"></i></div>
+                        <h3>Hybrid Modelling Approach</h3>
+                        <p>
+                            HistGradientBoostingRegressor models combine strong seasonal baselines with
+                            residual learning to capture emerging shifts &mdash; balancing interpretability
+                            with predictive accuracy across multiple respiratory indicators.
+                        </p>
+                        <a href="dashboard.html" class="learn-more">
+                            Learn more <span class="arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= Capabilities ================= -->
+    <section class="section section-white">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-heading">Built for Reliability</h2>
+                <p class="section-sub">
+                    A fully automated pipeline keeping every forecast fresh, transparent and reproducible.
+                </p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="research-card">
+                        <div class="card-icon"><i class="fas fa-viruses"></i></div>
+                        <h3>Multi-Virus Coverage</h3>
+                        <p>
+                            Track PCR positivity, hospital admissions and ICU rates for both Influenza
+                            and COVID-19 within a single unified view.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="research-card">
+                        <div class="card-icon"><i class="fas fa-database"></i></div>
+                        <h3>Live UKHSA Data</h3>
+                        <p>
+                            Forecasts are grounded in official surveillance data sourced directly from
+                            the UK Health Security Agency dashboard API.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="research-card">
+                        <div class="card-icon"><i class="fas fa-sync-alt"></i></div>
+                        <h3>Always Up To Date</h3>
+                        <p>
+                            Data is refreshed automatically every week via GitHub Actions, so predictions
+                            stay aligned with the latest reported trends.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= Footer ================= -->
     <footer>
         Data source:
         <a href="https://ukhsa-dashboard.data.gov.uk/" target="_blank" rel="noopener">UK Health Security Agency</a>.
