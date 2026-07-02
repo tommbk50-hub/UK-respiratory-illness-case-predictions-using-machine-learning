@@ -479,14 +479,14 @@ importance_scores = result.importances_mean</code></pre>
                             } : null;
 
                             // Live data beacon: single point at the last "Actuals" coordinate
-                            const lastX = history.dates[history.dates.length - 1];
-                            const lastY = history.values[history.values.length - 1];
-                            const traceBeacon = {
-                                x: [lastX], y: [lastY],
+                            const hasHistoryPoint = history.dates && history.dates.length && history.values && history.values.length;
+                            const traceBeacon = hasHistoryPoint ? {
+                                x: [history.dates[history.dates.length - 1]],
+                                y: [history.values[history.values.length - 1]],
                                 type: 'scatter', mode: 'markers', name: 'Live Edge',
                                 showlegend: false, hoverinfo: 'skip',
                                 marker: { color: '#ef4444', size: 12, line: { color: '#ffffff', width: 2 } }
-                            };
+                            } : null;
 
                             const layout = {
                                 font: { family: 'Inter, sans-serif' },
@@ -503,9 +503,10 @@ importance_scores = result.importances_mean</code></pre>
                             if (traceBacktest) { traces.push(traceBacktest); }
                             traces.push(traceForecast, traceHistory);
                             // Beacon added last so it is the final scatter trace (easy to target in the SVG)
-                            traces.push(traceBeacon);
+                            if (traceBeacon) { traces.push(traceBeacon); }
                             Plotly.newPlot(config.divId, traces, layout).then(gd => {
                                 // Attach the pulse animation to the beacon point's SVG node
+                                if (!traceBeacon) { return; }
                                 const points = gd.querySelectorAll('.scatterlayer > g.trace:last-of-type path.point');
                                 points.forEach(pt => pt.classList.add('live-beacon'));
                             });
