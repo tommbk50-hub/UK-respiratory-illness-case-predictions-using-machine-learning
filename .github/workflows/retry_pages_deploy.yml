@@ -1,4 +1,4 @@
-name: Retry Pages Deploy
+name: Auto-retry Failed Pages Deployments
 
 on:
   workflow_run:
@@ -7,6 +7,7 @@ on:
 
 jobs:
   retry-deploy:
+    # Retry when the failed run attempt is 1 or 2, allowing retries into attempts 2 and 3.
     if: ${{ github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt < 3 }}
     runs-on: ubuntu-latest
     permissions:
@@ -15,9 +16,32 @@ jobs:
       - name: Retry failed Pages jobs
         uses: actions/github-script@v7
         with:
-          script: |
-            await github.request('POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs', {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.payload.workflow_run.id
-            });
+          script: |-
+            try {
+              const runId = context.payload.workflow_run.id;
+              const { data: { jobs } } = await github.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: runId
+              });
+
+              const failedJobs = jobs.filter((job) => job.conclusion === 'failure').map((job) => job.name);
+              if (failedJobs.length === 0) {
+                core.info(`No failed jobs found for workflow run ${runId}.`);
+                return;
+              }
+
+              if (failedJobs.some((name) => name !== 'deploy')) {
+                core.info(`Skipping retry for workflow run ${runId}; non-deploy failures detected: ${failedJobs.join(', ')}`);
+                return;
+              }
+
+              await github.request('POST /repos/{owner}/{repo}/actions/runs/{run_id}/rerun-failed-jobs', {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: runId
+              });
+              core.info(`Triggered rerun for workflow run ${runId}`);
+            } catch (error) {
+              core.setFailed(`Failed to evaluate/retry workflow ${context.payload.workflow_run.id}: ${error.message}`);
+            }
