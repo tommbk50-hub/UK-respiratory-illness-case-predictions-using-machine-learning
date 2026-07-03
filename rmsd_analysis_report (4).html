@@ -1,0 +1,2905 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>RMSD Analysis Report</title>
+<style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; line-height: 1.6; padding: 20px; }
+    h1, h2 { color: #0056b3; }
+    h1 { border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
+    h2 { margin-top: 30px; border-bottom: 1px solid #ccc; padding-bottom: 5px; font-size: 1.2em; }
+    .highlight { background-color: #f8f9fa; padding: 15px; border-left: 4px solid #0056b3; margin-bottom: 20px; }
+    ul { list-style-type: square; }
+    li { margin-bottom: 8px; }
+    .recommendations { background-color: #e9f7ef; padding: 20px; border: 1px solid #c3e6cb; border-radius: 5px; }
+    table { border-collapse: collapse; margin-bottom: 20px; width: 100%; font-size: 0.9em; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .table-container { overflow-x: auto; margin-bottom: 30px; }
+</style>
+</head>
+<body>
+    <h1>SUMMARY OF RMSD FINDINGS</h1>
+<h2>RMSD Distribution Box Plot</h2>
+<div style="margin-bottom: 20px;">
+    <p><strong>Understanding this Plot:</strong> This interactive box plot illustrates the Root Mean Square Deviation (RMSD) of fragment-interacting residues across different clusters, compared to the natural substrate models.</p>
+    <ul>
+        <li><strong>X-Axis (Cluster):</strong> Represents the distinct fragment clusters grouped by binding proximity.</li>
+        <li><strong>Y-Axis (RMSD in &Aring;):</strong> Shows the structural deviation. Lower values indicate a closer structural match to the natural substrate's binding pocket.</li>
+        <li><strong>Boxes & Whiskers:</strong> The box spans the interquartile range (IQR) from the 25th to 75th percentile, with the middle line representing the median RMSD. Whiskers extend to show the rest of the distribution.</li>
+        <li><strong>Data Points:</strong> Each individual dot represents a specific fragment aligned to a specific natural helicase state (e.g., Apo, ATP-bound). Tighter groupings with lower overall values indicate fragments that consistently mimic the natural ligand across multiple dynamic states.</li>
+    </ul>
+</div>
+<div><div>                        <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>                <div id="6ea2c65a-6900-4b38-b0b0-d24ebb1fa3fe" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("6ea2c65a-6900-4b38-b0b0-d24ebb1fa3fe")) {                    Plotly.newPlot(                        "6ea2c65a-6900-4b38-b0b0-d24ebb1fa3fe",                        [{"alignmentgroup":"True","boxpoints":"all","hovertemplate":"\u003cb\u003e%{hovertext}\u003c\u002fb\u003e\u003cbr\u003e\u003cbr\u003eCluster=%{x}\u003cbr\u003eRMSD (Å)=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","hovertext":["frag=5RM7, nat=7CYQ","frag=5RM7, nat=7KRN","frag=5RM7, nat=9I53","frag=5RM7, nat=7KRO","frag=5RM7, nat=7RE3","frag=5RM7, nat=7CXM","frag=5RM7, nat=6XEZ","frag=5RM7, nat=9I51","frag=5RM7, nat=7RDZ","frag=5RL7, nat=7CYQ","frag=5RL7, nat=7KRN","frag=5RL7, nat=9I53","frag=5RL7, nat=7KRO","frag=5RL7, nat=7RE3","frag=5RL7, nat=7CXM","frag=5RL7, nat=6XEZ","frag=5RL7, nat=9I51","frag=5RL7, nat=7RDZ","frag=5RLY, nat=7CYQ","frag=5RLY, nat=7KRN","frag=5RLY, nat=9I53","frag=5RLY, nat=7KRO","frag=5RLY, nat=7RE3","frag=5RLY, nat=7CXM","frag=5RLY, nat=6XEZ","frag=5RLY, nat=9I51","frag=5RLY, nat=7RDZ","frag=5RLO, nat=7CYQ","frag=5RLO, nat=7KRN","frag=5RLO, nat=9I53","frag=5RLO, nat=7KRO","frag=5RLO, nat=7RE3","frag=5RLO, nat=7CXM","frag=5RLO, nat=6XEZ","frag=5RLO, nat=9I51","frag=5RLO, nat=7RDZ","frag=7NNG, nat=7CYQ","frag=7NNG, nat=7KRN","frag=7NNG, nat=9I53","frag=7NNG, nat=7KRO","frag=7NNG, nat=7RE3","frag=7NNG, nat=7CXM","frag=7NNG, nat=6XEZ","frag=7NNG, nat=9I51","frag=7NNG, nat=7RDZ","frag=5RL9, nat=7CYQ","frag=5RL9, nat=7KRN","frag=5RL9, nat=9I53","frag=5RL9, nat=7KRO","frag=5RL9, nat=7RE3","frag=5RL9, nat=7CXM","frag=5RL9, nat=6XEZ","frag=5RL9, nat=9I51","frag=5RL9, nat=7RDZ","frag=5RLJ, nat=7CYQ","frag=5RLJ, nat=7KRN","frag=5RLJ, nat=9I53","frag=5RLJ, nat=7KRO","frag=5RLJ, nat=7RE3","frag=5RLJ, nat=7CXM","frag=5RLJ, nat=6XEZ","frag=5RLJ, nat=9I51","frag=5RLJ, nat=7RDZ","frag=5RLW, nat=7CYQ","frag=5RLW, nat=7KRN","frag=5RLW, nat=9I53","frag=5RLW, nat=7KRO","frag=5RLW, nat=7RE3","frag=5RLW, nat=7CXM","frag=5RLW, nat=6XEZ","frag=5RLW, nat=9I51","frag=5RLW, nat=7RDZ","frag=5RLR, nat=7CYQ","frag=5RLR, nat=7KRN","frag=5RLR, nat=9I53","frag=5RLR, nat=7KRO","frag=5RLR, nat=7RE3","frag=5RLR, nat=7CXM","frag=5RLR, nat=6XEZ","frag=5RLR, nat=9I51","frag=5RLR, nat=7RDZ","frag=5RLN, nat=7CYQ","frag=5RLN, nat=7KRN","frag=5RLN, nat=9I53","frag=5RLN, nat=7KRO","frag=5RLN, nat=7RE3","frag=5RLN, nat=7CXM","frag=5RLN, nat=6XEZ","frag=5RLN, nat=9I51","frag=5RLN, nat=7RDZ","frag=5RLS, nat=7CYQ","frag=5RLS, nat=7KRN","frag=5RLS, nat=9I53","frag=5RLS, nat=7KRO","frag=5RLS, nat=7RE3","frag=5RLS, nat=7CXM","frag=5RLS, nat=6XEZ","frag=5RLS, nat=9I51","frag=5RLS, nat=7RDZ"],"legendgroup":"Cluster_1","marker":{"color":"cyan"},"name":"Cluster_1","notched":false,"offsetgroup":"Cluster_1","orientation":"v","showlegend":true,"x":["Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1","Cluster_1"],"x0":" ","xaxis":"x","y":[1.501,3.416,1.451,3.487,4.795,3.689,3.511,1.5,1.52,1.864,2.208,0.371,2.237,3.096,2.414,2.374,0.4,1.504,2.326,2.03,0.337,2.103,3.096,2.312,2.197,0.351,1.509,1.565,3.288,1.337,3.285,4.65,3.533,3.296,1.37,1.409,1.203,3.843,1.401,3.908,4.83,3.871,3.577,1.467,1.503,1.444,3.268,1.385,3.479,4.414,3.758,3.597,1.472,1.487,1.106,3.605,1.183,3.551,4.426,3.716,3.556,1.254,1.404,1.233,3.563,1.288,3.668,4.542,3.849,3.697,1.379,1.566,1.114,3.494,1.354,3.403,4.747,3.664,3.528,1.375,1.23,2.187,2.211,0.294,2.294,3.211,2.377,2.249,0.312,1.414,2.315,2.186,0.247,2.216,3.165,2.306,2.129,0.246,1.548],"y0":" ","yaxis":"y","type":"box","jitter":0.3,"opacity":0.6,"pointpos":0},{"alignmentgroup":"True","boxpoints":"all","hovertemplate":"\u003cb\u003e%{hovertext}\u003c\u002fb\u003e\u003cbr\u003e\u003cbr\u003eCluster=%{x}\u003cbr\u003eRMSD (Å)=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","hovertext":["frag=9I4V, nat=7CYQ","frag=9I4V, nat=7KRN","frag=9I4V, nat=9I53","frag=9I4V, nat=7KRO","frag=9I4V, nat=7RE3","frag=9I4V, nat=7CXM","frag=9I4V, nat=6XEZ","frag=9I4V, nat=9I51","frag=9I4V, nat=7RDZ","frag=5RLH, nat=7CYQ","frag=5RLH, nat=7KRN","frag=5RLH, nat=9I53","frag=5RLH, nat=7KRO","frag=5RLH, nat=7RE3","frag=5RLH, nat=7CXM","frag=5RLH, nat=6XEZ","frag=5RLH, nat=9I51","frag=5RLH, nat=7RDZ","frag=5RMM, nat=7CYQ","frag=5RMM, nat=7KRN","frag=5RMM, nat=9I53","frag=5RMM, nat=7KRO","frag=5RMM, nat=7RE3","frag=5RMM, nat=7CXM","frag=5RMM, nat=6XEZ","frag=5RMM, nat=9I51","frag=5RMM, nat=7RDZ","frag=5RLZ, nat=7CYQ","frag=5RLZ, nat=7KRN","frag=5RLZ, nat=9I53","frag=5RLZ, nat=7KRO","frag=5RLZ, nat=7RE3","frag=5RLZ, nat=7CXM","frag=5RLZ, nat=6XEZ","frag=5RLZ, nat=9I51","frag=5RLZ, nat=7RDZ"],"legendgroup":"Cluster_2","marker":{"color":"magenta"},"name":"Cluster_2","notched":false,"offsetgroup":"Cluster_2","orientation":"v","showlegend":true,"x":["Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2","Cluster_2"],"x0":" ","xaxis":"x","y":[1.525,3.146,1.266,3.167,9.572,2.741,2.471,1.139,1.814,1.041,2.84,1.226,2.54,3.122,2.383,2.314,1.279,1.057,1.406,3.3,1.294,3.359,8.376,3.125,2.816,1.189,1.689,1.365,3.343,1.236,3.38,8.716,3.138,2.797,1.115,1.73],"y0":" ","yaxis":"y","type":"box","jitter":0.3,"opacity":0.6,"pointpos":0},{"alignmentgroup":"True","boxpoints":"all","hovertemplate":"\u003cb\u003e%{hovertext}\u003c\u002fb\u003e\u003cbr\u003e\u003cbr\u003eCluster=%{x}\u003cbr\u003eRMSD (Å)=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","hovertext":["frag=5RLD, nat=7CYQ","frag=5RLD, nat=7KRN","frag=5RLD, nat=9I53","frag=5RLD, nat=7KRO","frag=5RLD, nat=7RE3","frag=5RLD, nat=7CXM","frag=5RLD, nat=6XEZ","frag=5RLD, nat=9I51","frag=5RLD, nat=7RDZ","frag=5RME, nat=7CYQ","frag=5RME, nat=7KRN","frag=5RME, nat=9I53","frag=5RME, nat=7KRO","frag=5RME, nat=7RE3","frag=5RME, nat=7CXM","frag=5RME, nat=6XEZ","frag=5RME, nat=9I51","frag=5RME, nat=7RDZ","frag=5RLC, nat=7CYQ","frag=5RLC, nat=7KRN","frag=5RLC, nat=9I53","frag=5RLC, nat=7KRO","frag=5RLC, nat=7RE3","frag=5RLC, nat=7CXM","frag=5RLC, nat=6XEZ","frag=5RLC, nat=9I51","frag=5RLC, nat=7RDZ","frag=9I1S, nat=7CYQ","frag=9I1S, nat=7KRN","frag=9I1S, nat=9I53","frag=9I1S, nat=7KRO","frag=9I1S, nat=7RE3","frag=9I1S, nat=7CXM","frag=9I1S, nat=6XEZ","frag=9I1S, nat=9I51","frag=9I1S, nat=7RDZ","frag=5RM0, nat=7CYQ","frag=5RM0, nat=7KRN","frag=5RM0, nat=9I53","frag=5RM0, nat=7KRO","frag=5RM0, nat=7RE3","frag=5RM0, nat=7CXM","frag=5RM0, nat=6XEZ","frag=5RM0, nat=9I51","frag=5RM0, nat=7RDZ"],"legendgroup":"Cluster_3","marker":{"color":"yellow"},"name":"Cluster_3","notched":false,"offsetgroup":"Cluster_3","orientation":"v","showlegend":true,"x":["Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3","Cluster_3"],"x0":" ","xaxis":"x","y":[1.029,1.356,1.104,1.04,2.476,1.194,1.362,1.162,0.912,0.989,1.382,1.201,1.212,2.702,1.167,1.363,1.26,0.824,0.971,1.257,1.178,1.014,2.393,1.134,1.215,1.245,0.908,0.832,1.722,1.49,1.558,3.015,1.346,1.468,1.511,1.027,1.096,1.399,1.141,1.065,2.977,1.136,1.394,1.223,0.935],"y0":" ","yaxis":"y","type":"box","jitter":0.3,"opacity":0.6,"pointpos":0},{"alignmentgroup":"True","boxpoints":"all","hovertemplate":"\u003cb\u003e%{hovertext}\u003c\u002fb\u003e\u003cbr\u003e\u003cbr\u003eCluster=%{x}\u003cbr\u003eRMSD (Å)=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","hovertext":["frag=5RLU, nat=7CYQ","frag=5RLU, nat=7KRN","frag=5RLU, nat=9I53","frag=5RLU, nat=7KRO","frag=5RLU, nat=7RE3","frag=5RLU, nat=7CXM","frag=5RLU, nat=6XEZ","frag=5RLU, nat=9I51","frag=5RLU, nat=7RDZ","frag=5RLL, nat=7CYQ","frag=5RLL, nat=7KRN","frag=5RLL, nat=9I53","frag=5RLL, nat=7KRO","frag=5RLL, nat=7RE3","frag=5RLL, nat=7CXM","frag=5RLL, nat=6XEZ","frag=5RLL, nat=9I51","frag=5RLL, nat=7RDZ","frag=5RLV, nat=7CYQ","frag=5RLV, nat=7KRN","frag=5RLV, nat=9I53","frag=5RLV, nat=7KRO","frag=5RLV, nat=7RE3","frag=5RLV, nat=7CXM","frag=5RLV, nat=6XEZ","frag=5RLV, nat=9I51","frag=5RLV, nat=7RDZ","frag=5RMK, nat=7CYQ","frag=5RMK, nat=7KRN","frag=5RMK, nat=9I53","frag=5RMK, nat=7KRO","frag=5RMK, nat=7RE3","frag=5RMK, nat=7CXM","frag=5RMK, nat=6XEZ","frag=5RMK, nat=9I51","frag=5RMK, nat=7RDZ","frag=5RLP, nat=7CYQ","frag=5RLP, nat=7KRN","frag=5RLP, nat=9I53","frag=5RLP, nat=7KRO","frag=5RLP, nat=7RE3","frag=5RLP, nat=7CXM","frag=5RLP, nat=6XEZ","frag=5RLP, nat=9I51","frag=5RLP, nat=7RDZ","frag=5RLE, nat=7CYQ","frag=5RLE, nat=7KRN","frag=5RLE, nat=9I53","frag=5RLE, nat=7KRO","frag=5RLE, nat=7RE3","frag=5RLE, nat=7CXM","frag=5RLE, nat=6XEZ","frag=5RLE, nat=9I51","frag=5RLE, nat=7RDZ"],"legendgroup":"Cluster_4","marker":{"color":"orange"},"name":"Cluster_4","notched":false,"offsetgroup":"Cluster_4","orientation":"v","showlegend":true,"x":["Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4","Cluster_4"],"x0":" ","xaxis":"x","y":[1.193,1.872,0.303,1.594,2.62,2.327,2.345,0.266,1.108,0.955,2.489,0.673,1.917,1.919,1.819,1.731,0.757,0.691,1.284,1.887,0.329,1.628,2.657,2.374,2.388,0.294,1.147,0.905,2.528,0.767,1.975,1.947,1.86,1.766,0.842,0.794,1.061,2.618,0.751,2.268,2.061,2.569,2.499,0.856,0.983,1.018,2.588,0.77,2.063,2.022,1.932,1.817,0.861,0.834],"y0":" ","yaxis":"y","type":"box","jitter":0.3,"opacity":0.6,"pointpos":0},{"alignmentgroup":"True","boxpoints":"all","hovertemplate":"\u003cb\u003e%{hovertext}\u003c\u002fb\u003e\u003cbr\u003e\u003cbr\u003eCluster=%{x}\u003cbr\u003eRMSD (Å)=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","hovertext":["frag=5RM6, nat=7CYQ","frag=5RM6, nat=7KRN","frag=5RM6, nat=9I53","frag=5RM6, nat=7KRO","frag=5RM6, nat=7RE3","frag=5RM6, nat=7CXM","frag=5RM6, nat=6XEZ","frag=5RM6, nat=9I51","frag=5RM6, nat=7RDZ","frag=5RM9, nat=7CYQ","frag=5RM9, nat=7KRN","frag=5RM9, nat=9I53","frag=5RM9, nat=7KRO","frag=5RM9, nat=7RE3","frag=5RM9, nat=7CXM","frag=5RM9, nat=6XEZ","frag=5RM9, nat=9I51","frag=5RM9, nat=7RDZ","frag=5RMJ, nat=7CYQ","frag=5RMJ, nat=7KRN","frag=5RMJ, nat=9I53","frag=5RMJ, nat=7KRO","frag=5RMJ, nat=7RE3","frag=5RMJ, nat=7CXM","frag=5RMJ, nat=6XEZ","frag=5RMJ, nat=9I51","frag=5RMJ, nat=7RDZ","frag=5RM3, nat=7CYQ","frag=5RM3, nat=7KRN","frag=5RM3, nat=9I53","frag=5RM3, nat=7KRO","frag=5RM3, nat=7RE3","frag=5RM3, nat=7CXM","frag=5RM3, nat=6XEZ","frag=5RM3, nat=9I51","frag=5RM3, nat=7RDZ","frag=5RMG, nat=7CYQ","frag=5RMG, nat=7KRN","frag=5RMG, nat=9I53","frag=5RMG, nat=7KRO","frag=5RMG, nat=7RE3","frag=5RMG, nat=7CXM","frag=5RMG, nat=6XEZ","frag=5RMG, nat=9I51","frag=5RMG, nat=7RDZ"],"legendgroup":"Cluster_5","marker":{"color":"green"},"name":"Cluster_5","notched":false,"offsetgroup":"Cluster_5","orientation":"v","showlegend":true,"x":["Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5","Cluster_5"],"x0":" ","xaxis":"x","y":[1.492,4.561,1.266,5.324,4.088,4.968,4.985,1.254,1.494,1.446,4.3,1.132,5.056,3.969,4.994,5.051,1.354,1.603,1.443,4.537,1.375,5.304,4.107,4.94,4.933,1.36,1.461,1.577,4.938,1.614,5.757,4.135,5.433,5.496,1.833,1.45,1.558,4.604,1.469,5.368,4.222,5.229,5.338,1.687,1.824],"y0":" ","yaxis":"y","type":"box","jitter":0.3,"opacity":0.6,"pointpos":0},{"alignmentgroup":"True","boxpoints":"all","hovertemplate":"\u003cb\u003e%{hovertext}\u003c\u002fb\u003e\u003cbr\u003e\u003cbr\u003eCluster=%{x}\u003cbr\u003eRMSD (Å)=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","hovertext":["frag=5RLI, nat=7CYQ","frag=5RLI, nat=7KRN","frag=5RLI, nat=9I53","frag=5RLI, nat=7KRO","frag=5RLI, nat=7RE3","frag=5RLI, nat=7CXM","frag=5RLI, nat=6XEZ","frag=5RLI, nat=9I51","frag=5RLI, nat=7RDZ","frag=5RLB, nat=7CYQ","frag=5RLB, nat=7KRN","frag=5RLB, nat=9I53","frag=5RLB, nat=7KRO","frag=5RLB, nat=7RE3","frag=5RLB, nat=7CXM","frag=5RLB, nat=6XEZ","frag=5RLB, nat=9I51","frag=5RLB, nat=7RDZ","frag=5RM1, nat=7CYQ","frag=5RM1, nat=7KRN","frag=5RM1, nat=9I53","frag=5RM1, nat=7KRO","frag=5RM1, nat=7RE3","frag=5RM1, nat=7CXM","frag=5RM1, nat=6XEZ","frag=5RM1, nat=9I51","frag=5RM1, nat=7RDZ","frag=5RMD, nat=7CYQ","frag=5RMD, nat=7KRN","frag=5RMD, nat=9I53","frag=5RMD, nat=7KRO","frag=5RMD, nat=7RE3","frag=5RMD, nat=7CXM","frag=5RMD, nat=6XEZ","frag=5RMD, nat=9I51","frag=5RMD, nat=7RDZ"],"legendgroup":"Cluster_6","marker":{"color":"blue"},"name":"Cluster_6","notched":false,"offsetgroup":"Cluster_6","orientation":"v","showlegend":true,"x":["Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6","Cluster_6"],"x0":" ","xaxis":"x","y":[0.911,1.021,0.91,0.934,3.595,0.723,0.803,0.917,0.903,1.163,1.247,0.242,1.118,2.896,0.937,0.996,0.205,1.408,1.083,1.408,1.202,1.198,3.809,1.17,1.3,1.236,1.023,1.137,1.326,0.259,1.098,2.708,1.008,1.196,0.272,1.455],"y0":" ","yaxis":"y","type":"box","jitter":0.3,"opacity":0.6,"pointpos":0}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmapgl":[{"type":"heatmapgl","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"Cluster"},"categoryorder":"array","categoryarray":["Cluster_1","Cluster_2","Cluster_3","Cluster_4","Cluster_5","Cluster_6"]},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"RMSD (Å)"}},"legend":{"title":{"text":"Cluster"},"tracegroupgap":0},"title":{"text":"RMSD Distribution Across Fragment Clusters compared to Natural Substrates"},"boxmode":"overlay"},                        {"responsive": true}                    )                };                            </script>        </div></div><h2>RMSD Analysis Results Data</h2><div class='table-container'><table border="1" class="dataframe dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Cluster</th>
+      <th>Clustered_PDB</th>
+      <th>Natural_Model</th>
+      <th>Ligand_Chem_ID</th>
+      <th>Residues_Compared</th>
+      <th>Num_Atoms_Compared</th>
+      <th>RMSD_Angstroms</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLB</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VVJ</td>
+      <td>VAL6, ARG21, PRO23, ARG129, LEU132, PHE133, GLU136, THR137, LEU235, SER236</td>
+      <td>10</td>
+      <td>0.205</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLB</td>
+      <td>9I53_ATP Binding</td>
+      <td>VVJ</td>
+      <td>VAL6, ARG21, PRO23, ARG129, LEU132, PHE133, GLU136, THR137, LEU235, SER236</td>
+      <td>10</td>
+      <td>0.242</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLS</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VWG</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>9</td>
+      <td>0.246</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLS</td>
+      <td>9I53_ATP Binding</td>
+      <td>VWG</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>9</td>
+      <td>0.247</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RMD</td>
+      <td>9I53_ATP Binding</td>
+      <td>VWY</td>
+      <td>VAL6, ASN9, ARG21, PRO23, GLU128, ARG129, LEU130, LEU132, PHE133, ALA134, GLU136, THR137, LEU235, SER236, PRO238</td>
+      <td>15</td>
+      <td>0.259</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLU</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>JG4</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>0.266</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RMD</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VWY</td>
+      <td>VAL6, ASN9, ARG21, PRO23, GLU128, ARG129, LEU130, LEU132, PHE133, ALA134, GLU136, THR137, LEU235, SER236, PRO238</td>
+      <td>15</td>
+      <td>0.272</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLV</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VWJ</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>0.294</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLN</td>
+      <td>9I53_ATP Binding</td>
+      <td>NZG</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>10</td>
+      <td>0.294</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLU</td>
+      <td>9I53_ATP Binding</td>
+      <td>JG4</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>0.303</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLN</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>NZG</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>10</td>
+      <td>0.312</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLV</td>
+      <td>9I53_ATP Binding</td>
+      <td>VWJ</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>0.329</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLY</td>
+      <td>9I53_ATP Binding</td>
+      <td>K34</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, ARG442</td>
+      <td>9</td>
+      <td>0.337</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLY</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>K34</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, ARG442</td>
+      <td>9</td>
+      <td>0.351</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL7</td>
+      <td>9I53_ATP Binding</td>
+      <td>VVD</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, SER289, HIS290, LYS320, ARG442</td>
+      <td>9</td>
+      <td>0.371</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL7</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VVD</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, SER289, HIS290, LYS320, ARG442</td>
+      <td>9</td>
+      <td>0.400</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLL</td>
+      <td>9I53_ATP Binding</td>
+      <td>H04</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>0.673</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLL</td>
+      <td>7RDZ_Apo State</td>
+      <td>H04</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>0.691</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLI</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>JFM</td>
+      <td>VAL6, ARG21, ARG22, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>13</td>
+      <td>0.723</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLP</td>
+      <td>9I53_ATP Binding</td>
+      <td>VWA</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>0.751</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLL</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>H04</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>0.757</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RMK</td>
+      <td>9I53_ATP Binding</td>
+      <td>O2A</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>0.767</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLE</td>
+      <td>9I53_ATP Binding</td>
+      <td>VVP</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>0.770</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RMK</td>
+      <td>7RDZ_Apo State</td>
+      <td>O2A</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>0.794</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLI</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>JFM</td>
+      <td>VAL6, ARG21, ARG22, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>13</td>
+      <td>0.803</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RME</td>
+      <td>7RDZ_Apo State</td>
+      <td>RYM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, VAL241, PRO242, ASN388, ALA389</td>
+      <td>10</td>
+      <td>0.824</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>9I1S</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>MYC</td>
+      <td>SER236, ALA237, PRO238, VAL241, PRO242, LYS276, VAL387, ASN388, ALA389, LEU391, ARG392, ALA393, TYR396</td>
+      <td>13</td>
+      <td>0.832</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLE</td>
+      <td>7RDZ_Apo State</td>
+      <td>VVP</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>0.834</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RMK</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>O2A</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>0.842</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLP</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VWA</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>0.856</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLE</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VVP</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>0.861</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLI</td>
+      <td>7RDZ_Apo State</td>
+      <td>JFM</td>
+      <td>VAL6, ARG21, ARG22, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>13</td>
+      <td>0.903</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RMK</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>O2A</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>0.905</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLC</td>
+      <td>7RDZ_Apo State</td>
+      <td>VVM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, LEU240, VAL241, PRO242</td>
+      <td>9</td>
+      <td>0.908</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLI</td>
+      <td>9I53_ATP Binding</td>
+      <td>JFM</td>
+      <td>VAL6, ARG21, ARG22, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>13</td>
+      <td>0.910</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLI</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>JFM</td>
+      <td>VAL6, ARG21, ARG22, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>13</td>
+      <td>0.911</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLD</td>
+      <td>7RDZ_Apo State</td>
+      <td>VVY</td>
+      <td>THR127, GLU128, ARG129, LEU130, LEU132, SER236, ALA237, PRO238</td>
+      <td>8</td>
+      <td>0.912</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLI</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>JFM</td>
+      <td>VAL6, ARG21, ARG22, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>13</td>
+      <td>0.917</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLI</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>JFM</td>
+      <td>VAL6, ARG21, ARG22, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>13</td>
+      <td>0.934</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RM0</td>
+      <td>7RDZ_Apo State</td>
+      <td>S7G</td>
+      <td>ASN9, GLU128, ARG129, LEU132, SER236, ALA237, PRO238</td>
+      <td>7</td>
+      <td>0.935</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLB</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VVJ</td>
+      <td>VAL6, ARG21, PRO23, ARG129, LEU132, PHE133, GLU136, THR137, LEU235, SER236</td>
+      <td>10</td>
+      <td>0.937</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLL</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>H04</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>0.955</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLC</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VVM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, LEU240, VAL241, PRO242</td>
+      <td>9</td>
+      <td>0.971</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLP</td>
+      <td>7RDZ_Apo State</td>
+      <td>VWA</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>0.983</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RME</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>RYM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, VAL241, PRO242, ASN388, ALA389</td>
+      <td>10</td>
+      <td>0.989</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLB</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VVJ</td>
+      <td>VAL6, ARG21, PRO23, ARG129, LEU132, PHE133, GLU136, THR137, LEU235, SER236</td>
+      <td>10</td>
+      <td>0.996</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RMD</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VWY</td>
+      <td>VAL6, ASN9, ARG21, PRO23, GLU128, ARG129, LEU130, LEU132, PHE133, ALA134, GLU136, THR137, LEU235, SER236, PRO238</td>
+      <td>15</td>
+      <td>1.008</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLC</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VVM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, LEU240, VAL241, PRO242</td>
+      <td>9</td>
+      <td>1.014</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLE</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VVP</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>1.018</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLI</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>JFM</td>
+      <td>VAL6, ARG21, ARG22, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>13</td>
+      <td>1.021</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RM1</td>
+      <td>7RDZ_Apo State</td>
+      <td>RY4</td>
+      <td>VAL6, ARG21, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>12</td>
+      <td>1.023</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>9I1S</td>
+      <td>7RDZ_Apo State</td>
+      <td>MYC</td>
+      <td>SER236, ALA237, PRO238, VAL241, PRO242, LYS276, VAL387, ASN388, ALA389, LEU391, ARG392, ALA393, TYR396</td>
+      <td>13</td>
+      <td>1.027</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLD</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VVY</td>
+      <td>THR127, GLU128, ARG129, LEU130, LEU132, SER236, ALA237, PRO238</td>
+      <td>8</td>
+      <td>1.029</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLD</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VVY</td>
+      <td>THR127, GLU128, ARG129, LEU130, LEU132, SER236, ALA237, PRO238</td>
+      <td>8</td>
+      <td>1.040</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLH</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>K2P</td>
+      <td>HIS482, SER485, SER486, ALA487, TYR515, THR550, THR552, HIS554, SER555</td>
+      <td>9</td>
+      <td>1.041</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLH</td>
+      <td>7RDZ_Apo State</td>
+      <td>K2P</td>
+      <td>HIS482, SER485, SER486, ALA487, TYR515, THR550, THR552, HIS554, SER555</td>
+      <td>9</td>
+      <td>1.057</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLP</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VWA</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>1.061</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RM0</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>S7G</td>
+      <td>ASN9, GLU128, ARG129, LEU132, SER236, ALA237, PRO238</td>
+      <td>7</td>
+      <td>1.065</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RM1</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>RY4</td>
+      <td>VAL6, ARG21, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>12</td>
+      <td>1.083</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RM0</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>S7G</td>
+      <td>ASN9, GLU128, ARG129, LEU132, SER236, ALA237, PRO238</td>
+      <td>7</td>
+      <td>1.096</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RMD</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VWY</td>
+      <td>VAL6, ASN9, ARG21, PRO23, GLU128, ARG129, LEU130, LEU132, PHE133, ALA134, GLU136, THR137, LEU235, SER236, PRO238</td>
+      <td>15</td>
+      <td>1.098</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLD</td>
+      <td>9I53_ATP Binding</td>
+      <td>VVY</td>
+      <td>THR127, GLU128, ARG129, LEU130, LEU132, SER236, ALA237, PRO238</td>
+      <td>8</td>
+      <td>1.104</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLJ</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VW4</td>
+      <td>GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>8</td>
+      <td>1.106</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLU</td>
+      <td>7RDZ_Apo State</td>
+      <td>JG4</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>1.108</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLR</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VWD</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, ARG442, ARG443, GLU540</td>
+      <td>8</td>
+      <td>1.114</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLZ</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VWM</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>11</td>
+      <td>1.115</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLB</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VVJ</td>
+      <td>VAL6, ARG21, PRO23, ARG129, LEU132, PHE133, GLU136, THR137, LEU235, SER236</td>
+      <td>10</td>
+      <td>1.118</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM9</td>
+      <td>9I53_ATP Binding</td>
+      <td>EJQ</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>9</td>
+      <td>1.132</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLC</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VVM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, LEU240, VAL241, PRO242</td>
+      <td>9</td>
+      <td>1.134</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RM0</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>S7G</td>
+      <td>ASN9, GLU128, ARG129, LEU132, SER236, ALA237, PRO238</td>
+      <td>7</td>
+      <td>1.136</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RMD</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VWY</td>
+      <td>VAL6, ASN9, ARG21, PRO23, GLU128, ARG129, LEU130, LEU132, PHE133, ALA134, GLU136, THR137, LEU235, SER236, PRO238</td>
+      <td>15</td>
+      <td>1.137</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>9I4V</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>MPO</td>
+      <td>LEU176, ASN177, SER485, SER486, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>9</td>
+      <td>1.139</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RM0</td>
+      <td>9I53_ATP Binding</td>
+      <td>S7G</td>
+      <td>ASN9, GLU128, ARG129, LEU132, SER236, ALA237, PRO238</td>
+      <td>7</td>
+      <td>1.141</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLV</td>
+      <td>7RDZ_Apo State</td>
+      <td>VWJ</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>1.147</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLD</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VVY</td>
+      <td>THR127, GLU128, ARG129, LEU130, LEU132, SER236, ALA237, PRO238</td>
+      <td>8</td>
+      <td>1.162</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLB</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VVJ</td>
+      <td>VAL6, ARG21, PRO23, ARG129, LEU132, PHE133, GLU136, THR137, LEU235, SER236</td>
+      <td>10</td>
+      <td>1.163</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RME</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>RYM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, VAL241, PRO242, ASN388, ALA389</td>
+      <td>10</td>
+      <td>1.167</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RM1</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>RY4</td>
+      <td>VAL6, ARG21, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>12</td>
+      <td>1.170</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLC</td>
+      <td>9I53_ATP Binding</td>
+      <td>VVM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, LEU240, VAL241, PRO242</td>
+      <td>9</td>
+      <td>1.178</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLJ</td>
+      <td>9I53_ATP Binding</td>
+      <td>VW4</td>
+      <td>GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>8</td>
+      <td>1.183</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RMM</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VXG</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, ASP534, HIS554</td>
+      <td>12</td>
+      <td>1.189</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLU</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>JG4</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>1.193</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLD</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VVY</td>
+      <td>THR127, GLU128, ARG129, LEU130, LEU132, SER236, ALA237, PRO238</td>
+      <td>8</td>
+      <td>1.194</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RMD</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VWY</td>
+      <td>VAL6, ASN9, ARG21, PRO23, GLU128, ARG129, LEU130, LEU132, PHE133, ALA134, GLU136, THR137, LEU235, SER236, PRO238</td>
+      <td>15</td>
+      <td>1.196</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RM1</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>RY4</td>
+      <td>VAL6, ARG21, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>12</td>
+      <td>1.198</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RME</td>
+      <td>9I53_ATP Binding</td>
+      <td>RYM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, VAL241, PRO242, ASN388, ALA389</td>
+      <td>10</td>
+      <td>1.201</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RM1</td>
+      <td>9I53_ATP Binding</td>
+      <td>RY4</td>
+      <td>VAL6, ARG21, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>12</td>
+      <td>1.202</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>7NNG</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>UJK</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, LYS323, TYR324, ARG442</td>
+      <td>8</td>
+      <td>1.203</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RME</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>RYM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, VAL241, PRO242, ASN388, ALA389</td>
+      <td>10</td>
+      <td>1.212</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLC</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VVM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, LEU240, VAL241, PRO242</td>
+      <td>9</td>
+      <td>1.215</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RM0</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>S7G</td>
+      <td>ASN9, GLU128, ARG129, LEU132, SER236, ALA237, PRO238</td>
+      <td>7</td>
+      <td>1.223</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLH</td>
+      <td>9I53_ATP Binding</td>
+      <td>K2P</td>
+      <td>HIS482, SER485, SER486, ALA487, TYR515, THR550, THR552, HIS554, SER555</td>
+      <td>9</td>
+      <td>1.226</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLR</td>
+      <td>7RDZ_Apo State</td>
+      <td>VWD</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, ARG442, ARG443, GLU540</td>
+      <td>8</td>
+      <td>1.230</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLW</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>S9S</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>1.233</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLZ</td>
+      <td>9I53_ATP Binding</td>
+      <td>VWM</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>11</td>
+      <td>1.236</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RM1</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>RY4</td>
+      <td>VAL6, ARG21, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>12</td>
+      <td>1.236</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLC</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VVM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, LEU240, VAL241, PRO242</td>
+      <td>9</td>
+      <td>1.245</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLB</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VVJ</td>
+      <td>VAL6, ARG21, PRO23, ARG129, LEU132, PHE133, GLU136, THR137, LEU235, SER236</td>
+      <td>10</td>
+      <td>1.247</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM6</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>HR5</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>8</td>
+      <td>1.254</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLJ</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VW4</td>
+      <td>GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>8</td>
+      <td>1.254</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLC</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VVM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, LEU240, VAL241, PRO242</td>
+      <td>9</td>
+      <td>1.257</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RME</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>RYM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, VAL241, PRO242, ASN388, ALA389</td>
+      <td>10</td>
+      <td>1.260</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM6</td>
+      <td>9I53_ATP Binding</td>
+      <td>HR5</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>8</td>
+      <td>1.266</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>9I4V</td>
+      <td>9I53_ATP Binding</td>
+      <td>MPO</td>
+      <td>LEU176, ASN177, SER485, SER486, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>9</td>
+      <td>1.266</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLH</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>K2P</td>
+      <td>HIS482, SER485, SER486, ALA487, TYR515, THR550, THR552, HIS554, SER555</td>
+      <td>9</td>
+      <td>1.279</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLV</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VWJ</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>1.284</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLW</td>
+      <td>9I53_ATP Binding</td>
+      <td>S9S</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>1.288</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RMM</td>
+      <td>9I53_ATP Binding</td>
+      <td>VXG</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, ASP534, HIS554</td>
+      <td>12</td>
+      <td>1.294</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RM1</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>RY4</td>
+      <td>VAL6, ARG21, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>12</td>
+      <td>1.300</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RMD</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VWY</td>
+      <td>VAL6, ASN9, ARG21, PRO23, GLU128, ARG129, LEU130, LEU132, PHE133, ALA134, GLU136, THR137, LEU235, SER236, PRO238</td>
+      <td>15</td>
+      <td>1.326</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLO</td>
+      <td>9I53_ATP Binding</td>
+      <td>UQS</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>10</td>
+      <td>1.337</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>9I1S</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>MYC</td>
+      <td>SER236, ALA237, PRO238, VAL241, PRO242, LYS276, VAL387, ASN388, ALA389, LEU391, ARG392, ALA393, TYR396</td>
+      <td>13</td>
+      <td>1.346</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLR</td>
+      <td>9I53_ATP Binding</td>
+      <td>VWD</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, ARG442, ARG443, GLU540</td>
+      <td>8</td>
+      <td>1.354</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM9</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>EJQ</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>9</td>
+      <td>1.354</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLD</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VVY</td>
+      <td>THR127, GLU128, ARG129, LEU130, LEU132, SER236, ALA237, PRO238</td>
+      <td>8</td>
+      <td>1.356</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMJ</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>JOV</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>8</td>
+      <td>1.360</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLD</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VVY</td>
+      <td>THR127, GLU128, ARG129, LEU130, LEU132, SER236, ALA237, PRO238</td>
+      <td>8</td>
+      <td>1.362</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RME</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>RYM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, VAL241, PRO242, ASN388, ALA389</td>
+      <td>10</td>
+      <td>1.363</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLZ</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VWM</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>11</td>
+      <td>1.365</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLO</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>UQS</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>10</td>
+      <td>1.370</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMJ</td>
+      <td>9I53_ATP Binding</td>
+      <td>JOV</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>8</td>
+      <td>1.375</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLR</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>VWD</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, ARG442, ARG443, GLU540</td>
+      <td>8</td>
+      <td>1.375</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLW</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>S9S</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>1.379</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RME</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>RYM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, VAL241, PRO242, ASN388, ALA389</td>
+      <td>10</td>
+      <td>1.382</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL9</td>
+      <td>9I53_ATP Binding</td>
+      <td>UR7</td>
+      <td>ASP260, GLU261, PHE262, SER264, GLY285, THR286, GLY287, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>1.385</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RM0</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>S7G</td>
+      <td>ASN9, GLU128, ARG129, LEU132, SER236, ALA237, PRO238</td>
+      <td>7</td>
+      <td>1.394</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RM0</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>S7G</td>
+      <td>ASN9, GLU128, ARG129, LEU132, SER236, ALA237, PRO238</td>
+      <td>7</td>
+      <td>1.399</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>7NNG</td>
+      <td>9I53_ATP Binding</td>
+      <td>UJK</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, LYS323, TYR324, ARG442</td>
+      <td>8</td>
+      <td>1.401</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLJ</td>
+      <td>7RDZ_Apo State</td>
+      <td>VW4</td>
+      <td>GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>8</td>
+      <td>1.404</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RMM</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VXG</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, ASP534, HIS554</td>
+      <td>12</td>
+      <td>1.406</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RM1</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>RY4</td>
+      <td>VAL6, ARG21, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>12</td>
+      <td>1.408</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLB</td>
+      <td>7RDZ_Apo State</td>
+      <td>VVJ</td>
+      <td>VAL6, ARG21, PRO23, ARG129, LEU132, PHE133, GLU136, THR137, LEU235, SER236</td>
+      <td>10</td>
+      <td>1.408</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLO</td>
+      <td>7RDZ_Apo State</td>
+      <td>UQS</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>10</td>
+      <td>1.409</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLN</td>
+      <td>7RDZ_Apo State</td>
+      <td>NZG</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>10</td>
+      <td>1.414</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMJ</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>JOV</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>9</td>
+      <td>1.443</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL9</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>UR7</td>
+      <td>ASP260, GLU261, PHE262, SER264, GLY285, THR286, GLY287, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>1.444</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM9</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>EJQ</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>10</td>
+      <td>1.446</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM3</td>
+      <td>7RDZ_Apo State</td>
+      <td>S7J</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>6</td>
+      <td>1.450</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RM7</td>
+      <td>9I53_ATP Binding</td>
+      <td>N0E</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>11</td>
+      <td>1.451</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RMD</td>
+      <td>7RDZ_Apo State</td>
+      <td>VWY</td>
+      <td>VAL6, ASN9, ARG21, PRO23, GLU128, ARG129, LEU130, LEU132, PHE133, ALA134, GLU136, THR137, LEU235, SER236, PRO238</td>
+      <td>15</td>
+      <td>1.455</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMJ</td>
+      <td>7RDZ_Apo State</td>
+      <td>JOV</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>7</td>
+      <td>1.461</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>7NNG</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>UJK</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, LYS323, TYR324, ARG442</td>
+      <td>8</td>
+      <td>1.467</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>9I1S</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>MYC</td>
+      <td>SER236, ALA237, PRO238, VAL241, PRO242, LYS276, VAL387, ASN388, ALA389, LEU391, ARG392, ALA393, TYR396</td>
+      <td>13</td>
+      <td>1.468</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMG</td>
+      <td>9I53_ATP Binding</td>
+      <td>MUK</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, SER589, LEU590, GLU591, ILE592, PRO593</td>
+      <td>9</td>
+      <td>1.469</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL9</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>UR7</td>
+      <td>ASP260, GLU261, PHE262, SER264, GLY285, THR286, GLY287, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>1.472</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL9</td>
+      <td>7RDZ_Apo State</td>
+      <td>UR7</td>
+      <td>ASP260, GLU261, PHE262, SER264, GLY285, THR286, GLY287, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>1.487</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>9I1S</td>
+      <td>9I53_ATP Binding</td>
+      <td>MYC</td>
+      <td>SER236, ALA237, PRO238, VAL241, PRO242, LYS276, VAL387, ASN388, ALA389, LEU391, ARG392, ALA393, TYR396</td>
+      <td>13</td>
+      <td>1.490</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM6</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>HR5</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>9</td>
+      <td>1.492</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM6</td>
+      <td>7RDZ_Apo State</td>
+      <td>HR5</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>7</td>
+      <td>1.494</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RM7</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>N0E</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>11</td>
+      <td>1.500</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RM7</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>N0E</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>11</td>
+      <td>1.501</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>7NNG</td>
+      <td>7RDZ_Apo State</td>
+      <td>UJK</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, LYS323, TYR324, ARG442</td>
+      <td>8</td>
+      <td>1.503</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL7</td>
+      <td>7RDZ_Apo State</td>
+      <td>VVD</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, SER289, HIS290, LYS320, ARG442</td>
+      <td>9</td>
+      <td>1.504</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLY</td>
+      <td>7RDZ_Apo State</td>
+      <td>K34</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, ARG442</td>
+      <td>9</td>
+      <td>1.509</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>9I1S</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>MYC</td>
+      <td>SER236, ALA237, PRO238, VAL241, PRO242, LYS276, VAL387, ASN388, ALA389, LEU391, ARG392, ALA393, TYR396</td>
+      <td>13</td>
+      <td>1.511</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RM7</td>
+      <td>7RDZ_Apo State</td>
+      <td>N0E</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>11</td>
+      <td>1.520</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>9I4V</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>MPO</td>
+      <td>LEU176, ASN177, SER485, SER486, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>9</td>
+      <td>1.525</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLS</td>
+      <td>7RDZ_Apo State</td>
+      <td>VWG</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>9</td>
+      <td>1.548</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>9I1S</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>MYC</td>
+      <td>SER236, ALA237, PRO238, VAL241, PRO242, LYS276, VAL387, ASN388, ALA389, LEU391, ARG392, ALA393, TYR396</td>
+      <td>13</td>
+      <td>1.558</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMG</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>MUK</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, SER589, LEU590, GLU591, ILE592, PRO593</td>
+      <td>10</td>
+      <td>1.558</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLO</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>UQS</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>10</td>
+      <td>1.565</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLW</td>
+      <td>7RDZ_Apo State</td>
+      <td>S9S</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>1.566</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM3</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>S7J</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>9</td>
+      <td>1.577</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLU</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>JG4</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>1.594</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM9</td>
+      <td>7RDZ_Apo State</td>
+      <td>EJQ</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>7</td>
+      <td>1.603</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM3</td>
+      <td>9I53_ATP Binding</td>
+      <td>S7J</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>8</td>
+      <td>1.614</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLV</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VWJ</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>1.628</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMG</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>MUK</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, SER589, LEU590, GLU591, ILE592, PRO593</td>
+      <td>9</td>
+      <td>1.687</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RMM</td>
+      <td>7RDZ_Apo State</td>
+      <td>VXG</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, ASP534, HIS554</td>
+      <td>12</td>
+      <td>1.689</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>9I1S</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>MYC</td>
+      <td>SER236, ALA237, PRO238, VAL241, PRO242, LYS276, VAL387, ASN388, ALA389, LEU391, ARG392, ALA393, TYR396</td>
+      <td>13</td>
+      <td>1.722</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLZ</td>
+      <td>7RDZ_Apo State</td>
+      <td>VWM</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>11</td>
+      <td>1.730</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLL</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>H04</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>1.731</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RMK</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>O2A</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>1.766</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>9I4V</td>
+      <td>7RDZ_Apo State</td>
+      <td>MPO</td>
+      <td>LEU176, ASN177, SER485, SER486, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>9</td>
+      <td>1.814</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLE</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VVP</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>1.817</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLL</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>H04</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>1.819</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMG</td>
+      <td>7RDZ_Apo State</td>
+      <td>MUK</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, SER589, LEU590, GLU591, ILE592, PRO593</td>
+      <td>7</td>
+      <td>1.824</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM3</td>
+      <td>9I51_ATP Hydrolysis</td>
+      <td>S7J</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>8</td>
+      <td>1.833</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RMK</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>O2A</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>1.860</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL7</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VVD</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, SER289, HIS290, LYS320, ARG442</td>
+      <td>9</td>
+      <td>1.864</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLU</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>JG4</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>1.872</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLV</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VWJ</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>1.887</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLL</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>H04</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>1.917</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLL</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>H04</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>1.919</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLE</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VVP</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>1.932</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RMK</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>O2A</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>1.947</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RMK</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>O2A</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>1.975</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLE</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VVP</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>2.022</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLY</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>K34</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, ARG442</td>
+      <td>9</td>
+      <td>2.030</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLP</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VWA</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>2.061</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLE</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VVP</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>2.063</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLY</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>K34</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, ARG442</td>
+      <td>9</td>
+      <td>2.103</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLS</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VWG</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>9</td>
+      <td>2.129</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLS</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VWG</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>9</td>
+      <td>2.186</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLN</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>NZG</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>10</td>
+      <td>2.187</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLY</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>K34</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, ARG442</td>
+      <td>9</td>
+      <td>2.197</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL7</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VVD</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, SER289, HIS290, LYS320, ARG442</td>
+      <td>9</td>
+      <td>2.208</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLN</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>NZG</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>10</td>
+      <td>2.211</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLS</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VWG</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>9</td>
+      <td>2.216</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL7</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VVD</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, SER289, HIS290, LYS320, ARG442</td>
+      <td>9</td>
+      <td>2.237</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLN</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>NZG</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>10</td>
+      <td>2.249</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLP</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VWA</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>2.268</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLN</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>NZG</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>10</td>
+      <td>2.294</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLS</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VWG</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>9</td>
+      <td>2.306</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLY</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>K34</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, ARG442</td>
+      <td>9</td>
+      <td>2.312</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLH</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>K2P</td>
+      <td>HIS482, SER485, SER486, ALA487, TYR515, THR550, THR552, HIS554, SER555</td>
+      <td>9</td>
+      <td>2.314</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLS</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>VWG</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>9</td>
+      <td>2.315</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLY</td>
+      <td>7CYQ_Active RNA Binding and Translocation</td>
+      <td>K34</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, ARG442</td>
+      <td>9</td>
+      <td>2.326</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLU</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>JG4</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>2.327</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLU</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>JG4</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>2.345</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLV</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VWJ</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>2.374</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL7</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VVD</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, SER289, HIS290, LYS320, ARG442</td>
+      <td>9</td>
+      <td>2.374</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLN</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>NZG</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>10</td>
+      <td>2.377</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLH</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>K2P</td>
+      <td>HIS482, SER485, SER486, ALA487, TYR515, THR550, THR552, HIS554, SER555</td>
+      <td>9</td>
+      <td>2.383</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLV</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VWJ</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>2.388</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLC</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VVM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, LEU240, VAL241, PRO242</td>
+      <td>9</td>
+      <td>2.393</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL7</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VVD</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, SER289, HIS290, LYS320, ARG442</td>
+      <td>9</td>
+      <td>2.414</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>9I4V</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>MPO</td>
+      <td>LEU176, ASN177, SER485, SER486, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>9</td>
+      <td>2.471</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RLD</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VVY</td>
+      <td>THR127, GLU128, ARG129, LEU130, LEU132, SER236, ALA237, PRO238</td>
+      <td>8</td>
+      <td>2.476</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLL</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>H04</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>2.489</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLP</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VWA</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>2.499</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RMK</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>O2A</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>2.528</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLH</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>K2P</td>
+      <td>HIS482, SER485, SER486, ALA487, TYR515, THR550, THR552, HIS554, SER555</td>
+      <td>9</td>
+      <td>2.540</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLP</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VWA</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>2.569</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLE</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VVP</td>
+      <td>GLU551, THR552, ALA553, CYS556</td>
+      <td>4</td>
+      <td>2.588</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLP</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VWA</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>2.618</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLU</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>JG4</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>2.620</td>
+    </tr>
+    <tr>
+      <td>Cluster_4</td>
+      <td>5RLV</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VWJ</td>
+      <td>GLU551, THR552, ALA553, CYS556, ASP578</td>
+      <td>5</td>
+      <td>2.657</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RME</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>RYM</td>
+      <td>GLU128, ARG129, LEU132, SER236, ALA237, PRO238, VAL241, PRO242, ASN388, ALA389</td>
+      <td>10</td>
+      <td>2.702</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RMD</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VWY</td>
+      <td>VAL6, ASN9, ARG21, PRO23, GLU128, ARG129, LEU130, LEU132, PHE133, ALA134, GLU136, THR137, LEU235, SER236, PRO238</td>
+      <td>15</td>
+      <td>2.708</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>9I4V</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>MPO</td>
+      <td>LEU176, ASN177, SER485, SER486, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>9</td>
+      <td>2.741</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLZ</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VWM</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>11</td>
+      <td>2.797</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RMM</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VXG</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, ASP534, HIS554</td>
+      <td>12</td>
+      <td>2.816</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLH</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>K2P</td>
+      <td>HIS482, SER485, SER486, ALA487, TYR515, THR550, THR552, HIS554, SER555</td>
+      <td>9</td>
+      <td>2.840</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLB</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VVJ</td>
+      <td>VAL6, ARG21, PRO23, ARG129, LEU132, PHE133, GLU136, THR137, LEU235, SER236</td>
+      <td>10</td>
+      <td>2.896</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>5RM0</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>S7G</td>
+      <td>ASN9, GLU128, ARG129, LEU132, SER236, ALA237, PRO238</td>
+      <td>7</td>
+      <td>2.977</td>
+    </tr>
+    <tr>
+      <td>Cluster_3</td>
+      <td>9I1S</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>MYC</td>
+      <td>SER236, ALA237, PRO238, VAL241, PRO242, LYS276, VAL387, ASN388, ALA389, LEU391, ARG392, ALA393, TYR396</td>
+      <td>13</td>
+      <td>3.015</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL7</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VVD</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, SER289, HIS290, LYS320, ARG442</td>
+      <td>9</td>
+      <td>3.096</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLY</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>K34</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, ARG442</td>
+      <td>9</td>
+      <td>3.096</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLH</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>K2P</td>
+      <td>HIS482, SER485, SER486, ALA487, TYR515, THR550, THR552, HIS554, SER555</td>
+      <td>9</td>
+      <td>3.122</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RMM</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VXG</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, ASP534, HIS554</td>
+      <td>12</td>
+      <td>3.125</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLZ</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VWM</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>11</td>
+      <td>3.138</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>9I4V</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>MPO</td>
+      <td>LEU176, ASN177, SER485, SER486, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>9</td>
+      <td>3.146</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLS</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VWG</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>9</td>
+      <td>3.165</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>9I4V</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>MPO</td>
+      <td>LEU176, ASN177, SER485, SER486, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>9</td>
+      <td>3.167</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLN</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>NZG</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, TYR324, THR440, ARG442</td>
+      <td>10</td>
+      <td>3.211</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL9</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>UR7</td>
+      <td>ASP260, GLU261, PHE262, SER264, GLY285, THR286, GLY287, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>3.268</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLO</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>UQS</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>10</td>
+      <td>3.285</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLO</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>UQS</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>10</td>
+      <td>3.288</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLO</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>UQS</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>10</td>
+      <td>3.296</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RMM</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VXG</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, ASP534, HIS554</td>
+      <td>12</td>
+      <td>3.300</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLZ</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VWM</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>11</td>
+      <td>3.343</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RMM</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VXG</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, ASP534, HIS554</td>
+      <td>12</td>
+      <td>3.359</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLZ</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VWM</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>11</td>
+      <td>3.380</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLR</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VWD</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, ARG442, ARG443, GLU540</td>
+      <td>8</td>
+      <td>3.403</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RM7</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>N0E</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>11</td>
+      <td>3.416</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL9</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>UR7</td>
+      <td>ASP260, GLU261, PHE262, SER264, GLY285, THR286, GLY287, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>3.479</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RM7</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>N0E</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>11</td>
+      <td>3.487</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLR</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VWD</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, ARG442, ARG443, GLU540</td>
+      <td>8</td>
+      <td>3.494</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RM7</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>N0E</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>11</td>
+      <td>3.511</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLR</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VWD</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, ARG442, ARG443, GLU540</td>
+      <td>8</td>
+      <td>3.528</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLO</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>UQS</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>10</td>
+      <td>3.533</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLJ</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>VW4</td>
+      <td>GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>8</td>
+      <td>3.551</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLJ</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>VW4</td>
+      <td>GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>8</td>
+      <td>3.556</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLW</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>S9S</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>3.563</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>7NNG</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>UJK</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, LYS323, TYR324, ARG442</td>
+      <td>8</td>
+      <td>3.577</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RLI</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>JFM</td>
+      <td>VAL6, ARG21, ARG22, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>13</td>
+      <td>3.595</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL9</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>UR7</td>
+      <td>ASP260, GLU261, PHE262, SER264, GLY285, THR286, GLY287, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>3.597</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLJ</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>VW4</td>
+      <td>GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>8</td>
+      <td>3.605</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLR</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VWD</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, ARG442, ARG443, GLU540</td>
+      <td>8</td>
+      <td>3.664</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLW</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>S9S</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>3.668</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RM7</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>N0E</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>11</td>
+      <td>3.689</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLW</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>S9S</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>3.697</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLJ</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>VW4</td>
+      <td>GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>8</td>
+      <td>3.716</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL9</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>UR7</td>
+      <td>ASP260, GLU261, PHE262, SER264, GLY285, THR286, GLY287, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>3.758</td>
+    </tr>
+    <tr>
+      <td>Cluster_6</td>
+      <td>5RM1</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>RY4</td>
+      <td>VAL6, ARG21, PRO23, PHE24, ARG129, LEU132, PHE133, GLU136, THR137, PRO234, LEU235, SER236</td>
+      <td>12</td>
+      <td>3.809</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>7NNG</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>UJK</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, LYS323, TYR324, ARG442</td>
+      <td>8</td>
+      <td>3.843</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLW</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>S9S</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>3.849</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>7NNG</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>UJK</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, LYS323, TYR324, ARG442</td>
+      <td>8</td>
+      <td>3.871</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>7NNG</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>UJK</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, LYS323, TYR324, ARG442</td>
+      <td>8</td>
+      <td>3.908</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM9</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>EJQ</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>7</td>
+      <td>3.969</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM6</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>HR5</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>7</td>
+      <td>4.088</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMJ</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>JOV</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>7</td>
+      <td>4.107</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM3</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>S7J</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>6</td>
+      <td>4.135</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMG</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>MUK</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, SER589, LEU590, GLU591, ILE592, PRO593</td>
+      <td>7</td>
+      <td>4.222</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM9</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>EJQ</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>7</td>
+      <td>4.300</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RL9</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>UR7</td>
+      <td>ASP260, GLU261, PHE262, SER264, GLY285, THR286, GLY287, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>4.414</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLJ</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VW4</td>
+      <td>GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>8</td>
+      <td>4.426</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMJ</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>JOV</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>7</td>
+      <td>4.537</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLW</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>S9S</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, LYS288, SER289, HIS290, LYS320, ARG442</td>
+      <td>10</td>
+      <td>4.542</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM6</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>HR5</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>7</td>
+      <td>4.561</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMG</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>MUK</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, SER589, LEU590, GLU591, ILE592, PRO593</td>
+      <td>7</td>
+      <td>4.604</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLO</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>UQS</td>
+      <td>SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>10</td>
+      <td>4.650</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RLR</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VWD</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, ARG442, ARG443, GLU540</td>
+      <td>8</td>
+      <td>4.747</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>5RM7</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>N0E</td>
+      <td>GLU261, SER264, GLY285, THR286, GLY287, HIS290, LYS320, THR440, CYS441, ARG442, HIS464</td>
+      <td>11</td>
+      <td>4.795</td>
+    </tr>
+    <tr>
+      <td>Cluster_1</td>
+      <td>7NNG</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>UJK</td>
+      <td>GLY285, THR286, GLY287, HIS290, LYS320, LYS323, TYR324, ARG442</td>
+      <td>8</td>
+      <td>4.830</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMJ</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>JOV</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>9</td>
+      <td>4.933</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM3</td>
+      <td>7KRN_RNA Backtracking</td>
+      <td>S7J</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>6</td>
+      <td>4.938</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMJ</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>JOV</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>9</td>
+      <td>4.940</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM6</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>HR5</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>9</td>
+      <td>4.968</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM6</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>HR5</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>9</td>
+      <td>4.985</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM9</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>EJQ</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>10</td>
+      <td>4.994</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM9</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>EJQ</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>10</td>
+      <td>5.051</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM9</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>EJQ</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>7</td>
+      <td>5.056</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMG</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>MUK</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, SER589, LEU590, GLU591, ILE592, PRO593</td>
+      <td>10</td>
+      <td>5.229</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMJ</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>JOV</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>7</td>
+      <td>5.304</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM6</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>HR5</td>
+      <td>PHE472, MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, PRO593</td>
+      <td>7</td>
+      <td>5.324</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMG</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>MUK</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, SER589, LEU590, GLU591, ILE592, PRO593</td>
+      <td>10</td>
+      <td>5.338</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RMG</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>MUK</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, SER589, LEU590, GLU591, ILE592, PRO593</td>
+      <td>7</td>
+      <td>5.368</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM3</td>
+      <td>7CXM_Active RNA Binding and Translocation</td>
+      <td>S7J</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>9</td>
+      <td>5.433</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM3</td>
+      <td>6XEZ_Active RNA Binding and Translocation</td>
+      <td>S7J</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>9</td>
+      <td>5.496</td>
+    </tr>
+    <tr>
+      <td>Cluster_5</td>
+      <td>5RM3</td>
+      <td>7KRO_RNA Backtracking</td>
+      <td>S7J</td>
+      <td>MET474, VAL495, GLU498, PHE499, ARG502, ASN503, LEU590, GLU591, ILE592, PRO593</td>
+      <td>6</td>
+      <td>5.757</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RMM</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VXG</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, ASP534, HIS554</td>
+      <td>12</td>
+      <td>8.376</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>5RLZ</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>VWM</td>
+      <td>ASN177, ASN179, SER485, SER486, ALA487, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>11</td>
+      <td>8.716</td>
+    </tr>
+    <tr>
+      <td>Cluster_2</td>
+      <td>9I4V</td>
+      <td>7RE3_Active RNA Binding and Translocation</td>
+      <td>MPO</td>
+      <td>LEU176, ASN177, SER485, SER486, PRO514, TYR515, ASN516, SER517, THR532, HIS554</td>
+      <td>9</td>
+      <td>9.572</td>
+    </tr>
+  </tbody>
+</table></div><h2>Top 5 Closest Fragment-Natural Pairings (Lowest RMSD)</h2><ul><li><strong>Fragment 5RLB</strong> vs Natural 9I51_ATP Hydrolysis_orange: RMSD = <strong>0.205 &Aring;</strong> (Cluster_6)</li><li><strong>Fragment 5RLB</strong> vs Natural 9I53_ATP Binding_blue: RMSD = <strong>0.242 &Aring;</strong> (Cluster_6)</li><li><strong>Fragment 5RLS</strong> vs Natural 9I51_ATP Hydrolysis_orange: RMSD = <strong>0.246 &Aring;</strong> (Cluster_1)</li><li><strong>Fragment 5RLS</strong> vs Natural 9I53_ATP Binding_blue: RMSD = <strong>0.247 &Aring;</strong> (Cluster_1)</li><li><strong>Fragment 5RMD</strong> vs Natural 9I53_ATP Binding_blue: RMSD = <strong>0.259 &Aring;</strong> (Cluster_6)</li></ul><h2>Best Fragment for Each Natural Binding Conformation</h2><ul><li><strong>Active RNA Binding and Translocation (PDB 6XEZ)</strong>: Fragment 5RLI (Cluster Cluster_6), RMSD = 0.803 &Aring;</li><li><strong>Active RNA Binding and Translocation (PDB 7CXM)</strong>: Fragment 5RLI (Cluster Cluster_6), RMSD = 0.723 &Aring;</li><li><strong>Active RNA Binding and Translocation (PDB 7CYQ)</strong>: Fragment 9I1S (Cluster Cluster_3), RMSD = 0.832 &Aring;</li><li><strong>RNA Backtracking (PDB 7KRN)</strong>: Fragment 5RLI (Cluster Cluster_6), RMSD = 1.021 &Aring;</li><li><strong>RNA Backtracking (PDB 7KRO)</strong>: Fragment 5RLI (Cluster Cluster_6), RMSD = 0.934 &Aring;</li><li><strong>Apo State (PDB 7RDZ)</strong>: Fragment 5RLL (Cluster Cluster_4), RMSD = 0.691 &Aring;</li><li><strong>Active RNA Binding and Translocation (PDB 7RE3)</strong>: Fragment 5RLL (Cluster Cluster_4), RMSD = 1.919 &Aring;</li><li><strong>ATP Hydrolysis (PDB 9I51)</strong>: Fragment 5RLB (Cluster Cluster_6), RMSD = 0.205 &Aring;</li><li><strong>ATP Binding (PDB 9I53)</strong>: Fragment 5RLB (Cluster Cluster_6), RMSD = 0.242 &Aring;</li></ul><h2>Closest Fragment-Natural Pairing per Cluster</h2><ul><li><strong>Cluster_1</strong>: Fragment 5RLS vs Natural 9I51_ATP Hydrolysis_orange (RMSD = 0.246 &Aring;)</li><li><strong>Cluster_2</strong>: Fragment 5RLH vs Natural 7CYQ_Active RNA Binding and Translocation_FF69B4 (RMSD = 1.041 &Aring;)</li><li><strong>Cluster_3</strong>: Fragment 5RME vs Natural 7RDZ_Apo State_lightblue (RMSD = 0.824 &Aring;)</li><li><strong>Cluster_4</strong>: Fragment 5RLU vs Natural 9I51_ATP Hydrolysis_orange (RMSD = 0.266 &Aring;)</li><li><strong>Cluster_5</strong>: Fragment 5RM9 vs Natural 9I53_ATP Binding_blue (RMSD = 1.132 &Aring;)</li><li><strong>Cluster_6</strong>: Fragment 5RLB vs Natural 9I51_ATP Hydrolysis_orange (RMSD = 0.205 &Aring;)</li></ul><div class='highlight'><p><strong>Cluster with the lowest average RMSD overall:</strong> Cluster_6 (Mean RMSD = 1.245 &Aring;)</p><p><strong>Cluster with the lowest variance:</strong> Cluster_3 (Variance = 0.2774)</p></div>
+    <div class="recommendations">
+    <h2>RECOMMENDATIONS FOR STRUCTURE-BASED DRUG DESIGN (SBDD)</h2>
+    <p>Based on the assumption that lower RMSD across multiple natural models indicates a higher likelihood of binding to several protein conformations, here are the best starting points:</p>
+
+    <h3>BEST FRAGMENT CLUSTERS:</h3>
+    <ol>
+        <li><strong>Cluster 4:</strong> This is the best overall cluster. It has the lowest average RMSD (1.263 &Aring;), indicating that its fragments generally maintain the closest structural mimicry to natural substrates across various functional states of the helicase.</li>
+        <li><strong>Cluster 1:</strong> Highly recommended due to having the lowest variance (0.2774). A low variance means the binding pocket's conformation remains highly consistent across all tested natural states, suggesting these fragments bind to a rigid, conformation-independent sub-pocket.</li>
+    </ol>
+
+    <h3>BEST INDIVIDUAL FRAGMENTS BY CONFORMATION:</h3>
+    <p>The best fragment to use as a starting point depends on which state of the helicase you wish to target:</p>
+    <ul>
+        <li>For the <strong>ATP Hydrolysis</strong> state: Use Fragment 5RLB (Cluster 4) - RMSD 0.205 &Aring;</li>
+        <li>For the <strong>ATP Binding</strong> state: Use Fragment 5RLB (Cluster 4) - RMSD 0.242 &Aring;</li>
+        <li>For <strong>Active Translocation</strong>: Depending on the specific state, fragments from Clusters 1, 4 or 6 show strong alignment.</li>
+    </ul>
+
+    <p><strong>Overall, Fragment 5RLB (Cluster 4) is the standout candidate.</strong> It occupies two of the top five closest pairings overall. Its ability to closely match multiple distinct active states makes it an ideal starting point for a multi-state inhibitor.</p>
+    </div>
+</body>
+</html>
