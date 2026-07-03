@@ -326,16 +326,21 @@
         <div class="container text-center">
             <div class="row justify-content-center g-4 py-5">
                 <div class="col-md-6 col-lg-5">
-                    <a href="sars-cov-2_fragments.html" class="text-decoration-none">
-                        <div class="card h-100 shadow-sm border-0" style="border-radius: 1rem; overflow: hidden; transition: transform 0.2s;">
-                            <div class="card-body p-5">
-                                <i class="fas fa-microscope mb-4" style="font-size: 3rem; color: var(--accent);"></i>
-                                <h3 class="h4 mb-3" style="color: var(--heading);">Fragment Cluster Analysis</h3>
-                                <p class="text-muted mb-4" style="color: var(--text-muted) !important;">Explore 3D predicted ligand-binding hotspots and clustering analysis on the SARS-CoV-2 helicase.</p>
-                                <span class="btn btn-primary px-4 py-2" style="background-color: var(--accent); border: none; border-radius: 2rem;">View Analysis</span>
-                            </div>
+                    <div class="card h-100 shadow-sm border-0" style="border-radius: 1rem; overflow: hidden; transition: transform 0.2s;">
+                        <div class="card-body p-5 dropdown">
+                            <i class="fas fa-microscope mb-4" style="font-size: 3rem; color: var(--accent);"></i>
+                            <h3 class="h4 mb-3" style="color: var(--heading);">SARS-CoV-2 Helicase (NSP13)</h3>
+                            <p class="text-muted mb-4" style="color: var(--text-muted) !important;">Explore 3D predicted ligand-binding hotspots, conformational dynamics, and clustering analysis on the SARS-CoV-2 helicase.</p>
+                            <button class="btn btn-primary px-4 py-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: var(--accent); border: none; border-radius: 2rem;">
+                                View Analysis
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="sars-cov-2_fragments.html">X-Ray Fragment Clustering using Machine Learning</a></li>
+                                <li><a class="dropdown-item" href="#">Conformational Dynamics and RMSD Heatamp</a></li>
+                                <li><a class="dropdown-item" href="#">Ligand-binding site prediction using machine learning</a></li>
+                            </ul>
                         </div>
-                    </a>
+                    </div>
                 </div>
                 <div class="col-md-6 col-lg-5">
                     <a href="dashboard.html" class="text-decoration-none">
