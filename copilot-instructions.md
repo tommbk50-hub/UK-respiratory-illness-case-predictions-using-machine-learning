@@ -14,6 +14,10 @@
 ## Component & Animation Guidelines
 - **Card Elements:** Include smooth 3D elevation transitions (`transition: all 0.3s ease-in-out`). On hover, cards must translate upward along the Y-axis (`transform: translateY(-6px)`) and gain a soft, wide drop-shadow.
 - **Micro-interactions:** When hovering over action links or buttons containing inline arrows (`→`), the arrow must smoothly translate slightly to the right to imply motion.
+- **Hero Banner Animation:** Every emerald hero banner (the dark slate/emerald gradient `.hero` or `.page-header` section) MUST include the HTML5 Canvas + vanilla JavaScript neural network animation. When creating a new page with such a banner, add it by default. Reuse the existing implementation from `index.html`:
+  - Add a `.hero-canvas` rule (`position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;`) and ensure the banner is `position: relative; overflow: hidden;` with its `.container` set to `position: relative; z-index: 1;`.
+  - Place `<canvas id="neural-net-canvas" class="hero-canvas" aria-hidden="true"></canvas>` as the first child of the banner section.
+  - Include the self-contained neural network `<script>` (IIFE keyed on `#neural-net-canvas`) before `</body>`. It uses teal-300 nodes (`rgba(94, 234, 212, 0.9)`) and emerald-500 links (`16, 185, 129`), sizes to the banner via `canvas.parentElement`, and respects `prefers-reduced-motion`.
 
 ## Technical Constraints
 - Keep `index.html` as a clean, static landing page that acts as the entry point.
