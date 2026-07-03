@@ -635,16 +635,24 @@
                 createNodes();
             }
 
-            function draw() {
-                ctx.clearRect(0, 0, width, height);
-
+            function updatePositions() {
                 for (var i = 0; i < nodes.length; i++) {
                     var n = nodes[i];
                     n.x += n.vx;
                     n.y += n.vy;
-                    if (n.x <= 0 || n.x >= width) n.vx *= -1;
-                    if (n.y <= 0 || n.y >= height) n.vy *= -1;
+                    if (n.x <= 0 || n.x >= width) {
+                        n.vx *= -1;
+                        n.x = Math.max(0, Math.min(width, n.x));
+                    }
+                    if (n.y <= 0 || n.y >= height) {
+                        n.vy *= -1;
+                        n.y = Math.max(0, Math.min(height, n.y));
+                    }
                 }
+            }
+
+            function render() {
+                ctx.clearRect(0, 0, width, height);
 
                 for (var a = 0; a < nodes.length; a++) {
                     for (var b = a + 1; b < nodes.length; b++) {
@@ -669,14 +677,17 @@
                     ctx.arc(nodes[k].x, nodes[k].y, nodes[k].r, 0, Math.PI * 2);
                     ctx.fill();
                 }
+            }
 
+            function draw() {
+                updatePositions();
+                render();
                 animationId = requestAnimationFrame(draw);
             }
 
             resize();
             if (prefersReduced) {
-                draw();
-                if (animationId) cancelAnimationFrame(animationId);
+                render();
             } else {
                 draw();
             }
@@ -684,7 +695,10 @@
             var resizeTimer = null;
             window.addEventListener('resize', function () {
                 clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(resize, 150);
+                resizeTimer = setTimeout(function () {
+                    resize();
+                    if (prefersReduced) render();
+                }, 150);
             });
         })();
     </script>
