@@ -172,6 +172,16 @@
 
         .hero .container { position: relative; z-index: 1; }
 
+        /* Neural network animation canvas */
+        .hero-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
         .hero-eyebrow {
             display: inline-flex;
             align-items: center;
@@ -425,6 +435,7 @@
 
     <!-- ================= Hero ================= -->
     <section class="hero">
+        <canvas id="neural-net-canvas" class="hero-canvas" aria-hidden="true"></canvas>
         <div class="container">
             <span class="hero-eyebrow"><i class="fas fa-atom"></i> Open-Source Computational Biology</span>
             <h1>Artificial Intelligence &amp; Machine Learning in <span class="accent">Open-Source Drug Discovery</span></h1>
@@ -571,6 +582,111 @@
                 });
             });
         });
+    </script>
+
+    <!-- ================= Neural Network Hero Animation ================= -->
+    <script>
+        (function () {
+            var canvas = document.getElementById('neural-net-canvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            var hero = canvas.parentElement;
+
+            var prefersReduced = window.matchMedia &&
+                window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            var nodes = [];
+            var width = 0;
+            var height = 0;
+            var dpr = window.devicePixelRatio || 1;
+            var animationId = null;
+
+            var NODE_COLOR = 'rgba(94, 234, 212, 0.9)';   // teal-300
+            var LINE_COLOR = '16, 185, 129';               // emerald-500 rgb
+            var MAX_DISTANCE = 150;
+
+            function nodeCount() {
+                var target = Math.round((width * height) / 14000);
+                return Math.max(24, Math.min(90, target));
+            }
+
+            function createNodes() {
+                nodes = [];
+                var count = nodeCount();
+                for (var i = 0; i < count; i++) {
+                    nodes.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        vx: (Math.random() - 0.5) * 0.4,
+                        vy: (Math.random() - 0.5) * 0.4,
+                        r: Math.random() * 1.8 + 1.2
+                    });
+                }
+            }
+
+            function resize() {
+                width = hero.clientWidth;
+                height = hero.clientHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                createNodes();
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+
+                for (var i = 0; i < nodes.length; i++) {
+                    var n = nodes[i];
+                    n.x += n.vx;
+                    n.y += n.vy;
+                    if (n.x <= 0 || n.x >= width) n.vx *= -1;
+                    if (n.y <= 0 || n.y >= height) n.vy *= -1;
+                }
+
+                for (var a = 0; a < nodes.length; a++) {
+                    for (var b = a + 1; b < nodes.length; b++) {
+                        var dx = nodes[a].x - nodes[b].x;
+                        var dy = nodes[a].y - nodes[b].y;
+                        var dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < MAX_DISTANCE) {
+                            var opacity = (1 - dist / MAX_DISTANCE) * 0.5;
+                            ctx.strokeStyle = 'rgba(' + LINE_COLOR + ',' + opacity + ')';
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(nodes[a].x, nodes[a].y);
+                            ctx.lineTo(nodes[b].x, nodes[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                ctx.fillStyle = NODE_COLOR;
+                for (var k = 0; k < nodes.length; k++) {
+                    ctx.beginPath();
+                    ctx.arc(nodes[k].x, nodes[k].y, nodes[k].r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                animationId = requestAnimationFrame(draw);
+            }
+
+            resize();
+            if (prefersReduced) {
+                draw();
+                if (animationId) cancelAnimationFrame(animationId);
+            } else {
+                draw();
+            }
+
+            var resizeTimer = null;
+            window.addEventListener('resize', function () {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(resize, 150);
+            });
+        })();
     </script>
 </body>
 </html>
