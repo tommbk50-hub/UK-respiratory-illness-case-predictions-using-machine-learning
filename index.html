@@ -1009,6 +1009,9 @@
             }
             for (L = 0; L < all.length; L++) {
                 for (k = 0; k < all[L].length; k++) {
+                    // Clamp to [-6, 6]: sigmoid saturates well within this range,
+                    // so bounding the weights keeps training stable and the on-screen
+                    // "w = ..." labels readable without affecting convergence.
                     all[L][k] = Math.max(-6, Math.min(6, all[L][k] - LR * grads[L][k]));
                 }
             }
