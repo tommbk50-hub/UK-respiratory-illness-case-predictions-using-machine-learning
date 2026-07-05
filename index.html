@@ -1008,7 +1008,10 @@
             ]}
         ];
 
-        function sigmoid(x) { return 1 / (1 + Math.exp(-x)); }
+        function sigmoid(x) {
+            var z = Math.max(-60, Math.min(60, x));
+            return 1 / (1 + Math.exp(-z));
+        }
 
         // Forward-propagate the current input values through the network so that
         // node activations (and therefore glow intensity) react to the inputs.
@@ -1058,7 +1061,8 @@
                 }
                 geom.cols.push(pts);
             }
-            var ex = left + (right - left) * ((colCount - 1) / (colCount - 1));
+            // Error/loss stage occupies the final (rightmost) column.
+            var ex = right;
             geom.error = { x: ex, y: (top + bottom) / 2 };
         }
 
@@ -1305,7 +1309,7 @@
         bindInput('nn-x2', 'nn-x2-val', function (v) { layers[0].nodes[1].act = v; forward(); });
         bindInput('nn-x3', 'nn-x3-val', function (v) { layers[0].nodes[2].act = v; forward(); });
         bindInput('nn-speed', 'nn-speed-val', function (v) { speed = v; },
-            function (v) { return v.toFixed(2).replace(/0$/, '') + '\u00d7'; });
+            function (v) { return v.toFixed(1) + '\u00d7'; });
 
         var triggerBtn = document.getElementById('nn-trigger');
         if (triggerBtn) {
