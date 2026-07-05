@@ -441,7 +441,7 @@
             max-width: 42rem;
         }
 
-        /* ---------- Interactive control panel ---------- */
+        /* ---------- Passive training-status panel ---------- */
         #nn-intro .nn-panel {
             position: relative;
             z-index: 3;
@@ -461,61 +461,45 @@
         #nn-intro .nn-panel .nn-panel-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 1.25rem 1.5rem;
-            align-items: flex-end;
+            gap: 1rem 1.5rem;
+            align-items: stretch;
         }
-        #nn-intro .nn-control {
+        #nn-intro .nn-steps {
+            flex: 2 1 320px;
             display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            min-width: 120px;
-            flex: 1 1 120px;
-        }
-        #nn-intro .nn-control label {
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #94a3b8;
-            display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
             gap: 0.5rem;
+            align-items: center;
         }
-        #nn-intro .nn-control label .nn-val {
-            color: #5eead4;
-            font-variant-numeric: tabular-nums;
-        }
-        #nn-intro input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 5px;
+        #nn-intro .nn-step {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: #94a3b8;
+            background: rgba(2, 6, 23, 0.45);
+            border: 1px solid rgba(148, 163, 184, 0.22);
             border-radius: 999px;
-            background: rgba(148, 163, 184, 0.35);
-            outline: none;
-            cursor: pointer;
+            padding: 0.4rem 0.85rem;
+            transition: color 0.25s ease, background-color 0.25s ease,
+                border-color 0.25s ease, box-shadow 0.25s ease;
         }
-        #nn-intro input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #10b981;
-            border: 2px solid #ecfdf5;
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+        #nn-intro .nn-step i { font-size: 0.85em; }
+        #nn-intro .nn-step.is-active {
+            color: #04211b;
+            background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+            border-color: rgba(16, 185, 129, 0.6);
+            box-shadow: 0 8px 22px -10px rgba(16, 185, 129, 0.8);
         }
-        #nn-intro input[type="range"]::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #10b981;
-            border: 2px solid #ecfdf5;
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+        #nn-intro .nn-step.is-done {
+            color: #5eead4;
+            border-color: rgba(16, 185, 129, 0.4);
         }
         #nn-intro .nn-readout {
-            flex: 1 1 150px;
-            min-width: 150px;
+            flex: 1 1 190px;
+            min-width: 180px;
             background: rgba(2, 6, 23, 0.55);
             border: 1px solid rgba(16, 185, 129, 0.25);
             border-radius: 0.7rem;
@@ -534,53 +518,19 @@
             font-variant-numeric: tabular-nums;
             font-weight: 600;
         }
-        #nn-intro .nn-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.6rem;
-            margin-top: 1rem;
-            justify-content: space-between;
-            align-items: center;
-        }
-        #nn-intro .nn-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            font-size: 0.9rem;
-            border-radius: 0.6rem;
-            padding: 0.6rem 1.15rem;
-            border: 1px solid transparent;
-            cursor: pointer;
-            text-decoration: none;
-            transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        #nn-intro .nn-btn:hover { transform: translateY(-1px); }
-        #nn-intro .nn-btn-trigger {
-            background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
-            color: #04211b;
-            box-shadow: 0 10px 26px -10px rgba(16, 185, 129, 0.75);
-        }
-        #nn-intro .nn-btn-enter {
-            background: #ecfdf5;
-            color: #065f46;
-            border-color: rgba(16, 185, 129, 0.4);
-        }
-        #nn-intro .nn-btn-enter:hover { background: #ffffff; }
         @keyframes intro-caption-in {
             from { opacity: 0; transform: translateY(14px); }
             to   { opacity: 1; transform: translateY(0); }
         }
         @media (max-width: 640px) {
             #nn-intro .nn-caption p { display: none; }
-            #nn-intro .nn-actions { justify-content: center; }
+            #nn-intro .nn-step { font-size: 0.72rem; padding: 0.35rem 0.65rem; }
         }
         @media (prefers-reduced-motion: reduce) {
             #nn-intro { transition: none; }
             #nn-intro .nn-caption,
             #nn-intro .nn-panel { animation: none; }
-            #nn-intro .nn-btn:hover { transform: none; }
+            #nn-intro .nn-step { transition: none; }
         }
     </style>
 </head>
@@ -590,42 +540,24 @@
         <canvas id="nn-canvas"></canvas>
         <div class="nn-caption">
             <span class="intro-badge"><i class="fas fa-diagram-project"></i>Feedforward Neural Network</span>
-            <h2>Watch a multi-layer perceptron fire</h2>
-            <p>A 3&ndash;3&ndash;4&ndash;2&ndash;1 network propagating inputs forward to a prediction &#375; and its loss (error = &#375; &minus; y). Adjust the inputs and speed, or trigger a pass.</p>
+            <h2>Watch a multi-layer perceptron learn</h2>
+            <p>A 3&ndash;3&ndash;4&ndash;2&ndash;1 network trains itself by gradient descent &mdash; firing forward to a prediction &#375;, measuring the loss, back-propagating the error and updating its weights, cycle after cycle, until it converges.</p>
         </div>
 
         <div class="nn-panel">
             <div class="nn-panel-grid">
-                <div class="nn-control">
-                    <label for="nn-x1">Input X1 <span class="nn-val" id="nn-x1-val">0.60</span></label>
-                    <input type="range" id="nn-x1" min="0" max="1" step="0.01" value="0.60">
-                </div>
-                <div class="nn-control">
-                    <label for="nn-x2">Input X2 <span class="nn-val" id="nn-x2-val">0.30</span></label>
-                    <input type="range" id="nn-x2" min="0" max="1" step="0.01" value="0.30">
-                </div>
-                <div class="nn-control">
-                    <label for="nn-x3">Input X3 <span class="nn-val" id="nn-x3-val">0.80</span></label>
-                    <input type="range" id="nn-x3" min="0" max="1" step="0.01" value="0.80">
-                </div>
-                <div class="nn-control">
-                    <label for="nn-speed">Speed <span class="nn-val" id="nn-speed-val">1.0&times;</span></label>
-                    <input type="range" id="nn-speed" min="0.25" max="3" step="0.05" value="1">
+                <div class="nn-steps" role="list" aria-label="Training cycle stages">
+                    <span class="nn-step" data-step="forward" role="listitem"><i class="fas fa-arrow-right-long"></i>Forward Pass</span>
+                    <span class="nn-step" data-step="error" role="listitem"><i class="fas fa-bullseye"></i>Calculate Error</span>
+                    <span class="nn-step" data-step="backprop" role="listitem"><i class="fas fa-arrow-left-long"></i>Backpropagation</span>
+                    <span class="nn-step" data-step="update" role="listitem"><i class="fas fa-sliders"></i>Update Weights</span>
                 </div>
                 <div class="nn-readout" aria-live="polite">
+                    <div class="nn-readout-row"><span>Epoch</span><span class="nn-num" id="nn-epoch">0</span></div>
                     <div class="nn-readout-row"><span>Prediction &#375;</span><span class="nn-num" id="nn-yhat">0.00</span></div>
                     <div class="nn-readout-row"><span>Target y</span><span class="nn-num" id="nn-target">0.50</span></div>
-                    <div class="nn-readout-row"><strong>error = &#375; &minus; y</strong><span class="nn-num" id="nn-error">0.00</span></div>
+                    <div class="nn-readout-row"><strong>loss &frac12;(&#375; &minus; y)&sup2;</strong><span class="nn-num" id="nn-error">0.00</span></div>
                 </div>
-            </div>
-            <div class="nn-actions">
-                <button type="button" class="nn-btn nn-btn-trigger" id="nn-trigger">
-                    <i class="fas fa-bolt"></i>Trigger Forward Pass
-                </button>
-                <a class="nn-btn nn-btn-enter" id="nn-enter"
-                   href="https://tommbk50-hub.github.io/UK-respiratory-illness-case-predictions-using-machine-learning/index.html">
-                    Enter Homepage<i class="fas fa-arrow-right"></i>
-                </a>
             </div>
         </div>
     </div>
@@ -1013,14 +945,34 @@
             return 1 / (1 + Math.exp(-z));
         }
 
-        // Forward-propagate the current input values through the network so that
-        // node activations (and therefore glow intensity) react to the inputs.
-        var yhat = 0, errorVal = 0;
+        // Fixed training example fed to the network on every epoch.
+        var INPUTS = [0.60, 0.30, 0.80];
+
+        // Pure forward evaluation used both for display and for the numeric
+        // gradient (finite differences) that drives back-propagation.
+        function forwardValue(w0, w1, w2, w3, w4) {
+            var s0 = 0;
+            for (var i = 0; i < INPUTS.length; i++) { s0 += INPUTS[i] * w0[i]; }
+            var s1 = 0, a1 = [];
+            for (i = 0; i < w1.length; i++) { a1[i] = sigmoid(w1[i] * s0); s1 += a1[i]; }
+            var s2 = 0, a2 = [];
+            for (i = 0; i < w2.length; i++) { a2[i] = sigmoid(w2[i] * s1); s2 += a2[i]; }
+            var s3 = 0, a3 = [];
+            for (i = 0; i < w3.length; i++) { a3[i] = sigmoid(w3[i] * s2); s3 += a3[i]; }
+            return sigmoid(w4[0] * s3);
+        }
+        function lossOf(w0, w1, w2, w3, w4) {
+            var d = forwardValue(w0, w1, w2, w3, w4) - TARGET;
+            return 0.5 * d * d;
+        }
+
+        // Forward-propagate the fixed inputs through the network so that node
+        // activations (and therefore glow intensity) reflect the current weights.
+        var yhat = 0, errorVal = 0, lossVal = 0;
         function forward() {
-            var prev = layers[0].nodes.map(function (n) { return n.act; });
-            // input -> L1 uses the 1-to-1 input weights W0
+            layers[0].nodes.forEach(function (n, i) { n.act = INPUTS[i]; });
             var weightedInputSum = 0;
-            for (var i = 0; i < prev.length; i++) { weightedInputSum += prev[i] * W0[i]; }
+            for (var i = 0; i < INPUTS.length; i++) { weightedInputSum += INPUTS[i] * W0[i]; }
 
             layers[1].nodes.forEach(function (n) { n.act = sigmoid(n.weight * weightedInputSum); });
             for (var L = 2; L < layers.length; L++) {
@@ -1030,11 +982,44 @@
             }
             yhat = layers[layers.length - 1].nodes[0].act;
             errorVal = yhat - TARGET;
+            lossVal = 0.5 * errorVal * errorVal;
 
             var yEl = document.getElementById('nn-yhat');
             var eEl = document.getElementById('nn-error');
             if (yEl) { yEl.textContent = yhat.toFixed(2); }
-            if (eEl) { eEl.textContent = (errorVal >= 0 ? '+' : '') + errorVal.toFixed(2); }
+            if (eEl) { eEl.textContent = lossVal.toFixed(4); }
+        }
+
+        // ---- Back-propagation: numeric gradient + gradient-descent update ----
+        // Computes dLoss/dw for every weight by central finite differences, then
+        // nudges each weight downhill so the next forward pass has a smaller loss.
+        var LR = 6.0;                              // learning rate
+        function trainStep() {
+            var all = [W0, W1, W2, W3, W4];
+            var eps = 1e-4;
+            var grads = all.map(function (a) { return a.map(function () { return 0; }); });
+            for (var L = 0; L < all.length; L++) {
+                for (var k = 0; k < all[L].length; k++) {
+                    var saved = all[L][k];
+                    all[L][k] = saved + eps; var lp = lossOf(W0, W1, W2, W3, W4);
+                    all[L][k] = saved - eps; var lm = lossOf(W0, W1, W2, W3, W4);
+                    all[L][k] = saved;
+                    grads[L][k] = (lp - lm) / (2 * eps);
+                }
+            }
+            for (L = 0; L < all.length; L++) {
+                for (k = 0; k < all[L].length; k++) {
+                    all[L][k] = Math.max(-6, Math.min(6, all[L][k] - LR * grads[L][k]));
+                }
+            }
+            syncWeights();
+        }
+        // Keep the per-node display weights in sync with the W* arrays.
+        function syncWeights() {
+            var arrs = [W0, W1, W2, W3, W4];
+            for (var c = 0; c < layers.length; c++) {
+                layers[c].nodes.forEach(function (n, k) { n.weight = arrs[c][k]; });
+            }
         }
 
         // ---- Layout --------------------------------------------------------
@@ -1067,17 +1052,28 @@
         }
 
         // ---- Animation state ----------------------------------------------
-        var front = 0;                 // wave front position measured in columns
-        var speed = 1;                 // columns per second (scaled by slider)
-        var running = !prefersReduced;
-        var lastTs = null;
         var rafId = null;
-        var PAUSE = 0.9;               // columns of "pause" appended before loop reset
 
-        function colGlow(colIndex, nodeIndex) {
+        // Training schedule. Each epoch runs four phases; phase durations shrink
+        // with every epoch so the neurons visibly fire faster and faster until
+        // the loss converges to its final value.
+        var EPOCHS = 8;
+        function fwdDur(e)  { return lerp(0.90, 0.28, e / (EPOCHS - 1)); }
+        function errDur(e)  { return lerp(0.40, 0.18, e / (EPOCHS - 1)); }
+        function backDur(e) { return fwdDur(e) * 0.7; }
+        function updDur(e)  { return lerp(0.38, 0.18, e / (EPOCHS - 1)); }
+
+        var epoch = 0;
+        var phase = 'forward';         // forward | error | backprop | update | final | done
+        var phaseStart = null;         // timestamp (ms) the current phase began
+        var wavePos = 0;               // wave-front position in "stages"
+        var errGlow = 0;               // loss-node glow intensity
+        var weightGlow = 0;            // weight-label flash during Update Weights
+        var STEP_ORDER = ['forward', 'error', 'backprop', 'update'];
+
+        function colGlow(colIndex, nodeIndex, pos) {
             // Sequential firing: later nodes in a layer light a touch after earlier ones.
-            var d = front - (colIndex + nodeIndex * 0.12);
-            if (d < -0.02) { return colIndex === 0 ? 0.18 : 0.06; } // ambient
+            var d = pos - (colIndex + nodeIndex * 0.12);
             var sigma = 0.5;
             var flash = Math.exp(-(d * d) / (2 * sigma * sigma));
             var ambient = colIndex === 0 ? 0.2 : 0.08;
@@ -1086,11 +1082,16 @@
 
         function lerp(a, b, t) { return a + (b - a) * t; }
 
-        function drawConnection(x1, y1, x2, y2, active, frac, intensity) {
+        function drawConnection(x1, y1, x2, y2, active, frac, intensity, back) {
             var baseAlpha = active ? 0.5 : 0.16;
-            ctx.strokeStyle = active
-                ? 'rgba(45, 212, 191,' + (0.35 + 0.5 * intensity).toFixed(3) + ')'
-                : 'rgba(94, 234, 212,' + baseAlpha.toFixed(3) + ')';
+            if (active && back) {
+                // Back-propagation: error flows right -> left in warm amber.
+                ctx.strokeStyle = 'rgba(251, 191, 36,' + (0.4 + 0.5 * intensity).toFixed(3) + ')';
+            } else {
+                ctx.strokeStyle = active
+                    ? 'rgba(45, 212, 191,' + (0.35 + 0.5 * intensity).toFixed(3) + ')'
+                    : 'rgba(94, 234, 212,' + baseAlpha.toFixed(3) + ')';
+            }
             ctx.lineWidth = active ? 2 : 1;
             ctx.beginPath();
             ctx.moveTo(x1, y1);
@@ -1098,13 +1099,21 @@
             ctx.stroke();
 
             if (active && frac >= 0 && frac <= 1) {
-                var px = lerp(x1, x2, frac);
-                var py = lerp(y1, y2, frac);
+                // Travelling pulse. Forward flows x1->x2, backprop flows x2->x1.
+                var t = back ? 1 - frac : frac;
+                var px = lerp(x1, x2, t);
+                var py = lerp(y1, y2, t);
                 var pr = 3 + 3 * intensity;
                 var glow = ctx.createRadialGradient(px, py, 0, px, py, pr * 3);
-                glow.addColorStop(0, 'rgba(236, 253, 245, 0.95)');
-                glow.addColorStop(0.4, 'rgba(16, 185, 129, 0.8)');
-                glow.addColorStop(1, 'rgba(16, 185, 129, 0)');
+                if (back) {
+                    glow.addColorStop(0, 'rgba(255, 251, 235, 0.95)');
+                    glow.addColorStop(0.4, 'rgba(245, 158, 11, 0.85)');
+                    glow.addColorStop(1, 'rgba(245, 158, 11, 0)');
+                } else {
+                    glow.addColorStop(0, 'rgba(236, 253, 245, 0.95)');
+                    glow.addColorStop(0.4, 'rgba(16, 185, 129, 0.8)');
+                    glow.addColorStop(1, 'rgba(16, 185, 129, 0)');
+                }
                 ctx.fillStyle = glow;
                 ctx.beginPath();
                 ctx.arc(px, py, pr * 3, 0, Math.PI * 2);
@@ -1157,6 +1166,13 @@
             var layer = layers[colIndex];
             var sup = superscript(layer.sup);
             var sub = subscript(nodeIndex + 1);
+            // Weight labels flash amber while the Update-Weights phase is active.
+            var wColor = weightGlow > 0.02
+                ? 'rgba(' + Math.round(148 + 107 * weightGlow) + ',' +
+                            Math.round(163 + 28 * weightGlow) + ',' +
+                            Math.round(184 - 173 * weightGlow) + ',1)'
+                : '#94a3b8';
+            var wText = layer.nodes[nodeIndex].weight.toFixed(2);
             ctx.textAlign = 'center';
             ctx.font = '600 ' + Math.round(r * 0.6) + "px 'Inter', sans-serif";
 
@@ -1165,20 +1181,16 @@
                 ctx.textBaseline = 'alphabetic';
                 ctx.fillStyle = '#a7f3d0';
                 ctx.fillText(layer.prefix + (nodeIndex + 1), x, y - r - 8);
-                ctx.fillStyle = '#94a3b8';
-                ctx.font = '500 ' + Math.round(r * 0.5) + "px 'Inter', sans-serif";
-                ctx.textBaseline = 'top';
-                ctx.fillText('w' + sub + sup + ' = ' + layer.nodes[nodeIndex].weight, x, y + r + 6);
             } else {
                 // activation label a_i^l above; weight below.
                 ctx.textBaseline = 'alphabetic';
                 ctx.fillStyle = '#a7f3d0';
                 ctx.fillText('a' + sub + sup, x, y - r - 8);
-                ctx.fillStyle = '#94a3b8';
-                ctx.font = '500 ' + Math.round(r * 0.5) + "px 'Inter', sans-serif";
-                ctx.textBaseline = 'top';
-                ctx.fillText('w' + sub + sup + ' = ' + layer.nodes[nodeIndex].weight, x, y + r + 6);
             }
+            ctx.fillStyle = wColor;
+            ctx.font = '500 ' + Math.round(r * 0.5) + "px 'Inter', sans-serif";
+            ctx.textBaseline = 'top';
+            ctx.fillText('w' + sub + sup + ' = ' + wText, x, y + r + 6);
         }
 
         function drawColumnTitle(colIndex, x) {
@@ -1240,105 +1252,160 @@
         function render() {
             ctx.clearRect(0, 0, W, H);
             var r = geom.r;
-            var stage = Math.floor(front);
-            var frac = front - stage;
+            var back = (phase === 'backprop' || phase === 'update');
+            var wave = phase === 'forward' || phase === 'backprop';
+            var stage = Math.floor(wavePos);
+            var frac = wavePos - stage;
+            var lastStage = geom.cols.length - 1; // stage index for output->error
 
             // 1) Connections between successive columns (drawn behind nodes).
             for (var c = 0; c < geom.cols.length - 1; c++) {
                 var a = geom.cols[c], b = geom.cols[c + 1];
-                var active = (c === stage);
+                var active = wave && (c === stage);
                 for (var i = 0; i < a.length; i++) {
                     for (var j = 0; j < b.length; j++) {
-                        var intensity = layers[c].nodes[i].act;
+                        var intensity = back
+                            ? Math.min(1, Math.abs(errorVal) * 2)
+                            : layers[c].nodes[i].act;
                         drawConnection(a[i].x, a[i].y, b[j].x, b[j].y,
-                            active, active ? frac : -1, intensity);
+                            active, active ? frac : -1, intensity, back);
                     }
                 }
             }
             // Output -> error connection (final stage).
-            var outCol = geom.cols[geom.cols.length - 1];
-            var lastStage = geom.cols.length - 1; // stage index for output->error
-            var errActive = (stage === lastStage);
+            var outCol = geom.cols[lastStage];
+            var errActive = wave && (stage === lastStage);
             drawConnection(outCol[0].x, outCol[0].y, geom.error.x - r * 3.1, geom.error.y,
-                errActive, errActive ? frac : -1, yhat);
+                errActive, errActive ? frac : -1,
+                back ? Math.min(1, Math.abs(errorVal) * 2) : yhat, back);
 
             // 2) Column titles + nodes + labels.
             for (var col = 0; col < geom.cols.length; col++) {
                 drawColumnTitle(col, geom.cols[col][0].x);
                 for (var n = 0; n < geom.cols[col].length; n++) {
                     var p = geom.cols[col][n];
-                    var glow = colGlow(col, n);
+                    var glow = colGlow(col, n, wavePos);
                     drawNode(p.x, p.y, r, glow, layers[col].nodes[n], col);
                     drawNodeLabels(col, n, p.x, p.y, r);
                 }
             }
 
-            // 3) Error / loss node – fires when the wave reaches the final stage.
-            var errGlow = Math.max(0, Math.min(1, front - lastStage));
-            drawErrorNode(errGlow);
+            // 3) Error / loss node – intensity driven by the training phase.
+            drawErrorNode(Math.max(0, Math.min(1, errGlow)));
+        }
+
+        // ---- Training scheduler / phase state machine ----------------------
+        function setSteps() {
+            var els = overlay.querySelectorAll('.nn-step');
+            var activeIdx = STEP_ORDER.indexOf(phase);
+            for (var k = 0; k < els.length; k++) {
+                var el = els[k];
+                var idx = STEP_ORDER.indexOf(el.getAttribute('data-step'));
+                el.classList.remove('is-active', 'is-done');
+                if (phase === 'final' || phase === 'done') { el.classList.add('is-done'); }
+                else if (idx === activeIdx) { el.classList.add('is-active'); }
+                else if (idx >= 0 && idx < activeIdx) { el.classList.add('is-done'); }
+            }
+        }
+        function setEpochReadout() {
+            var el = document.getElementById('nn-epoch');
+            if (el) { el.textContent = Math.min(epoch + 1, EPOCHS) + ' / ' + EPOCHS; }
+        }
+        function enterPhase(p, ts) {
+            phase = p;
+            phaseStart = ts;
+            setSteps();
+            if (p === 'forward') { forward(); setEpochReadout(); }
+            else if (p === 'update') { trainStep(); }   // gradient-descent weight update
+            else if (p === 'final') { forward(); }
+        }
+        function finishIntro() {
+            if (phase === 'done') { return; }
+            phase = 'done';
+            setSteps();
+            // Auto-transition into the homepage underneath – no button required.
+            overlay.classList.add('intro-hide');
+            window.setTimeout(function () {
+                overlay.style.display = 'none';
+                if (rafId) { window.cancelAnimationFrame(rafId); rafId = null; }
+            }, 800);
         }
 
         function step(ts) {
-            if (lastTs === null) { lastTs = ts; }
-            var dt = Math.min(0.05, (ts - lastTs) / 1000);
-            lastTs = ts;
+            if (phaseStart === null) { phaseStart = ts; }
+            var elapsed = (ts - phaseStart) / 1000;
+            var prog;
 
-            if (running) {
-                front += speed * dt;
-                if (front >= STAGES + PAUSE) { front = 0; } // continuous loop
+            switch (phase) {
+                case 'forward':
+                    prog = Math.min(1, elapsed / fwdDur(epoch));
+                    wavePos = prog * STAGES;
+                    errGlow = Math.max(0, Math.min(1, wavePos - (STAGES - 1)));
+                    weightGlow = 0;
+                    if (prog >= 1) { enterPhase('error', ts); }
+                    break;
+                case 'error':
+                    prog = Math.min(1, elapsed / errDur(epoch));
+                    wavePos = STAGES;
+                    errGlow = 0.7 + 0.3 * Math.abs(Math.sin(prog * Math.PI * 2)); // pulse
+                    weightGlow = 0;
+                    if (prog >= 1) { enterPhase('backprop', ts); }
+                    break;
+                case 'backprop':
+                    prog = Math.min(1, elapsed / backDur(epoch));
+                    wavePos = STAGES * (1 - prog);   // wave travels right -> left
+                    errGlow = 1 - prog;
+                    weightGlow = 0;
+                    if (prog >= 1) { enterPhase('update', ts); }
+                    break;
+                case 'update':
+                    prog = Math.min(1, elapsed / updDur(epoch));
+                    wavePos = 0;
+                    errGlow = 0;
+                    weightGlow = Math.sin(prog * Math.PI);  // flash weight labels
+                    if (prog >= 1) {
+                        epoch++;
+                        if (epoch >= EPOCHS) { enterPhase('final', ts); }
+                        else { enterPhase('forward', ts); }
+                    }
+                    break;
+                case 'final':
+                    prog = Math.min(1, elapsed / 1.1);
+                    wavePos = STAGES;
+                    errGlow = 0.3;
+                    weightGlow = 0;
+                    if (prog >= 1) { finishIntro(); }
+                    break;
+                default:
+                    break;
             }
+
             render();
-            rafId = window.requestAnimationFrame(step);
-        }
-
-        // ---- Controls ------------------------------------------------------
-        function bindInput(id, valId, onChange, fmt) {
-            var el = document.getElementById(id);
-            var out = document.getElementById(valId);
-            if (!el) { return; }
-            var apply = function () {
-                var v = parseFloat(el.value);
-                if (out) { out.textContent = fmt ? fmt(v) : v.toFixed(2); }
-                onChange(v);
-            };
-            el.addEventListener('input', apply);
-            apply();
-        }
-
-        bindInput('nn-x1', 'nn-x1-val', function (v) { layers[0].nodes[0].act = v; forward(); });
-        bindInput('nn-x2', 'nn-x2-val', function (v) { layers[0].nodes[1].act = v; forward(); });
-        bindInput('nn-x3', 'nn-x3-val', function (v) { layers[0].nodes[2].act = v; forward(); });
-        bindInput('nn-speed', 'nn-speed-val', function (v) { speed = v; },
-            function (v) { return v.toFixed(1) + '\u00d7'; });
-
-        var triggerBtn = document.getElementById('nn-trigger');
-        if (triggerBtn) {
-            triggerBtn.addEventListener('click', function () {
-                forward();
-                front = 0;
-                running = true;
-            });
-        }
-
-        var enterBtn = document.getElementById('nn-enter');
-        if (enterBtn) {
-            // Fade the overlay out for a smoother hand-off before navigating.
-            enterBtn.addEventListener('click', function () {
-                overlay.classList.add('intro-hide');
-            });
+            if (phase !== 'done') { rafId = window.requestAnimationFrame(step); }
         }
 
         window.addEventListener('resize', function () { resize(); layout(); });
 
         // ---- Boot ----------------------------------------------------------
         layout();
+        syncWeights();
         forward();
+        setEpochReadout();
+        setSteps();
         document.getElementById('nn-target').textContent = TARGET.toFixed(2);
 
         if (prefersReduced) {
-            front = STAGES;   // show fully-propagated static state
+            // Respect reduced-motion: skip the animation and reveal the homepage.
+            for (var t = 0; t < EPOCHS; t++) { trainStep(); }
+            forward();
+            phase = 'final';
+            wavePos = STAGES;
+            errGlow = 0.3;
             render();
+            window.setTimeout(finishIntro, 400);
         } else {
+            phase = 'forward';
+            phaseStart = null;
             rafId = window.requestAnimationFrame(step);
         }
     })();
