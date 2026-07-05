@@ -381,81 +381,252 @@
 
         footer a:hover { text-decoration: underline; }
 
-        /* ---------- Intro molecule animation ---------- */
-        #molecule-intro {
+        /* ---------- Intro neural-network animation ---------- */
+        #nn-intro {
             position: fixed;
             inset: 0;
             z-index: 2000;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at 50% 40%, #1e293b 0%, #0f172a 70%, #020617 100%);
+            justify-content: flex-start;
+            background: radial-gradient(circle at 50% 35%, #0b2b26 0%, #0f172a 62%, #020617 100%);
             overflow: hidden;
             opacity: 1;
-            transition: opacity 0.9s ease;
+            transition: opacity 0.7s ease;
         }
-        #molecule-intro.intro-hide {
+        #nn-intro.intro-hide {
             opacity: 0;
             pointer-events: none;
         }
-        #molecule-intro canvas {
+        #nn-intro #nn-canvas {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             display: block;
+            z-index: 1;
         }
-        #molecule-intro .intro-caption {
+        #nn-intro .nn-caption {
             position: relative;
             z-index: 2;
             text-align: center;
             color: #f8fafc;
             font-family: 'Inter', sans-serif;
-            padding: 0 1.5rem;
+            padding: 1.6rem 1.5rem 0;
             pointer-events: none;
-            animation: intro-caption-in 1.2s ease both;
+            animation: intro-caption-in 1s ease both;
         }
-        #molecule-intro .intro-caption .intro-badge {
+        #nn-intro .nn-caption .intro-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 600;
             letter-spacing: 0.18em;
             text-transform: uppercase;
             color: #5eead4;
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
         }
-        #molecule-intro .intro-caption h2 {
+        #nn-intro .nn-caption h2 {
             color: #f8fafc;
             font-weight: 800;
-            font-size: clamp(1.6rem, 4vw, 2.6rem);
+            font-size: clamp(1.4rem, 3.4vw, 2.3rem);
             margin: 0;
         }
-        #molecule-intro .intro-caption p {
+        #nn-intro .nn-caption p {
             color: #94a3b8;
-            font-size: clamp(0.9rem, 2vw, 1.05rem);
-            margin: 0.6rem 0 0;
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
+            margin: 0.45rem auto 0;
+            max-width: 42rem;
         }
+
+        /* ---------- Interactive control panel ---------- */
+        #nn-intro .nn-panel {
+            position: relative;
+            z-index: 3;
+            margin: auto 1rem 1.4rem;
+            width: min(960px, calc(100% - 2rem));
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid rgba(16, 185, 129, 0.28);
+            border-radius: 1rem;
+            box-shadow: 0 24px 60px -28px rgba(2, 6, 23, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 1rem 1.25rem;
+            font-family: 'Inter', sans-serif;
+            color: #cbd5e1;
+            animation: intro-caption-in 1s ease both;
+        }
+        #nn-intro .nn-panel .nn-panel-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem 1.5rem;
+            align-items: flex-end;
+        }
+        #nn-intro .nn-control {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            min-width: 120px;
+            flex: 1 1 120px;
+        }
+        #nn-intro .nn-control label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        #nn-intro .nn-control label .nn-val {
+            color: #5eead4;
+            font-variant-numeric: tabular-nums;
+        }
+        #nn-intro input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.35);
+            outline: none;
+            cursor: pointer;
+        }
+        #nn-intro input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #10b981;
+            border: 2px solid #ecfdf5;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+        }
+        #nn-intro input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #10b981;
+            border: 2px solid #ecfdf5;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+        }
+        #nn-intro .nn-readout {
+            flex: 1 1 150px;
+            min-width: 150px;
+            background: rgba(2, 6, 23, 0.55);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 0.7rem;
+            padding: 0.55rem 0.75rem;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        #nn-intro .nn-readout .nn-readout-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        #nn-intro .nn-readout strong { color: #ecfdf5; }
+        #nn-intro .nn-readout .nn-num {
+            color: #5eead4;
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+        }
+        #nn-intro .nn-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 1rem;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #nn-intro .nn-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 0.6rem;
+            padding: 0.6rem 1.15rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        #nn-intro .nn-btn:hover { transform: translateY(-1px); }
+        #nn-intro .nn-btn-trigger {
+            background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+            color: #04211b;
+            box-shadow: 0 10px 26px -10px rgba(16, 185, 129, 0.75);
+        }
+        #nn-intro .nn-btn-enter {
+            background: #ecfdf5;
+            color: #065f46;
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+        #nn-intro .nn-btn-enter:hover { background: #ffffff; }
         @keyframes intro-caption-in {
             from { opacity: 0; transform: translateY(14px); }
             to   { opacity: 1; transform: translateY(0); }
         }
+        @media (max-width: 640px) {
+            #nn-intro .nn-caption p { display: none; }
+            #nn-intro .nn-actions { justify-content: center; }
+        }
         @media (prefers-reduced-motion: reduce) {
-            #molecule-intro { transition: none; }
-            #molecule-intro .intro-caption { animation: none; }
+            #nn-intro { transition: none; }
+            #nn-intro .nn-caption,
+            #nn-intro .nn-panel { animation: none; }
+            #nn-intro .nn-btn:hover { transform: none; }
         }
     </style>
 </head>
 <body>
-    <!-- ================= Intro molecule animation ================= -->
-    <div id="molecule-intro" role="presentation" aria-hidden="true">
-        <canvas id="molecule-canvas"></canvas>
-        <div class="intro-caption">
-            <span class="intro-badge"><i class="fas fa-atom"></i>AI-Driven Drug Discovery</span>
-            <h2>Modelling molecules with machine learning</h2>
-            <p>Preparing your open-source discovery workspace&hellip;</p>
+    <!-- ================= Intro neural-network animation ================= -->
+    <div id="nn-intro" role="dialog" aria-label="Neural network forward-pass visualization">
+        <canvas id="nn-canvas"></canvas>
+        <div class="nn-caption">
+            <span class="intro-badge"><i class="fas fa-diagram-project"></i>Feedforward Neural Network</span>
+            <h2>Watch a multi-layer perceptron fire</h2>
+            <p>A 3&ndash;3&ndash;4&ndash;2&ndash;1 network propagating inputs forward to a prediction &#375; and its loss (error = &#375; &minus; y). Adjust the inputs and speed, or trigger a pass.</p>
+        </div>
+
+        <div class="nn-panel">
+            <div class="nn-panel-grid">
+                <div class="nn-control">
+                    <label for="nn-x1">Input X1 <span class="nn-val" id="nn-x1-val">0.60</span></label>
+                    <input type="range" id="nn-x1" min="0" max="1" step="0.01" value="0.60">
+                </div>
+                <div class="nn-control">
+                    <label for="nn-x2">Input X2 <span class="nn-val" id="nn-x2-val">0.30</span></label>
+                    <input type="range" id="nn-x2" min="0" max="1" step="0.01" value="0.30">
+                </div>
+                <div class="nn-control">
+                    <label for="nn-x3">Input X3 <span class="nn-val" id="nn-x3-val">0.80</span></label>
+                    <input type="range" id="nn-x3" min="0" max="1" step="0.01" value="0.80">
+                </div>
+                <div class="nn-control">
+                    <label for="nn-speed">Speed <span class="nn-val" id="nn-speed-val">1.0&times;</span></label>
+                    <input type="range" id="nn-speed" min="0.25" max="3" step="0.05" value="1">
+                </div>
+                <div class="nn-readout" aria-live="polite">
+                    <div class="nn-readout-row"><span>Prediction &#375;</span><span class="nn-num" id="nn-yhat">0.00</span></div>
+                    <div class="nn-readout-row"><span>Target y</span><span class="nn-num" id="nn-target">0.50</span></div>
+                    <div class="nn-readout-row"><strong>error = &#375; &minus; y</strong><span class="nn-num" id="nn-error">0.00</span></div>
+                </div>
+            </div>
+            <div class="nn-actions">
+                <button type="button" class="nn-btn nn-btn-trigger" id="nn-trigger">
+                    <i class="fas fa-bolt"></i>Trigger Forward Pass
+                </button>
+                <a class="nn-btn nn-btn-enter" id="nn-enter"
+                   href="https://tommbk50-hub.github.io/UK-respiratory-illness-case-predictions-using-machine-learning/index.html">
+                    Enter Homepage<i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -779,11 +950,11 @@
         })();
     </script>
 
-    <!-- ================= Intro molecule animation script ================= -->
+    <!-- ================= Intro neural-network animation script ================= -->
     <script>
     (function () {
-        var overlay = document.getElementById('molecule-intro');
-        var canvas = document.getElementById('molecule-canvas');
+        var overlay = document.getElementById('nn-intro');
+        var canvas = document.getElementById('nn-canvas');
         if (!overlay || !canvas || !canvas.getContext) { return; }
 
         var ctx = canvas.getContext('2d');
@@ -802,153 +973,369 @@
         }
         resize();
 
-        // Build a rotating 3D "molecule": a central atom with orbiting groups.
-        var palette = ['#5eead4', '#2dd4bf', '#0d9488', '#38bdf8', '#a78bfa', '#f472b6'];
-        var atoms = [];
-        var bonds = [];
+        // ---- Network definition (left -> right) ----------------------------
+        // Column meaning: 0 input, 1 hidden L1, 2 hidden L2, 3 hidden L3,
+        // 4 output L4, 5 loss/error stage.
+        var TARGET = 0.5;               // ground-truth y used in the error stage
+        var STAGES = 5;                 // connection groups the wave travels
 
-        // Central atom.
-        atoms.push({ x: 0, y: 0, z: 0, r: 16, color: '#f8fafc', core: true });
+        // Per-node fixed weights (the value shown as w_i^l next to each node).
+        var W0 = [0.8, -0.5, 1.1];               // input -> L1 weights (w_i^0)
+        var W1 = [0.9, -0.7, 0.6];               // L1 node weights (w_i^1)
+        var W2 = [0.5, 0.8, -0.6, 0.7];          // L2 node weights (w_i^2)
+        var W3 = [1.0, -0.9];                    // L3 node weights (w_i^3)
+        var W4 = [1.2];                          // L4 output weight (w_1^4)
 
-        // Surrounding atoms arranged on a sphere (fibonacci distribution).
-        var count = 14;
-        var radius = Math.min(W, H) * 0.28 || 180;
-        var offset = 2 / count;
-        var increment = Math.PI * (3 - Math.sqrt(5));
-        for (var i = 0; i < count; i++) {
-            var yy = ((i * offset) - 1) + (offset / 2);
-            var rr = Math.sqrt(Math.max(0, 1 - yy * yy));
-            var phi = i * increment;
-            atoms.push({
-                x: Math.cos(phi) * rr * radius,
-                y: yy * radius,
-                z: Math.sin(phi) * rr * radius,
-                r: 7 + (i % 3) * 2,
-                color: palette[i % palette.length]
-            });
-            bonds.push([0, i + 1]);
-        }
-        // A few ring bonds between neighbouring outer atoms for visual richness.
-        for (var b = 1; b < count; b += 2) {
-            bonds.push([b, b + 1]);
-        }
+        // Layers: each node = { act, weight, wl (superscript), sup (label sup) }
+        var layers = [
+            { role: 'input',  sup: 0, prefix: 'X', nodes: [
+                { act: 0.60, weight: W0[0] },
+                { act: 0.30, weight: W0[1] },
+                { act: 0.80, weight: W0[2] }
+            ]},
+            { role: 'hidden', sup: 1, prefix: 'a', nodes: [
+                { act: 0, weight: W1[0] }, { act: 0, weight: W1[1] }, { act: 0, weight: W1[2] }
+            ]},
+            { role: 'hidden', sup: 2, prefix: 'a', nodes: [
+                { act: 0, weight: W2[0] }, { act: 0, weight: W2[1] },
+                { act: 0, weight: W2[2] }, { act: 0, weight: W2[3] }
+            ]},
+            { role: 'hidden', sup: 3, prefix: 'a', nodes: [
+                { act: 0, weight: W3[0] }, { act: 0, weight: W3[1] }
+            ]},
+            { role: 'output', sup: 4, prefix: 'a', nodes: [
+                { act: 0, weight: W4[0] }
+            ]}
+        ];
 
-        function rotate(p, ax, ay) {
-            var cosY = Math.cos(ay), sinY = Math.sin(ay);
-            var x1 = p.x * cosY - p.z * sinY;
-            var z1 = p.x * sinY + p.z * cosY;
-            var cosX = Math.cos(ax), sinX = Math.sin(ax);
-            var y1 = p.y * cosX - z1 * sinX;
-            var z2 = p.y * sinX + z1 * cosX;
-            return { x: x1, y: y1, z: z2 };
-        }
+        function sigmoid(x) { return 1 / (1 + Math.exp(-x)); }
 
-        var startTime = null;
-        var rafId = null;
-        var DURATION = prefersReduced ? 0 : 3600; // ms visible before dismissing
+        // Forward-propagate the current input values through the network so that
+        // node activations (and therefore glow intensity) react to the inputs.
+        var yhat = 0, errorVal = 0;
+        function forward() {
+            var prev = layers[0].nodes.map(function (n) { return n.act; });
+            // input -> L1 uses the 1-to-1 input weights W0
+            var weightedInputSum = 0;
+            for (var i = 0; i < prev.length; i++) { weightedInputSum += prev[i] * W0[i]; }
 
-        function frame(ts) {
-            if (startTime === null) { startTime = ts; }
-            var elapsed = ts - startTime;
-            var t = elapsed / 1000;
-
-            ctx.clearRect(0, 0, W, H);
-
-            var cx = W / 2, cy = H / 2;
-            var focal = 520;
-            var ax = t * 0.55;
-            var ay = t * 0.8;
-            // Gentle entrance/breathing scale.
-            var scale = 0.6 + 0.4 * Math.min(1, elapsed / 900) +
-                        0.03 * Math.sin(t * 2);
-
-            var projected = atoms.map(function (a) {
-                var r = rotate(a, ax, ay);
-                var depth = focal / (focal - r.z);
-                return {
-                    sx: cx + r.x * depth * scale,
-                    sy: cy + r.y * depth * scale,
-                    z: r.z,
-                    depth: depth,
-                    r: a.r * depth * scale,
-                    color: a.color,
-                    core: a.core
-                };
-            });
-
-            // Draw bonds first (behind atoms).
-            for (var k = 0; k < bonds.length; k++) {
-                var p1 = projected[bonds[k][0]];
-                var p2 = projected[bonds[k][1]];
-                var avgZ = (p1.z + p2.z) / 2;
-                var alpha = 0.25 + 0.35 * ((avgZ + radius) / (2 * radius));
-                ctx.strokeStyle = 'rgba(148, 163, 184,' + alpha.toFixed(3) + ')';
-                ctx.lineWidth = Math.max(0.6, 2.2 * ((avgZ + radius) / (2 * radius)));
-                ctx.beginPath();
-                ctx.moveTo(p1.sx, p1.sy);
-                ctx.lineTo(p2.sx, p2.sy);
-                ctx.stroke();
+            layers[1].nodes.forEach(function (n) { n.act = sigmoid(n.weight * weightedInputSum); });
+            for (var L = 2; L < layers.length; L++) {
+                var sumPrev = 0;
+                layers[L - 1].nodes.forEach(function (p) { sumPrev += p.act; });
+                layers[L].nodes.forEach(function (n) { n.act = sigmoid(n.weight * sumPrev); });
             }
+            yhat = layers[layers.length - 1].nodes[0].act;
+            errorVal = yhat - TARGET;
 
-            // Draw atoms sorted back-to-front.
-            projected.slice().sort(function (a, c) { return a.z - c.z; })
-                .forEach(function (p) {
-                    var glow = ctx.createRadialGradient(
-                        p.sx, p.sy, 0, p.sx, p.sy, p.r * 2.4);
-                    glow.addColorStop(0, p.color);
-                    glow.addColorStop(0.5, p.color);
-                    glow.addColorStop(1, 'rgba(15,23,42,0)');
-                    ctx.globalAlpha = 0.55 + 0.45 * ((p.z + radius) / (2 * radius));
-                    ctx.fillStyle = glow;
-                    ctx.beginPath();
-                    ctx.arc(p.sx, p.sy, p.r * 2.4, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.globalAlpha = 1;
-                    ctx.fillStyle = p.color;
-                    ctx.beginPath();
-                    ctx.arc(p.sx, p.sy, p.r, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    // Specular highlight.
-                    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-                    ctx.beginPath();
-                    ctx.arc(p.sx - p.r * 0.3, p.sy - p.r * 0.3, p.r * 0.32, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-            ctx.globalAlpha = 1;
-
-            if (elapsed < DURATION) {
-                rafId = window.requestAnimationFrame(frame);
-            } else {
-                dismiss();
-            }
+            var yEl = document.getElementById('nn-yhat');
+            var eEl = document.getElementById('nn-error');
+            if (yEl) { yEl.textContent = yhat.toFixed(2); }
+            if (eEl) { eEl.textContent = (errorVal >= 0 ? '+' : '') + errorVal.toFixed(2); }
         }
 
-        function dismiss() {
-            if (rafId) { window.cancelAnimationFrame(rafId); rafId = null; }
-            overlay.classList.add('intro-hide');
-            window.setTimeout(function () {
-                if (overlay && overlay.parentNode) {
-                    overlay.parentNode.removeChild(overlay);
+        // ---- Layout --------------------------------------------------------
+        // Compute on-screen coordinates for every node plus the error node.
+        var geom = { cols: [], error: null, r: 18 };
+        function layout() {
+            var top = H * 0.29;
+            var bottom = H * 0.65;
+            var left = W * 0.08;
+            var right = W * 0.92;
+            var colCount = layers.length + 1;             // + error stage column
+            var r = Math.max(11, Math.min(22, W / 60));
+            geom.r = r;
+            geom.cols = [];
+            for (var c = 0; c < layers.length; c++) {
+                var x = left + (right - left) * (c / (colCount - 1));
+                var nodes = layers[c].nodes;
+                var pts = [];
+                for (var j = 0; j < nodes.length; j++) {
+                    var y = nodes.length === 1
+                        ? (top + bottom) / 2
+                        : top + (bottom - top) * (j / (nodes.length - 1));
+                    pts.push({ x: x, y: y });
                 }
-            }, 1000);
+                geom.cols.push(pts);
+            }
+            var ex = left + (right - left) * ((colCount - 1) / (colCount - 1));
+            geom.error = { x: ex, y: (top + bottom) / 2 };
         }
 
-        window.addEventListener('resize', function () {
-            resize();
-            radius = Math.min(W, H) * 0.28 || 180;
-        });
+        // ---- Animation state ----------------------------------------------
+        var front = 0;                 // wave front position measured in columns
+        var speed = 1;                 // columns per second (scaled by slider)
+        var running = !prefersReduced;
+        var lastTs = null;
+        var rafId = null;
+        var PAUSE = 0.9;               // columns of "pause" appended before loop reset
 
-        // Allow the user to skip the intro by clicking.
-        overlay.addEventListener('click', dismiss);
+        function colGlow(colIndex, nodeIndex) {
+            // Sequential firing: later nodes in a layer light a touch after earlier ones.
+            var d = front - (colIndex + nodeIndex * 0.12);
+            if (d < -0.02) { return colIndex === 0 ? 0.18 : 0.06; } // ambient
+            var sigma = 0.5;
+            var flash = Math.exp(-(d * d) / (2 * sigma * sigma));
+            var ambient = colIndex === 0 ? 0.2 : 0.08;
+            return Math.min(1, ambient + flash);
+        }
+
+        function lerp(a, b, t) { return a + (b - a) * t; }
+
+        function drawConnection(x1, y1, x2, y2, active, frac, intensity) {
+            var baseAlpha = active ? 0.5 : 0.16;
+            ctx.strokeStyle = active
+                ? 'rgba(45, 212, 191,' + (0.35 + 0.5 * intensity).toFixed(3) + ')'
+                : 'rgba(94, 234, 212,' + baseAlpha.toFixed(3) + ')';
+            ctx.lineWidth = active ? 2 : 1;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            if (active && frac >= 0 && frac <= 1) {
+                var px = lerp(x1, x2, frac);
+                var py = lerp(y1, y2, frac);
+                var pr = 3 + 3 * intensity;
+                var glow = ctx.createRadialGradient(px, py, 0, px, py, pr * 3);
+                glow.addColorStop(0, 'rgba(236, 253, 245, 0.95)');
+                glow.addColorStop(0.4, 'rgba(16, 185, 129, 0.8)');
+                glow.addColorStop(1, 'rgba(16, 185, 129, 0)');
+                ctx.fillStyle = glow;
+                ctx.beginPath();
+                ctx.arc(px, py, pr * 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawNode(x, y, r, glow, node, colIndex) {
+            // Outer glow halo grows with activation firing.
+            var haloR = r * (1.5 + glow * 1.4);
+            var halo = ctx.createRadialGradient(x, y, r * 0.3, x, y, haloR);
+            halo.addColorStop(0, 'rgba(16, 185, 129,' + (0.35 + 0.55 * glow).toFixed(3) + ')');
+            halo.addColorStop(1, 'rgba(16, 185, 129, 0)');
+            ctx.fillStyle = halo;
+            ctx.beginPath();
+            ctx.arc(x, y, haloR, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Node body – brightness tied to activation + firing glow.
+            var lit = Math.min(1, 0.25 + 0.75 * glow);
+            var body = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.2, x, y, r);
+            body.addColorStop(0, 'rgba(236, 253, 245,' + (0.5 + 0.5 * lit).toFixed(3) + ')');
+            body.addColorStop(1, 'rgba(6, 95, 70,' + (0.55 + 0.35 * lit).toFixed(3) + ')');
+            ctx.fillStyle = body;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'rgba(94, 234, 212,' + (0.5 + 0.5 * glow).toFixed(3) + ')';
+            ctx.stroke();
+
+            // Inner activation value.
+            ctx.fillStyle = 'rgba(4, 33, 27, 0.92)';
+            ctx.font = '600 ' + Math.round(r * 0.66) + "px 'Inter', sans-serif";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(node.act.toFixed(2), x, y);
+        }
+
+        function superscript(n) {
+            var map = { '0': '\u2070', '1': '\u00b9', '2': '\u00b2', '3': '\u00b3', '4': '\u2074' };
+            return String(n).split('').map(function (c) { return map[c] || c; }).join('');
+        }
+        function subscript(n) {
+            var map = { '0': '\u2080', '1': '\u2081', '2': '\u2082', '3': '\u2083', '4': '\u2084' };
+            return String(n).split('').map(function (c) { return map[c] || c; }).join('');
+        }
+
+        function drawNodeLabels(colIndex, nodeIndex, x, y, r) {
+            var layer = layers[colIndex];
+            var sup = superscript(layer.sup);
+            var sub = subscript(nodeIndex + 1);
+            ctx.textAlign = 'center';
+            ctx.font = '600 ' + Math.round(r * 0.6) + "px 'Inter', sans-serif";
+
+            if (layer.role === 'input') {
+                // X1, X2, X3 above; weight w_i^0 below.
+                ctx.textBaseline = 'alphabetic';
+                ctx.fillStyle = '#a7f3d0';
+                ctx.fillText(layer.prefix + (nodeIndex + 1), x, y - r - 8);
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '500 ' + Math.round(r * 0.5) + "px 'Inter', sans-serif";
+                ctx.textBaseline = 'top';
+                ctx.fillText('w' + sub + sup + ' = ' + layer.nodes[nodeIndex].weight, x, y + r + 6);
+            } else {
+                // activation label a_i^l above; weight below.
+                ctx.textBaseline = 'alphabetic';
+                ctx.fillStyle = '#a7f3d0';
+                ctx.fillText('a' + sub + sup, x, y - r - 8);
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '500 ' + Math.round(r * 0.5) + "px 'Inter', sans-serif";
+                ctx.textBaseline = 'top';
+                ctx.fillText('w' + sub + sup + ' = ' + layer.nodes[nodeIndex].weight, x, y + r + 6);
+            }
+        }
+
+        function drawColumnTitle(colIndex, x) {
+            var titles = ['Input', 'Hidden L1', 'Hidden L2', 'Hidden L3', 'Output L4'];
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.9)';
+            ctx.font = '600 ' + Math.round(geom.r * 0.55) + "px 'Inter', sans-serif";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText(titles[colIndex], x, H * 0.24);
+        }
+
+        function drawErrorNode(glow) {
+            var e = geom.error;
+            var r = geom.r;
+            var w = r * 6.2, h = r * 2.6;
+            var x = e.x - w / 2, y = e.y - h / 2;
+            // Card.
+            ctx.fillStyle = 'rgba(2, 6, 23,' + (0.55 + 0.3 * glow).toFixed(3) + ')';
+            ctx.strokeStyle = 'rgba(16, 185, 129,' + (0.4 + 0.6 * glow).toFixed(3) + ')';
+            ctx.lineWidth = 1.5;
+            roundRect(x, y, w, h, 10);
+            ctx.fill();
+            ctx.stroke();
+            // Glow halo when the loss stage fires.
+            if (glow > 0.02) {
+                var halo = ctx.createRadialGradient(e.x, e.y, r, e.x, e.y, w * 0.8);
+                halo.addColorStop(0, 'rgba(16, 185, 129,' + (0.3 * glow).toFixed(3) + ')');
+                halo.addColorStop(1, 'rgba(16, 185, 129, 0)');
+                ctx.fillStyle = halo;
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, w * 0.8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.fillStyle = '#5eead4';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = '700 ' + Math.round(r * 0.72) + "px 'Inter', sans-serif";
+            ctx.fillText('error = \u0177 \u2212 y', e.x, e.y - r * 0.35);
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '600 ' + Math.round(r * 0.62) + "px 'Inter', sans-serif";
+            ctx.fillText('= ' + (errorVal >= 0 ? '+' : '') + errorVal.toFixed(2), e.x, e.y + r * 0.55);
+
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.9)';
+            ctx.font = '600 ' + Math.round(r * 0.55) + "px 'Inter', sans-serif";
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText('Loss', e.x, H * 0.24);
+        }
+
+        function roundRect(x, y, w, h, rad) {
+            ctx.beginPath();
+            ctx.moveTo(x + rad, y);
+            ctx.arcTo(x + w, y, x + w, y + h, rad);
+            ctx.arcTo(x + w, y + h, x, y + h, rad);
+            ctx.arcTo(x, y + h, x, y, rad);
+            ctx.arcTo(x, y, x + w, y, rad);
+            ctx.closePath();
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, W, H);
+            var r = geom.r;
+            var stage = Math.floor(front);
+            var frac = front - stage;
+
+            // 1) Connections between successive columns (drawn behind nodes).
+            for (var c = 0; c < geom.cols.length - 1; c++) {
+                var a = geom.cols[c], b = geom.cols[c + 1];
+                var active = (c === stage);
+                for (var i = 0; i < a.length; i++) {
+                    for (var j = 0; j < b.length; j++) {
+                        var intensity = layers[c].nodes[i].act;
+                        drawConnection(a[i].x, a[i].y, b[j].x, b[j].y,
+                            active, active ? frac : -1, intensity);
+                    }
+                }
+            }
+            // Output -> error connection (final stage).
+            var outCol = geom.cols[geom.cols.length - 1];
+            var lastStage = geom.cols.length - 1; // stage index for output->error
+            var errActive = (stage === lastStage);
+            drawConnection(outCol[0].x, outCol[0].y, geom.error.x - r * 3.1, geom.error.y,
+                errActive, errActive ? frac : -1, yhat);
+
+            // 2) Column titles + nodes + labels.
+            for (var col = 0; col < geom.cols.length; col++) {
+                drawColumnTitle(col, geom.cols[col][0].x);
+                for (var n = 0; n < geom.cols[col].length; n++) {
+                    var p = geom.cols[col][n];
+                    var glow = colGlow(col, n);
+                    drawNode(p.x, p.y, r, glow, layers[col].nodes[n], col);
+                    drawNodeLabels(col, n, p.x, p.y, r);
+                }
+            }
+
+            // 3) Error / loss node – fires when the wave reaches the final stage.
+            var errGlow = Math.max(0, Math.min(1, front - lastStage));
+            drawErrorNode(errGlow);
+        }
+
+        function step(ts) {
+            if (lastTs === null) { lastTs = ts; }
+            var dt = Math.min(0.05, (ts - lastTs) / 1000);
+            lastTs = ts;
+
+            if (running) {
+                front += speed * dt;
+                if (front >= STAGES + PAUSE) { front = 0; } // continuous loop
+            }
+            render();
+            rafId = window.requestAnimationFrame(step);
+        }
+
+        // ---- Controls ------------------------------------------------------
+        function bindInput(id, valId, onChange, fmt) {
+            var el = document.getElementById(id);
+            var out = document.getElementById(valId);
+            if (!el) { return; }
+            var apply = function () {
+                var v = parseFloat(el.value);
+                if (out) { out.textContent = fmt ? fmt(v) : v.toFixed(2); }
+                onChange(v);
+            };
+            el.addEventListener('input', apply);
+            apply();
+        }
+
+        bindInput('nn-x1', 'nn-x1-val', function (v) { layers[0].nodes[0].act = v; forward(); });
+        bindInput('nn-x2', 'nn-x2-val', function (v) { layers[0].nodes[1].act = v; forward(); });
+        bindInput('nn-x3', 'nn-x3-val', function (v) { layers[0].nodes[2].act = v; forward(); });
+        bindInput('nn-speed', 'nn-speed-val', function (v) { speed = v; },
+            function (v) { return v.toFixed(2).replace(/0$/, '') + '\u00d7'; });
+
+        var triggerBtn = document.getElementById('nn-trigger');
+        if (triggerBtn) {
+            triggerBtn.addEventListener('click', function () {
+                forward();
+                front = 0;
+                running = true;
+            });
+        }
+
+        var enterBtn = document.getElementById('nn-enter');
+        if (enterBtn) {
+            // Fade the overlay out for a smoother hand-off before navigating.
+            enterBtn.addEventListener('click', function () {
+                overlay.classList.add('intro-hide');
+            });
+        }
+
+        window.addEventListener('resize', function () { resize(); layout(); });
+
+        // ---- Boot ----------------------------------------------------------
+        layout();
+        forward();
+        document.getElementById('nn-target').textContent = TARGET.toFixed(2);
 
         if (prefersReduced) {
-            // Draw a single static frame, then dismiss shortly after.
-            frame(0);
-            window.setTimeout(dismiss, 1200);
+            front = STAGES;   // show fully-propagated static state
+            render();
         } else {
-            rafId = window.requestAnimationFrame(frame);
+            rafId = window.requestAnimationFrame(step);
         }
     })();
     </script>
