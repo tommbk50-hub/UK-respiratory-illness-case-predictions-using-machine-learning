@@ -540,7 +540,7 @@
         <canvas id="nn-canvas"></canvas>
         <div class="nn-caption">
             <span class="intro-badge"><i class="fas fa-diagram-project"></i>Feedforward Neural Network</span>
-            <h2>Watch a multi-layer perceptron learn</h2>
+            <h2 id="nn-countdown" aria-live="polite">Welcoming you to Open Discovery AI in 5&hellip;</h2>
             <p>A 3&ndash;3&ndash;4&ndash;2&ndash;1 network trains itself by gradient descent &mdash; firing forward to a prediction &#375;, measuring the loss, back-propagating the error and updating its weights, cycle after cycle, until it converges.</p>
         </div>
 
@@ -984,6 +984,16 @@
             errorVal = yhat - TARGET;
             lossVal = 0.5 * errorVal * errorVal;
 
+            // Arm an orange "changed" flash for any node whose displayed activation
+            // moved, so recomputed activations are visible as the network learns.
+            layers.forEach(function (layer) {
+                layer.nodes.forEach(function (n) {
+                    var str = n.act.toFixed(2);
+                    if (n.aPrev !== undefined && str !== n.aPrev) { n.aFlash = 1; }
+                    n.aPrev = str;
+                });
+            });
+
             var yEl = document.getElementById('nn-yhat');
             var eEl = document.getElementById('nn-error');
             if (yEl) { yEl.textContent = yhat.toFixed(2); }
@@ -993,7 +1003,20 @@
         // ---- Back-propagation: numeric gradient + gradient-descent update ----
         // Computes dLoss/dw for every weight by central finite differences, then
         // nudges each weight downhill so the next forward pass has a smaller loss.
-        var LR = 6.0;                              // learning rate
+        //
+        // We move each weight by a fixed step in the direction opposite its
+        // gradient's sign (a resilient / Rprop-style update) rather than by a
+        // step proportional to the gradient magnitude. Plain gradient descent
+        // vanishes in the early layers of this deep sigmoid network, so those
+        // weights would never visibly change on screen. Sign-based descent keeps
+        // every layer's weights moving by a perceptible amount each epoch while
+        // still decreasing the loss, which is what makes the learning legible.
+        // The step size decays across epochs so the network settles as it nears
+        // the target instead of oscillating.
+        // Per-epoch step magnitude used by the sign-based update above. `e` is the
+        // current epoch index; the step decays from 0.14 (bold early moves that are
+        // clearly visible) to 0.04 (fine settling near the target) across training.
+        function stepSize(e) { return lerp(0.14, 0.04, e / (EPOCHS - 1)); }
         function trainStep() {
             var all = [W0, W1, W2, W3, W4];
             var eps = 1e-4;
@@ -1007,21 +1030,31 @@
                     grads[L][k] = (lp - lm) / (2 * eps);
                 }
             }
+            var st = stepSize(epoch);
             for (L = 0; L < all.length; L++) {
                 for (k = 0; k < all[L].length; k++) {
+                    var g = grads[L][k];
+                    var dir = g > 0 ? 1 : (g < 0 ? -1 : 0);
                     // Clamp to [-6, 6]: sigmoid saturates well within this range,
                     // so bounding the weights keeps training stable and the on-screen
                     // "w = ..." labels readable without affecting convergence.
-                    all[L][k] = Math.max(-6, Math.min(6, all[L][k] - LR * grads[L][k]));
+                    all[L][k] = Math.max(-6, Math.min(6, all[L][k] - st * dir));
                 }
             }
             syncWeights();
         }
-        // Keep the per-node display weights in sync with the W* arrays.
+        // Keep the per-node display weights in sync with the W* arrays. Whenever a
+        // node's displayed weight (rounded to what the label shows) actually changes,
+        // arm its orange "changed" flash so the update is visible on screen.
         function syncWeights() {
             var arrs = [W0, W1, W2, W3, W4];
             for (var c = 0; c < layers.length; c++) {
-                layers[c].nodes.forEach(function (n, k) { n.weight = arrs[c][k]; });
+                layers[c].nodes.forEach(function (n, k) {
+                    n.weight = arrs[c][k];
+                    var str = n.weight.toFixed(2);
+                    if (n.wPrev !== undefined && str !== n.wPrev) { n.wFlash = 1; }
+                    n.wPrev = str;
+                });
             }
         }
 
@@ -1059,20 +1092,52 @@
 
         // Training schedule. Each epoch runs four phases; phase durations shrink
         // with every epoch so the neurons visibly fire faster and faster until
-        // the loss converges to its final value.
+        // the loss converges to its final value. Total runtime is tuned so the
+        // whole training run completes in step with the ~5-second intro countdown.
         var EPOCHS = 8;
-        function fwdDur(e)  { return lerp(0.90, 0.28, e / (EPOCHS - 1)); }
-        function errDur(e)  { return lerp(0.40, 0.18, e / (EPOCHS - 1)); }
+        function fwdDur(e)  { return lerp(0.30, 0.12, e / (EPOCHS - 1)); }
+        function errDur(e)  { return lerp(0.14, 0.07, e / (EPOCHS - 1)); }
         function backDur(e) { return fwdDur(e) * 0.7; }
-        function updDur(e)  { return lerp(0.38, 0.18, e / (EPOCHS - 1)); }
+        function updDur(e)  { return lerp(0.14, 0.07, e / (EPOCHS - 1)); }
 
         var epoch = 0;
         var phase = 'forward';         // forward | error | backprop | update | final | done
         var phaseStart = null;         // timestamp (ms) the current phase began
         var wavePos = 0;               // wave-front position in "stages"
         var errGlow = 0;               // loss-node glow intensity
-        var weightGlow = 0;            // weight-label flash during Update Weights
+        var weightGlow = 0;            // loss-node/back-prop cue (unused for labels)
         var STEP_ORDER = ['forward', 'error', 'backprop', 'update'];
+
+        // Per-value "just changed" flashes decay in real time (seconds).
+        var FLASH_DUR = 0.7;           // how long a value stays orange after changing
+        var lastTs = null;             // previous frame timestamp (for dt)
+        var introStart = null;         // timestamp the intro/countdown began
+        var COUNTDOWN_FROM = 5;        // countdown starts at "5"
+        var lastCountdown = null;      // last rendered countdown number
+
+        // Fade every armed flash (weights + activations) toward zero over time.
+        function decayFlashes(dt) {
+            var d = dt / FLASH_DUR;
+            layers.forEach(function (layer) {
+                layer.nodes.forEach(function (n) {
+                    if (n.wFlash > 0) { n.wFlash = Math.max(0, n.wFlash - d); }
+                    if (n.aFlash > 0) { n.aFlash = Math.max(0, n.aFlash - d); }
+                });
+            });
+        }
+
+        // Update the intro heading to count down to the homepage loading.
+        function updateCountdown(ts) {
+            var el = document.getElementById('nn-countdown');
+            if (!el) { return; }
+            var elapsed = introStart === null ? 0 : (ts - introStart) / 1000;
+            // Whole seconds remaining, clamped to the 1..COUNTDOWN_FROM display range.
+            var n = Math.max(1, Math.min(COUNTDOWN_FROM, Math.ceil(COUNTDOWN_FROM - elapsed)));
+            if (n !== lastCountdown) {
+                lastCountdown = n;
+                el.textContent = 'Welcoming you to Open Discovery AI in ' + n + '\u2026';
+            }
+        }
 
         function colGlow(colIndex, nodeIndex, pos) {
             // Sequential firing: later nodes in a layer light a touch after earlier ones.
@@ -1148,8 +1213,13 @@
             ctx.strokeStyle = 'rgba(94, 234, 212,' + (0.5 + 0.5 * glow).toFixed(3) + ')';
             ctx.stroke();
 
-            // Inner activation value.
-            ctx.fillStyle = 'rgba(4, 33, 27, 0.92)';
+            // Inner activation value. Flashes orange when it just changed.
+            var af = node.aFlash || 0;
+            ctx.fillStyle = af > 0.02
+                ? 'rgba(' + Math.round(4 + 241 * af) + ',' +
+                            Math.round(33 + 125 * af) + ',' +
+                            Math.round(27 - 16 * af) + ',0.95)'
+                : 'rgba(4, 33, 27, 0.92)';
             ctx.font = '600 ' + Math.round(r * 0.66) + "px 'Inter', sans-serif";
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -1169,11 +1239,13 @@
             var layer = layers[colIndex];
             var sup = superscript(layer.sup);
             var sub = subscript(nodeIndex + 1);
-            // Weight labels flash amber while the Update-Weights phase is active.
-            var wColor = weightGlow > 0.02
-                ? 'rgba(' + Math.round(148 + 107 * weightGlow) + ',' +
-                            Math.round(163 + 28 * weightGlow) + ',' +
-                            Math.round(184 - 173 * weightGlow) + ',1)'
+            // Weight labels flash orange only while that specific weight's
+            // displayed value is changing (armed in syncWeights / trainStep).
+            var wf = layer.nodes[nodeIndex].wFlash || 0;
+            var wColor = wf > 0.02
+                ? 'rgba(' + Math.round(148 + 97 * wf) + ',' +
+                            Math.round(163 - 5 * wf) + ',' +
+                            Math.round(184 - 173 * wf) + ',1)'
                 : '#94a3b8';
             var wText = layer.nodes[nodeIndex].weight.toFixed(2);
             ctx.textAlign = 'center';
@@ -1335,6 +1407,13 @@
         }
 
         function step(ts) {
+            if (introStart === null) { introStart = ts; }
+            if (lastTs === null) { lastTs = ts; }
+            // Cap dt at 100ms so flashes don't jump if the tab was backgrounded.
+            var dt = Math.min(0.1, (ts - lastTs) / 1000);
+            lastTs = ts;
+            decayFlashes(dt);
+            updateCountdown(ts);
             if (phaseStart === null) { phaseStart = ts; }
             var elapsed = (ts - phaseStart) / 1000;
             var prog;
@@ -1365,7 +1444,7 @@
                     prog = Math.min(1, elapsed / updDur(epoch));
                     wavePos = 0;
                     errGlow = 0;
-                    weightGlow = Math.sin(prog * Math.PI);  // flash weight labels
+                    weightGlow = 0;
                     if (prog >= 1) {
                         epoch++;
                         if (epoch >= EPOCHS) { enterPhase('final', ts); }
@@ -1373,7 +1452,7 @@
                     }
                     break;
                 case 'final':
-                    prog = Math.min(1, elapsed / 1.1);
+                    prog = Math.min(1, elapsed / 0.5);
                     wavePos = STAGES;
                     errGlow = 0.3;
                     weightGlow = 0;
@@ -1399,8 +1478,14 @@
 
         if (prefersReduced) {
             // Respect reduced-motion: skip the animation and reveal the homepage.
-            for (var t = 0; t < EPOCHS; t++) { trainStep(); }
+            for (epoch = 0; epoch < EPOCHS; epoch++) { trainStep(); }
             forward();
+            // No animation loop runs to fade the flashes, so clear them.
+            layers.forEach(function (layer) {
+                layer.nodes.forEach(function (n) { n.wFlash = 0; n.aFlash = 0; });
+            });
+            var cdEl = document.getElementById('nn-countdown');
+            if (cdEl) { cdEl.textContent = 'Welcoming you to Open Discovery AI\u2026'; }
             phase = 'final';
             wavePos = STAGES;
             errGlow = 0.3;
