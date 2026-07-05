@@ -1013,6 +1013,9 @@
         // still decreasing the loss, which is what makes the learning legible.
         // The step size decays across epochs so the network settles as it nears
         // the target instead of oscillating.
+        // Per-epoch step magnitude used by the sign-based update above. `e` is the
+        // current epoch index; the step decays from 0.14 (bold early moves that are
+        // clearly visible) to 0.04 (fine settling near the target) across training.
         function stepSize(e) { return lerp(0.14, 0.04, e / (EPOCHS - 1)); }
         function trainStep() {
             var all = [W0, W1, W2, W3, W4];
@@ -1128,6 +1131,7 @@
             var el = document.getElementById('nn-countdown');
             if (!el) { return; }
             var elapsed = introStart === null ? 0 : (ts - introStart) / 1000;
+            // Whole seconds remaining, clamped to the 1..COUNTDOWN_FROM display range.
             var n = Math.max(1, Math.min(COUNTDOWN_FROM, Math.ceil(COUNTDOWN_FROM - elapsed)));
             if (n !== lastCountdown) {
                 lastCountdown = n;
@@ -1405,6 +1409,7 @@
         function step(ts) {
             if (introStart === null) { introStart = ts; }
             if (lastTs === null) { lastTs = ts; }
+            // Cap dt at 100ms so flashes don't jump if the tab was backgrounded.
             var dt = Math.min(0.1, (ts - lastTs) / 1000);
             lastTs = ts;
             decayFlashes(dt);
