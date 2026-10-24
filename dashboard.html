@@ -309,6 +309,46 @@
             vertical-align: middle;
         }
 
+        /* Executive Briefing card (auto-generated summary) */
+        .exec-briefing {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 1px solid var(--border-soft);
+            border-left: 4px solid var(--accent);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 10px 30px -18px rgba(15, 23, 42, 0.5);
+        }
+        .exec-briefing-icon {
+            flex: 0 0 auto;
+            width: 2.6rem;
+            height: 2.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.7rem;
+            background-color: rgba(13, 148, 136, 0.18);
+            color: #5eead4;
+            font-size: 1.15rem;
+        }
+        .exec-briefing-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #5eead4;
+            margin-bottom: 0.35rem;
+        }
+        .exec-briefing-text {
+            color: #e2e8f0;
+            font-size: 1.02rem;
+            line-height: 1.55;
+            font-weight: 400;
+        }
+        .exec-briefing-text strong { color: #ffffff; font-weight: 600; }
+
         /* Tech Section */
         .tech-section { background: #fff; border: 1px solid #e2e8f0; }
         .tech-section h5 { font-weight: 700; color: var(--primary-color); margin-top: 40px; margin-bottom: 15px; font-size: 1.2rem; }
@@ -535,6 +575,18 @@
             </div>
         </div>
 
+        <div class="row mb-4">
+            <div class="col-12">
+                <div id="exec-briefing" class="exec-briefing" role="status" aria-live="polite">
+                    <div class="exec-briefing-icon"><i class="fas fa-file-medical"></i></div>
+                    <div class="exec-briefing-body">
+                        <div class="exec-briefing-label">Weekly Executive Briefing</div>
+                        <div id="exec-briefing-text" class="exec-briefing-text">Generating automated summary from the latest forecast&hellip;</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -596,6 +648,62 @@
                         <div class="metric-subtitle">Total Weekly Count (Sum of Daily Admissions)</div>
                     </div>
                     <div class="card-body"><div id="chart-covid-hospital" class="chart-container"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-header"><i class="fas fa-chart-line text-primary"></i>Epidemic Intelligence &amp; Winter Planning<span class="badge-live">DERIVED</span></h3>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="metric-card-header">
+                        <h5 class="metric-title">Combined Winter Bed Occupancy Pressure</h5>
+                        <div class="metric-subtitle">Projected total acute hospital pressure from Influenza and COVID-19 combined (relative index)</div>
+                    </div>
+                    <div class="card-body">
+                        <p class="metric-subtitle mb-3">Hospital managers rarely plan for a single virus in isolation. Because Influenza (admissions per 100k) and COVID-19 (weekly admission counts) use different native units, each forecast is indexed to a percentage of its own historical peak and then stacked, giving a single comparable "total acute bed load" signal that makes the combined winter pressure, and when it peaks, immediately visible.</p>
+                        <div id="chart-bed-pressure" class="chart-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="metric-card-header">
+                        <h5 class="metric-title">Effective Reproduction Number (R<sub>t</sub>)</h5>
+                        <div class="metric-subtitle">Flu hospital admissions &ndash; estimated transmission rate vs the R = 1 threshold</div>
+                    </div>
+                    <div class="card-body">
+                        <p class="metric-subtitle mb-3">R<sub>t</sub> estimates how many further cases each current case generates, derived from the week-on-week growth rate of the forecast trajectory. Above the dashed R = 1 line the epidemic is accelerating; below it the wave is subsiding. This acts as an early-warning signal weeks before admissions actually peak.</p>
+                        <div id="chart-rt" class="accuracy-container"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="metric-card-header">
+                        <h5 class="metric-title">Forecast Horizon Error</h5>
+                        <div class="metric-subtitle">Flu hospital admissions &ndash; backtest error magnitude by forecast lead time</div>
+                    </div>
+                    <div class="card-body">
+                        <p class="metric-subtitle mb-3">Forecasts are more accurate close to today and decay further out. This chart orders the walk-forward backtest errors by how far ahead they were made, illustrating calibration decay &ndash; short horizons are highly accurate, while long horizons serve mainly as a generalised seasonal baseline.</p>
+                        <div id="chart-horizon-error" class="accuracy-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="metric-card-header">
+                        <h5 class="metric-title">Peak Timing &amp; Magnitude</h5>
+                        <div class="metric-subtitle">Flu hospital admissions &ndash; forecast peak week and the plausible range of peak admission rate</div>
+                    </div>
+                    <div class="card-body">
+                        <p class="metric-subtitle mb-3">Directly answers the core NHS winter-planning question: "When is our peak bed crisis expected, and how tall will it be?" The marker shows the forecast peak week and admission rate, while the shaded band spans the 90% confidence cone at that peak &ndash; the plausible best- and worst-case peak heights.</p>
+                        <div id="chart-peak" class="chart-container"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -882,7 +990,8 @@ importance_scores = result.importances_mean</code></pre>
 
         // All Plotly containers on the page (used for responsive resizing).
         const ALL_CHART_IDS = chartsConfig.map(c => c.divId)
-            .concat(['chart-region-flu-map', 'chart-accuracy', 'chart-residuals', 'chart-importance']);
+            .concat(['chart-region-flu-map', 'chart-accuracy', 'chart-residuals', 'chart-importance',
+                     'chart-bed-pressure', 'chart-rt', 'chart-horizon-error', 'chart-peak']);
 
         // Key under which the last successfully loaded dataset is cached in the browser,
         // so the dashboard can still show the most recent plots if live data is unavailable.
@@ -1248,6 +1357,297 @@ importance_scores = result.importances_mean</code></pre>
             } else {
                 document.getElementById('chart-importance').innerHTML = `<div class="loading-msg text-warning"><i class="fas fa-exclamation-triangle me-2"></i>Importance data not available</div>`;
             }
+
+            // 5. EPIDEMIC INTELLIGENCE & WINTER PLANNING (all derived client-side from the data above)
+            try { renderExecutiveBriefing(data); } catch (e) { console.error('Exec briefing error:', e); }
+            try { renderBedPressureChart(data); } catch (e) { console.error('Bed pressure chart error:', e); }
+            try { renderRtChart(data); } catch (e) { console.error('R_t chart error:', e); }
+            try { renderHorizonErrorChart(data); } catch (e) { console.error('Horizon error chart error:', e); }
+            try { renderPeakChart(data); } catch (e) { console.error('Peak chart error:', e); }
+        }
+
+        // ---- Small helpers for the derived "Epidemic Intelligence" plots ----
+        function showChartMessage(id, message, kind) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const cls = kind === 'error' ? 'text-danger' : 'text-warning';
+            const icon = kind === 'error' ? 'fa-times-circle' : 'fa-exclamation-triangle';
+            el.innerHTML = `<div class="loading-msg ${cls}"><i class="fas ${icon} me-2"></i>${message}</div>`;
+        }
+        // Index of the maximum finite value in an array (or -1 if none).
+        function argMaxFinite(arr) {
+            let best = -1, bestV = -Infinity;
+            (arr || []).forEach((v, i) => {
+                if (typeof v === 'number' && isFinite(v) && v > bestV) { bestV = v; best = i; }
+            });
+            return best;
+        }
+
+        // Automated 2-3 sentence executive summary generated from the latest flu forecast.
+        function renderExecutiveBriefing(data) {
+            const el = document.getElementById('exec-briefing-text');
+            if (!el) return;
+            const flu = data['hospital'];
+            if (!flu || !flu.forecast || !Array.isArray(flu.forecast.values) || !flu.history) {
+                el.innerHTML = 'Automated briefing unavailable: the latest Influenza forecast could not be loaded.';
+                return;
+            }
+            const fVals = flu.forecast.values;
+            const fDates = flu.forecast.dates || [];
+            const peakIdx = argMaxFinite(fVals);
+            const hist = flu.history.values || [];
+            const lastActual = hist.length ? hist[hist.length - 1] : null;
+
+            const sentences = [];
+            if (peakIdx >= 0) {
+                const peakVal = fVals[peakIdx];
+                const peakDate = fDates[peakIdx];
+                let weekLabel = peakDate;
+                try {
+                    const d = new Date(peakDate);
+                    if (!isNaN(d)) {
+                        weekLabel = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) +
+                            ' (ISO week ' + isoWeek(d) + ')';
+                    }
+                } catch (e) { /* keep raw date */ }
+                sentences.push(`Influenza hospital admissions are projected to peak around <strong>${weekLabel}</strong> at an estimated <strong>${peakVal.toFixed(1)} per 100k</strong>.`);
+            }
+            if (typeof lastActual === 'number' && peakIdx >= 0 && isFinite(fVals[peakIdx]) && lastActual > 0) {
+                const changePct = ((fVals[peakIdx] - lastActual) / lastActual) * 100;
+                const dir = changePct >= 0 ? 'above' : 'below';
+                sentences.push(`That peak is <strong>${Math.abs(changePct).toFixed(0)}% ${dir}</strong> the latest reported rate of ${lastActual.toFixed(1)} per 100k.`);
+            }
+            // Trend direction over the first few forecast weeks via growth rate.
+            if (fVals.length >= 2 && typeof fVals[0] === 'number' && typeof fVals[1] === 'number') {
+                const rising = fVals[1] >= fVals[0];
+                sentences.push(`The near-term trajectory is currently <strong>${rising ? 'rising' : 'easing'}</strong>, so planners should ${rising ? 'prepare for increasing acute bed demand' : 'expect gradually reducing pressure'} in the coming weeks.`);
+            }
+            el.innerHTML = sentences.length ? sentences.join(' ') : 'Automated briefing unavailable for the current dataset.';
+        }
+
+        // ISO-8601 week number for a Date.
+        function isoWeek(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = (d.getUTCDay() + 6) % 7;
+            d.setUTCDate(d.getUTCDate() - dayNum + 3);
+            const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+            const firstDayNum = (firstThursday.getUTCDay() + 6) % 7;
+            firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNum + 3);
+            return 1 + Math.round((d - firstThursday) / (7 * 24 * 3600 * 1000));
+        }
+
+        // Combined Winter Bed Occupancy Pressure: flu and COVID hospital forecasts expressed as a
+        // relative pressure index (% of each virus's own historical peak), so the two series share a
+        // comparable 0-100% scale and can be meaningfully stacked despite using different native units
+        // (flu = admissions per 100k, COVID = weekly admission counts).
+        function renderBedPressureChart(data) {
+            const flu = data['hospital'];
+            const covid = data['covid_hospital'];
+            if (!flu || !flu.forecast || !covid || !covid.forecast) {
+                showChartMessage('chart-bed-pressure', 'Combined bed pressure data currently unavailable', 'warning');
+                return;
+            }
+            const peakOf = series => {
+                const hist = (series.history && series.history.values) || [];
+                const fc = (series.forecast && series.forecast.values) || [];
+                const all = hist.concat(fc).filter(v => typeof v === 'number' && isFinite(v));
+                return all.length ? Math.max.apply(null, all) : 0;
+            };
+            const fluPeak = peakOf(flu) || 1;
+            const covidPeak = peakOf(covid) || 1;
+
+            const fluDates = flu.forecast.dates || [];
+            const covidByDate = {};
+            (covid.forecast.dates || []).forEach((dt, i) => { covidByDate[dt] = covid.forecast.values[i]; });
+
+            // Index each series onto the flu forecast date axis as a % of its own historical peak.
+            const fluVals = fluDates.map((dt, i) => {
+                const v = flu.forecast.values[i];
+                return (typeof v === 'number') ? (v / fluPeak) * 100 : null;
+            });
+            const covidVals = fluDates.map(dt => {
+                const v = covidByDate[dt];
+                return (typeof v === 'number') ? (v / covidPeak) * 100 : null;
+            });
+
+            const traceFlu = {
+                x: fluDates, y: fluVals, type: 'scatter', mode: 'lines', name: 'Influenza',
+                stackgroup: 'beds', line: { width: 0.5, color: '#dc3545' }, fillcolor: hexToRgba('#dc3545', 0.5),
+                hovertemplate: 'Influenza: %{y:.0f}% of peak<extra></extra>'
+            };
+            const traceCovid = {
+                x: fluDates, y: covidVals, type: 'scatter', mode: 'lines', name: 'COVID-19',
+                stackgroup: 'beds', line: { width: 0.5, color: '#6610f2' }, fillcolor: hexToRgba('#6610f2', 0.5),
+                hovertemplate: 'COVID-19: %{y:.0f}% of peak<extra></extra>'
+            };
+            const layout = {
+                font: { family: 'Inter, sans-serif' },
+                margin: { t: 20, b: 40, l: 55, r: 20 },
+                xaxis: { showgrid: true, gridcolor: '#f1f5f9' },
+                yaxis: { title: 'Relative bed pressure (% of each virus\u2019s own peak, stacked)', showgrid: true, gridcolor: '#f1f5f9' },
+                showlegend: true, legend: { orientation: 'h', y: -0.15 },
+                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+            document.getElementById('chart-bed-pressure').innerHTML = '';
+            Plotly.newPlot('chart-bed-pressure', [traceFlu, traceCovid], layout, PLOTLY_CONFIG);
+        }
+
+        // Effective Reproduction Number R_t derived from the week-on-week growth rate of the
+        // flu hospital-admission trajectory (recent history + forecast), with a 5-day
+        // generation-interval approximation: R_t = exp(growth_rate * gen_interval_weeks).
+        function renderRtChart(data) {
+            const flu = data['hospital'];
+            if (!flu || !flu.history || !flu.forecast) {
+                showChartMessage('chart-rt', 'R_t data currently unavailable', 'warning');
+                return;
+            }
+            const GEN_INTERVAL_WEEKS = 5 / 7; // ~5-day serial interval for influenza
+            const histDates = flu.history.dates || [];
+            const histVals = flu.history.values || [];
+            const recentN = Math.min(26, histDates.length); // last ~6 months of history for context
+            const dates = histDates.slice(histDates.length - recentN).concat(flu.forecast.dates || []);
+            const vals = histVals.slice(histVals.length - recentN).concat(flu.forecast.values || []);
+
+            const rtX = [], rtY = [];
+            for (let i = 1; i < vals.length; i++) {
+                const prev = vals[i - 1], cur = vals[i];
+                if (typeof prev === 'number' && typeof cur === 'number' && prev > 0 && cur > 0) {
+                    const growth = Math.log(cur / prev); // per-week log growth rate
+                    rtX.push(dates[i]);
+                    rtY.push(Math.exp(growth * GEN_INTERVAL_WEEKS));
+                }
+            }
+            if (rtX.length === 0) {
+                showChartMessage('chart-rt', 'Insufficient data to estimate R_t', 'warning');
+                return;
+            }
+            const traceRt = {
+                x: rtX, y: rtY, type: 'scatter', mode: 'lines', name: 'Estimated R\u209C',
+                line: { color: '#0d9488', width: 3 }
+            };
+            const layout = {
+                font: { family: 'Inter, sans-serif' },
+                margin: { t: 20, b: 50, l: 55, r: 20 },
+                xaxis: { title: 'Date', showgrid: false },
+                yaxis: { title: 'R\u209C (reproduction number)', showgrid: true, gridcolor: '#f1f5f9' },
+                shapes: [{
+                    type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 1, y1: 1,
+                    line: { color: '#ef4444', width: 2, dash: 'dash' }
+                }],
+                annotations: [{
+                    xref: 'paper', x: 0.01, y: 1, yanchor: 'bottom', showarrow: false,
+                    text: 'R = 1 (epidemic threshold)', font: { size: 11, color: '#ef4444' }
+                }],
+                showlegend: false,
+                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+            document.getElementById('chart-rt').innerHTML = '';
+            Plotly.newPlot('chart-rt', [traceRt], layout, PLOTLY_CONFIG);
+        }
+
+        // Forecast Horizon Error: orders the walk-forward backtest residuals by lead time
+        // (oldest backtest week = longest horizon) and plots the rolling absolute error,
+        // illustrating calibration decay across the forecast horizon.
+        function renderHorizonErrorChart(data) {
+            const flu = data['hospital'];
+            const acc = flu && flu.accuracy;
+            if (!acc || !Array.isArray(acc.residuals) || acc.residuals.length === 0) {
+                showChartMessage('chart-horizon-error', 'Horizon error data currently unavailable', 'warning');
+                return;
+            }
+            // Backtest dates run oldest -> newest; horizon 1 = most recent week.
+            const absErr = acc.residuals.map(r => (typeof r === 'number' ? Math.abs(r) : null));
+            const n = absErr.length;
+            const horizons = [], values = [];
+            for (let i = 0; i < n; i++) {
+                horizons.push(n - i); // oldest row = largest lead time
+                values.push(absErr[i]);
+            }
+            // Pair and sort ascending by horizon for a clean left-to-right lead-time axis.
+            const paired = horizons.map((h, i) => [h, values[i]]).filter(p => typeof p[1] === 'number');
+            paired.sort((a, b) => a[0] - b[0]);
+            const x = paired.map(p => p[0]);
+            const y = paired.map(p => p[1]);
+
+            const traceBar = {
+                x: x, y: y, type: 'bar', name: 'Absolute error',
+                marker: { color: hexToRgba('#f59e0b', 0.55) }, hovertemplate: 'Horizon %{x} wk<br>|error| %{y:.2f}<extra></extra>'
+            };
+            // Simple trailing moving average to show the overall decay trend.
+            const trendY = [];
+            const win = 4;
+            for (let i = 0; i < y.length; i++) {
+                let s = 0, c = 0;
+                for (let j = Math.max(0, i - win + 1); j <= i; j++) { s += y[j]; c++; }
+                trendY.push(c ? s / c : null);
+            }
+            const traceTrend = {
+                x: x, y: trendY, type: 'scatter', mode: 'lines', name: 'Trend (4-wk avg)',
+                line: { color: '#dc3545', width: 2.5 }
+            };
+            const layout = {
+                font: { family: 'Inter, sans-serif' },
+                margin: { t: 20, b: 50, l: 55, r: 20 },
+                xaxis: { title: 'Forecast lead time (weeks ahead)', showgrid: false },
+                yaxis: { title: 'Absolute error', showgrid: true, gridcolor: '#f1f5f9' },
+                showlegend: true, legend: { orientation: 'h', y: 1.1 },
+                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+            document.getElementById('chart-horizon-error').innerHTML = '';
+            Plotly.newPlot('chart-horizon-error', [traceBar, traceTrend], layout, PLOTLY_CONFIG);
+        }
+
+        // Peak Timing & Magnitude: forecast flu peak week with the 90% confidence band at the peak.
+        function renderPeakChart(data) {
+            const flu = data['hospital'];
+            if (!flu || !flu.forecast || !Array.isArray(flu.forecast.values)) {
+                showChartMessage('chart-peak', 'Peak timing data currently unavailable', 'warning');
+                return;
+            }
+            const f = flu.forecast;
+            const peakIdx = argMaxFinite(f.values);
+            if (peakIdx < 0) {
+                showChartMessage('chart-peak', 'Peak timing could not be estimated', 'warning');
+                return;
+            }
+            const lower = (f.lower && typeof f.lower[peakIdx] === 'number') ? f.lower[peakIdx] : null;
+            const upper = (f.upper && typeof f.upper[peakIdx] === 'number') ? f.upper[peakIdx] : null;
+
+            const traceForecast = {
+                x: f.dates, y: f.values, type: 'scatter', mode: 'lines', name: 'Forecast',
+                line: { color: '#dc3545', width: 2, dash: 'dash' }
+            };
+            const traces = [];
+            if (lower !== null && upper !== null) {
+                traces.push(
+                    { x: f.dates, y: f.upper, type: 'scatter', mode: 'lines', line: { width: 0 }, showlegend: false, hoverinfo: 'skip' },
+                    { x: f.dates, y: f.lower, type: 'scatter', mode: 'lines', fill: 'tonexty', fillcolor: hexToRgba('#dc3545', 0.15), line: { width: 0 }, name: 'Confidence Cone (90%)', hoverinfo: 'skip' }
+                );
+            }
+            traces.push(traceForecast);
+            // Peak marker + range annotation.
+            traces.push({
+                x: [f.dates[peakIdx]], y: [f.values[peakIdx]],
+                type: 'scatter', mode: 'markers+text', name: 'Forecast peak',
+                text: ['<b>PEAK</b>'], textposition: 'top center',
+                textfont: { color: '#0f172a', size: 11 },
+                marker: { color: '#0f172a', size: 11, symbol: 'star' }, hoverinfo: 'x+y'
+            });
+            const rangeTxt = (lower !== null && upper !== null)
+                ? `Peak range: ${lower.toFixed(1)}\u2013${upper.toFixed(1)} per 100k`
+                : `Peak: ${f.values[peakIdx].toFixed(1)} per 100k`;
+            const layout = {
+                font: { family: 'Inter, sans-serif' },
+                margin: { t: 40, b: 40, l: 55, r: 20 },
+                title: { text: rangeTxt, font: { size: 14, color: '#0f172a' }, x: 0.5, xanchor: 'center', y: 0.98 },
+                xaxis: { showgrid: true, gridcolor: '#f1f5f9' },
+                yaxis: { title: 'Admissions per 100k', showgrid: true, gridcolor: '#f1f5f9' },
+                shapes: [{ type: 'line', x0: f.dates[peakIdx], x1: f.dates[peakIdx], y0: 0, y1: 1, yref: 'paper', line: { color: '#0f172a', width: 1.5, dash: 'dot' } }],
+                showlegend: true, legend: { orientation: 'h', y: -0.15 },
+                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+            document.getElementById('chart-peak').innerHTML = '';
+            Plotly.newPlot('chart-peak', traces, layout, PLOTLY_CONFIG);
         }
 
         // Render using cached data (if any) when live data cannot be loaded, and explain

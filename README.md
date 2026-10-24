@@ -50,3 +50,16 @@ Here is an expanded breakdown of the mechanics inside this module:
 * **Processing Loop:** The script loops through all five metrics defined in the configuration, running the fetching, forecasting, and evaluation functions for each target.
 * **Data Compilation:** It compiles the historical data, the 52-week forecast (with upper and lower bounds), accuracy metrics, and feature importance scores into a large Python dictionary.
 * **JSON Export:** Finally, it exports this comprehensive dataset into a local file named `dashboard_data.json`.
+
+## Changelog
+
+### 2026-10-24 &ndash; Round 1 dashboard improvements (`dashboard.html`)
+
+A set of clinician-focused, data-derived enhancements were added to the dashboard. All new visualisations are computed in the browser from the existing `dashboard_data.json` payload, so they add no new dependencies, external data sources, or CI/build steps to the weekly pipeline. Changes made to the previous version of the dashboard:
+
+* **Automated Weekly Executive Briefing:** Added a summary card at the top of the dashboard that generates a short, plain-English narrative from the latest Influenza forecast (projected peak week with ISO week number and admission rate, the change versus the most recent reported rate, and the near-term trend direction) to answer winter-planning questions at a glance.
+* **Combined Winter Bed Occupancy Pressure:** Added a stacked area chart that combines the Influenza and COVID-19 hospital-admission forecasts into a single "total acute bed load" signal. Because the two metrics use different native units (flu = admissions per 100k, COVID = weekly admission counts), each series is indexed to a percentage of its own historical peak so they can be compared and stacked meaningfully.
+* **Effective Reproduction Number (Rₜ):** Added an Rₜ plot derived from the week-on-week growth rate of the Influenza admission trajectory (recent history plus forecast), using an ~5-day influenza generation-interval approximation, with a dashed R = 1 epidemic threshold line for early-warning interpretation.
+* **Forecast Horizon Error:** Added a chart that orders the walk-forward backtest absolute errors by forecast lead time (weeks ahead) with a trailing-average trend line, illustrating calibration decay as the horizon lengthens.
+* **Peak Timing & Magnitude:** Added a chart highlighting the forecast peak week and admission rate for the upcoming season, with the 90% confidence band at the peak shown as a shaded range of plausible peak heights.
+* **Supporting changes:** Added styling for the Executive Briefing card and registered the four new chart containers for responsive resizing. Each new visualisation renders inside its own isolated error guard so that missing or malformed data can never block the existing forecast and diagnostic plots.
