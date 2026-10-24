@@ -74,6 +74,33 @@ REGION_BASE_URL = (
 )
 
 
+def fetch_latest_metric(session, url, headers, region_name, metric_id):
+    current_url = url
+    params = {'page_size': 365, 'format': 'json'}
+    latest_result = None
+
+    while current_url:
+        try:
+            response = session.get(current_url, headers=headers, params=params, timeout=10)
+            params = None
+            if response.status_code != 200:
+                print(f"    Warning: HTTP {response.status_code} fetching '{metric_id}' for '{region_name}'.")
+                return None
+
+            payload = response.json()
+            for result in payload.get('results') or []:
+                result_date = result.get('date')
+                if result_date and (latest_result is None or result_date > latest_result.get('date', '')):
+                    latest_result = result
+            current_url = payload.get('next')
+            time.sleep(0.1)
+        except Exception as e:
+            print(f"    Warning: Error fetching '{metric_id}' for '{region_name}': {e}")
+            return None
+
+    return latest_result
+
+
 def fetch_region_influenza_map_data(days=7):
     """Fetch the latest Influenza positivity, hospital and ICU/HDU rates per UKHSA Region."""
     headers = {
@@ -114,21 +141,15 @@ def fetch_region_influenza_map_data(days=7):
         for key, metric_id in REGION_MAP_METRICS.items():
             record[key] = None
             url = f"{REGION_BASE_URL}/{quote(region_name)}/metrics/{metric_id}"
-            try:
-                r = session.get(url, headers=headers, params={'page_size': 1, 'format': 'json'}, timeout=10)
-                if r.status_code != 200:
-                    continue
-                results = r.json().get('results') or []
-                if not results:
-                    continue
-                value = pd.to_numeric(results[0].get('metric_value'), errors='coerce')
-                if pd.isna(value):
-                    continue
-                record[key] = float(value)
-                record[f"{key}_date"] = results[0].get('date')
-                has_value = True
-            except Exception as e:
-                print(f"    Warning: Error fetching '{metric_id}' for '{region_name}': {e}")
+            latest_result = fetch_latest_metric(session, url, headers, region_name, metric_id)
+            if not latest_result:
+                continue
+            value = pd.to_numeric(latest_result.get('metric_value'), errors='coerce')
+            if pd.isna(value):
+                continue
+            record[key] = float(value)
+            record[f"{key}_date"] = latest_result.get('date')
+            has_value = True
             time.sleep(0.1)
 
         if has_value:
@@ -178,9 +199,10 @@ def fetch_data(config):
     df = pd.DataFrame(all_data)
     df = df[['date', 'metric_value']].copy()
     df['date'] = pd.to_datetime(df['date'])
+    df['metric_value'] = pd.to_numeric(df['metric_value'], errors='coerce')
     
     if config['agg'] == 'sum':
-        df = df.groupby('date')['metric_value'].sum().reset_index()
+        df = df.groupby('date')['metric_value'].sum(min_count=1).reset_index()
     else:
         df = df.groupby('date')['metric_value'].mean().reset_index()
 
@@ -188,11 +210,11 @@ def fetch_data(config):
     df.set_index('date', inplace=True)
     
     if config['agg'] == 'sum':
-        df = df.resample('W-SUN')['metric_value'].sum().to_frame()
+        df = df.resample('W-SUN')['metric_value'].sum(min_count=1).to_frame()
     else:
         df = df.resample('W-SUN')['metric_value'].mean().to_frame()
     
-    df = df[df['metric_value'] > 0.001].copy()
+    df = df[df['metric_value'].notna()].copy()
     
     return df
 
