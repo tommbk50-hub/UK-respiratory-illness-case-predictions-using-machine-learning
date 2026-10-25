@@ -390,6 +390,23 @@
             font-size: 0.95rem;
         }
 
+        /* Per-chart notice shown below a plot when live UKHSA data could not be
+           retrieved or has not been updated recently. */
+        .chart-data-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin: 0 24px 20px;
+            padding: 0.65rem 0.9rem;
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            color: #92400e;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .chart-data-notice i { margin-top: 0.15rem; }
+
         /* Live Data Beacon: Plotly native annotation pulsing at the last "Actuals" point */
         .live-beacon-container {
             display: flex;
@@ -608,6 +625,7 @@
                         <div class="metric-subtitle">Percentage of tests returning positive for Influenza</div>
                     </div>
                     <div class="card-body"><div id="chart-positivity" class="chart-container"></div></div>
+                    <div id="notice-positivity" class="chart-data-notice" style="display:none;"></div>
                 </div>
             </div>
             <div class="col-12">
@@ -617,6 +635,7 @@
                         <div class="metric-subtitle">Admissions per 100,000 population (Weekly)</div>
                     </div>
                     <div class="card-body"><div id="chart-hospital" class="chart-container"></div></div>
+                    <div id="notice-hospital" class="chart-data-notice" style="display:none;"></div>
                 </div>
             </div>
             <div class="col-12">
@@ -626,6 +645,7 @@
                         <div class="metric-subtitle">Critical care admissions per 100,000 population</div>
                     </div>
                     <div class="card-body"><div id="chart-icu" class="chart-container"></div></div>
+                    <div id="notice-icu" class="chart-data-notice" style="display:none;"></div>
                 </div>
             </div>
         </div>
@@ -639,6 +659,7 @@
                         <div class="metric-subtitle">7-Day Rolling Average (%)</div>
                     </div>
                     <div class="card-body"><div id="chart-covid-positivity" class="chart-container"></div></div>
+                    <div id="notice-covid_positivity" class="chart-data-notice" style="display:none;"></div>
                 </div>
             </div>
             <div class="col-12">
@@ -648,6 +669,7 @@
                         <div class="metric-subtitle">Total Weekly Count (Sum of Daily Admissions)</div>
                     </div>
                     <div class="card-body"><div id="chart-covid-hospital" class="chart-container"></div></div>
+                    <div id="notice-covid_hospital" class="chart-data-notice" style="display:none;"></div>
                 </div>
             </div>
         </div>

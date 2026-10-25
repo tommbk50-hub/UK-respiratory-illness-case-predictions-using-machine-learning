@@ -85,7 +85,9 @@ def fetch_latest_metric(session, url, headers, region_name, metric_id):
             params = None
             if response.status_code != 200:
                 print(f"    Warning: HTTP {response.status_code} fetching '{metric_id}' for '{region_name}'.")
-                return None
+                # Return whatever was already found on earlier pages rather than
+                # discarding valid data because a later page failed.
+                return latest_result
 
             payload = response.json()
             for result in payload.get('results') or []:
@@ -96,7 +98,9 @@ def fetch_latest_metric(session, url, headers, region_name, metric_id):
             time.sleep(0.1)
         except Exception as e:
             print(f"    Warning: Error fetching '{metric_id}' for '{region_name}': {e}")
-            return None
+            # As above: a transient error on one page shouldn't wipe out results
+            # already collected from previous pages.
+            return latest_result
 
     return latest_result
 
@@ -365,7 +369,15 @@ def train_and_forecast(df):
 # -------------------------------------------------------
 # MAIN EXECUTION
 # -------------------------------------------------------
+# Maximum gap (in days) allowed between the latest UKHSA data point for a metric
+# and the freshest data point retrieved across all metrics in this run before the
+# metric is treated as "stale" and a brief explanation is shown under its chart.
+# 21 days (3 weeks) comfortably covers UKHSA's off-season fortnightly reporting
+# cadence while still catching genuine outages/discontinuations like multi-month gaps.
+STALE_DATA_THRESHOLD_DAYS = 21
+
 full_dashboard_data = {}
+last_dates = {}  # key -> most recent pandas Timestamp successfully retrieved
 print("Starting Multi-Virus Forecast Job...")
 
 for key, config in METRICS.items():
@@ -380,6 +392,7 @@ for key, config in METRICS.items():
         forecasts, importances = train_and_forecast(df)
         accuracy_data = evaluate_accuracy(df, weeks_back=52)
 
+        last_dates[key] = df.index[-1]
         full_dashboard_data[key] = {
             "meta": {"name": config['name'], "topic": config['topic']},
             "history": {
@@ -398,6 +411,34 @@ for key, config in METRICS.items():
         }
     else:
         print("  Skipping (No data found).")
+        full_dashboard_data[key] = {
+            "meta": {"name": config['name'], "topic": config['topic']},
+            "data_notice": (
+                f"Live data unavailable: the UKHSA API did not return any data for "
+                f"'{config['metric_id']}'. This may be a temporary API issue, or UKHSA "
+                f"may have retired/renamed this metric."
+            )
+        }
+
+# Flag any metric whose latest data point is significantly older than the freshest
+# data retrieved in this run, which indicates UKHSA has stopped publishing (or is
+# delayed in publishing) new figures for that specific series rather than a bug in
+# this script. Surface a brief, honest explanation under the affected chart instead
+# of silently showing out-of-date numbers.
+if last_dates:
+    newest_date = max(last_dates.values())
+    for key, metric_last_date in last_dates.items():
+        gap_days = (newest_date - metric_last_date).days
+        if gap_days > STALE_DATA_THRESHOLD_DAYS:
+            config = METRICS[key]
+            full_dashboard_data[key]["data_notice"] = (
+                f"Live data unavailable: UKHSA has not published a newer figure for "
+                f"'{config['name']}' since {metric_last_date.strftime('%d %B %Y')} "
+                f"({gap_days} days behind the most recent UKHSA update used elsewhere on "
+                f"this dashboard). The chart shows the most recent data UKHSA has made "
+                f"available via its API."
+            )
+            print(f"  Notice: '{config['name']}' is stale ({gap_days} days behind latest).")
 
 # Optional UKHSA Region influenza maps. Isolated so that API timeouts or missing map
 # data can never abort the forecasting job above.
