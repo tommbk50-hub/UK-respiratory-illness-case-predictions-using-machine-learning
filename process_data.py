@@ -5,6 +5,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from urllib.parse import quote
+import re
 import time
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error
@@ -13,40 +14,59 @@ from sklearn.inspection import permutation_importance
 # -------------------------------------------------------
 # CONFIGURATION
 # -------------------------------------------------------
+# Each metric lists the primary UKHSA metric ID plus a 'fallback_pattern' regex.
+# UKHSA periodically renames/replaces metrics (e.g. when surveillance methodology
+# changes between seasons), which silently freezes the old series. At runtime the
+# script lists the metrics the API actually offers for the topic and, if a metric
+# matching the pattern has fresher data than the configured ID, switches to it.
 METRICS = {
     "positivity": {
         "topic": "Influenza",
         "metric_id": "influenza_testing_positivityByWeek",
+        "fallback_pattern": r"(?i)influenza.*test.*positivity",
         "agg": "mean",
         "name": "Flu: PCR Positivity Rate (%)"
     },
     "hospital": {
         "topic": "Influenza",
         "metric_id": "influenza_healthcare_hospitalAdmissionRateByWeek", 
+        "fallback_pattern": r"(?i)influenza(?!.*(?:icu|hdu)).*admission.*rate",
         "agg": "mean",
         "name": "Flu: Hospital Admission Rate"
     },
     "icu": {
         "topic": "Influenza",
         "metric_id": "influenza_healthcare_ICUHDUadmissionRateByWeek",
+        "fallback_pattern": r"(?i)influenza.*(?:icu|hdu).*admission.*rate",
         "agg": "mean",
         "name": "Flu: ICU/HDU Admission Rate"
     },
     "covid_positivity": {
         "topic": "COVID-19",
         "metric_id": "COVID-19_testing_positivity7DayRolling",
+        "fallback_pattern": r"(?i)covid.*test.*positivity",
         "agg": "mean",
         "name": "COVID: PCR Positivity Rate (%)"
     },
     "covid_hospital": {
         "topic": "COVID-19",
         "metric_id": "COVID-19_healthcare_admissionByDay", 
+        "fallback_pattern": r"(?i)covid.*healthcare.*admission(?!.*rate)",
         "agg": "sum",
         "name": "COVID: Weekly Hospital Admissions"
     }
 }
 
+# Headline/summary metrics are single snapshot numbers (not time series) and must
+# never be selected as a fallback for a weekly series.
+FALLBACK_EXCLUDE_PATTERN = re.compile(r"(?i)headline|change|percent|latest")
+
 API_TEMPLATE = "https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/{topic}/geography_types/Nation/geographies/England/metrics/{metric_id}"
+METRICS_LIST_TEMPLATE = "https://api.ukhsa-dashboard.data.gov.uk/themes/infectious_disease/sub_themes/respiratory/topics/{topic}/geography_types/Nation/geographies/England/metrics"
+
+# key -> metric ID whose data was actually used for the national series, so the
+# regional map can query the same (possibly renamed) metrics.
+RESOLVED_METRIC_IDS = {}
 
 # Approximate centroid coordinates for the nine UKHSA Regions. Regions returned by
 # the API that are not listed here fall back to a central England coordinate.
@@ -62,10 +82,12 @@ REGION_COORDS = {
     "North East": (54.9700, -1.6100),
 }
 
+# Region map keys -> the national METRICS entry whose (possibly re-resolved)
+# metric ID should be queried at UKHSA Region level.
 REGION_MAP_METRICS = {
-    "pos_value": "influenza_testing_positivityByWeek",
-    "adm_value": "influenza_healthcare_hospitalAdmissionRateByWeek",
-    "icu_value": "influenza_healthcare_ICUHDUadmissionRateByWeek",
+    "pos_value": "positivity",
+    "adm_value": "hospital",
+    "icu_value": "icu",
 }
 
 REGION_BASE_URL = (
@@ -142,10 +164,18 @@ def fetch_region_influenza_map_data(days=7):
         record = {'region': region_name, 'lat': lat, 'lon': lon, 'date': date_range_str}
         has_value = False
 
-        for key, metric_id in REGION_MAP_METRICS.items():
+        for key, metric_key in REGION_MAP_METRICS.items():
             record[key] = None
-            url = f"{REGION_BASE_URL}/{quote(region_name)}/metrics/{metric_id}"
-            latest_result = fetch_latest_metric(session, url, headers, region_name, metric_id)
+            configured_id = METRICS[metric_key]['metric_id']
+            resolved_id = RESOLVED_METRIC_IDS.get(metric_key, configured_id)
+            # Try the metric actually used nationally first, then the configured one.
+            metric_ids = [resolved_id] if resolved_id == configured_id else [resolved_id, configured_id]
+            latest_result = None
+            for metric_id in metric_ids:
+                url = f"{REGION_BASE_URL}/{quote(region_name)}/metrics/{metric_id}"
+                latest_result = fetch_latest_metric(session, url, headers, region_name, metric_id)
+                if latest_result:
+                    break
             if not latest_result:
                 continue
             value = pd.to_numeric(latest_result.get('metric_value'), errors='coerce')
@@ -165,29 +195,64 @@ def fetch_region_influenza_map_data(days=7):
     return {'points': points, 'date_range': date_range_str}
 
 
-def fetch_data(config):
-    url = API_TEMPLATE.format(topic=config['topic'], metric_id=config['metric_id'])
-    print(f"  Fetching {config['topic']} data: {config['metric_id']}...")
-    
-    all_data = []
-    current_url = f"{url}?page_size=365&format=json"
-    
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json'
-    }
-
+def _build_session():
     retry = Retry(total=5, backoff_factor=2, status_forcelist=[403, 429, 500, 502, 503, 504])
     adapter = HTTPAdapter(max_retries=retry)
     session = requests.Session()
     session.mount('http://', adapter)
     session.mount('https://', adapter)
+    return session
+
+
+_API_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    'Accept': 'application/json'
+}
+
+_available_metrics_cache = {}
+
+
+def list_available_metrics(session, topic):
+    """List the metric IDs the UKHSA API currently offers for a topic (England, Nation level)."""
+    if topic in _available_metrics_cache:
+        return _available_metrics_cache[topic]
+
+    names = []
+    current_url = METRICS_LIST_TEMPLATE.format(topic=topic)
+    params = {'format': 'json'}
+    while current_url:
+        try:
+            response = session.get(current_url, headers=_API_HEADERS, params=params, timeout=15)
+            params = None
+            if response.status_code != 200:
+                print(f"    Warning: HTTP {response.status_code} listing metrics for '{topic}'.")
+                break
+            payload = response.json()
+            results = payload if isinstance(payload, list) else payload.get('results', [])
+            for item in results or []:
+                if isinstance(item, dict) and item.get('name'):
+                    names.append(item['name'])
+            current_url = payload.get('next') if isinstance(payload, dict) else None
+            time.sleep(0.2)
+        except Exception as e:
+            print(f"    Warning: Could not list metrics for '{topic}': {e}")
+            break
+
+    _available_metrics_cache[topic] = names
+    return names
+
+
+def fetch_metric_series(session, topic, metric_id, agg):
+    """Fetch one metric as a weekly-resampled DataFrame, or None if no data."""
+    all_data = []
+    url = API_TEMPLATE.format(topic=topic, metric_id=metric_id)
+    current_url = f"{url}?page_size=365&format=json"
 
     while current_url:
         try:
-            response = session.get(current_url, headers=headers, timeout=15)
+            response = session.get(current_url, headers=_API_HEADERS, timeout=15)
             if response.status_code != 200:
-                print(f"    Warning: HTTP {response.status_code} for {config['metric_id']}: {response.text[:250]}")
+                print(f"    Warning: HTTP {response.status_code} for {metric_id}: {response.text[:250]}")
                 return None
             data = response.json()
             all_data.extend(data['results'])
@@ -196,7 +261,7 @@ def fetch_data(config):
         except Exception as e:
             print(f"    Error fetching data: {e}")
             break
-            
+
     if not all_data:
         return None
 
@@ -205,7 +270,7 @@ def fetch_data(config):
     df['date'] = pd.to_datetime(df['date'])
     df['metric_value'] = pd.to_numeric(df['metric_value'], errors='coerce')
     
-    if config['agg'] == 'sum':
+    if agg == 'sum':
         df = df.groupby('date')['metric_value'].sum(min_count=1).reset_index()
     else:
         df = df.groupby('date')['metric_value'].mean().reset_index()
@@ -213,14 +278,60 @@ def fetch_data(config):
     df.sort_values('date', inplace=True)
     df.set_index('date', inplace=True)
     
-    if config['agg'] == 'sum':
+    if agg == 'sum':
         df = df.resample('W-SUN')['metric_value'].sum(min_count=1).to_frame()
     else:
         df = df.resample('W-SUN')['metric_value'].mean().to_frame()
     
     df = df[df['metric_value'].notna()].copy()
-    
+
+    if df.empty:
+        return None
+
     return df
+
+
+def fetch_data(key, config):
+    session = _build_session()
+    metric_id = config['metric_id']
+    print(f"  Fetching {config['topic']} data: {metric_id}...")
+    primary_df = fetch_metric_series(session, config['topic'], metric_id, config['agg'])
+    if primary_df is not None:
+        print(f"    Latest data point for '{metric_id}': {primary_df.index[-1].date()}")
+
+    # Discover alternative metric IDs in case UKHSA renamed/replaced the series.
+    pattern = re.compile(config['fallback_pattern'])
+    available = list_available_metrics(session, config['topic'])
+    candidates = [
+        m for m in available
+        if m != metric_id and pattern.search(m) and not FALLBACK_EXCLUDE_PATTERN.search(m)
+    ]
+
+    best_df, best_id = primary_df, metric_id
+    for candidate in candidates:
+        print(f"  Checking alternative metric: {candidate}...")
+        candidate_df = fetch_metric_series(session, config['topic'], candidate, config['agg'])
+        if candidate_df is None:
+            continue
+        print(f"    Latest data point for '{candidate}': {candidate_df.index[-1].date()}")
+        if best_df is None or candidate_df.index[-1] > best_df.index[-1]:
+            best_df, best_id = candidate_df, candidate
+
+    if best_df is None:
+        return None
+
+    if best_id != metric_id:
+        print(f"    Using fresher metric '{best_id}' instead of configured '{metric_id}'.")
+        # Keep enough history for model training by splicing the legacy series
+        # in front of the replacement series.
+        if primary_df is not None:
+            legacy = primary_df[primary_df.index < best_df.index[0]]
+            if not legacy.empty:
+                print(f"    Splicing {len(legacy)} legacy weeks from '{metric_id}' before {best_df.index[0].date()}.")
+                best_df = pd.concat([legacy, best_df]).sort_index()
+
+    RESOLVED_METRIC_IDS[key] = best_id
+    return best_df
 
 def evaluate_accuracy(df, weeks_back=52):
     if len(df) < (weeks_back + 20):
@@ -382,7 +493,7 @@ print("Starting Multi-Virus Forecast Job...")
 
 for key, config in METRICS.items():
     print(f"\nProcessing: {config['name']}")
-    df = fetch_data(config)
+    df = fetch_data(key, config)
     
     if df is not None and not df.empty:
         if len(df) < 20:
@@ -393,8 +504,13 @@ for key, config in METRICS.items():
         accuracy_data = evaluate_accuracy(df, weeks_back=52)
 
         last_dates[key] = df.index[-1]
+        print(f"  Using metric '{RESOLVED_METRIC_IDS.get(key, config['metric_id'])}' (latest: {df.index[-1].date()}).")
         full_dashboard_data[key] = {
-            "meta": {"name": config['name'], "topic": config['topic']},
+            "meta": {
+                "name": config['name'],
+                "topic": config['topic'],
+                "metric_id": RESOLVED_METRIC_IDS.get(key, config['metric_id'])
+            },
             "history": {
                 "dates": df.index.strftime('%Y-%m-%d').tolist(),
                 "values": df['metric_value'].tolist()
