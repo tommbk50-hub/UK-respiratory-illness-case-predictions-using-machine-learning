@@ -4,7 +4,7 @@ This [dashboard](https://tommbk50-hub.github.io/UK-respiratory-illness-case-pred
 
 The system is fully automated, retrieving live data from the UKHSA public API each week, then iteratively retraining the model every week via GitHub Actions, ensuring the forecast is always based on the latest available statistics.
 
-<img src="assets/dashboard.gif" width="600" alt="Predictions demo">
+<img src="assets/dashboard.gif" width="900" alt="Predictions demo">
 
 # UKHSA Respiratory Disease Forecaster
 
